@@ -8,24 +8,24 @@
 		<artifactId>frost</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-
-	<artifactId>frost-executor</artifactId>
-	<name>frost-executor</name>
-	<url>https://gitee.com/justlive1/earth-frost</url>
+	<artifactId>frost-executor-redis</artifactId>
+	<name>frost-executor-redis</name>
+	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<dependencies>
 
 		<dependency>
 			<groupId>justlive.earth.breeze.frost</groupId>
-			<artifactId>frost-core</artifactId>
+			<artifactId>frost-executor</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson</artifactId>
 		</dependency>
 
 		<dependency>
