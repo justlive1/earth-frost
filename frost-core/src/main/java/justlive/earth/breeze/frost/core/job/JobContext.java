@@ -1,5 +1,7 @@
 package justlive.earth.breeze.frost.core.job;
 
+import justlive.earth.breeze.frost.core.model.JobInfo;
+
 /**
  * job上下文
  * 
@@ -9,9 +11,9 @@ package justlive.earth.breeze.frost.core.job;
 public interface JobContext {
 
   /**
-   * 获取job编号
+   * 获取job信息
    */
-  void getId();
-  
-  
+  JobInfo getInfo();
+
+
 }

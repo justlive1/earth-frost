@@ -1,6 +1,7 @@
 package justlive.earth.breeze.frost.executor.example;
 
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Component;
 import justlive.earth.breeze.frost.core.job.IJob;
 import justlive.earth.breeze.frost.core.job.Job;
 import justlive.earth.breeze.frost.core.job.JobContext;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Job("printTimeJob")
+@Component
 public class PrintTimeJob implements IJob {
 
   @Override

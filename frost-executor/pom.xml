@@ -15,12 +15,13 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<frost.support>-redis</frost.support>
 	</properties>
 	<dependencies>
 
 		<dependency>
 			<groupId>justlive.earth.breeze.frost</groupId>
-			<artifactId>frost-core</artifactId>
+			<artifactId>frost-support${frost.support}</artifactId>
 		</dependency>
 
 		<dependency>

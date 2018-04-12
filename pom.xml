@@ -19,6 +19,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<snow.version>0.0.1-SNAPSHOT</snow.version>
 		<redisson.version>3.6.4</redisson.version>
 	</properties>
 
@@ -35,6 +36,18 @@
 				<groupId>justlive.earth.breeze.frost</groupId>
 				<artifactId>frost-executor</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>justlive.earth.breeze.frost</groupId>
+				<artifactId>frost-support-redis</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>justlive.earth.breeze.snow</groupId>
+				<artifactId>snow-common-base</artifactId>
+				<version>${snow.version}</version>
 			</dependency>
 
 			<dependency>
@@ -60,6 +73,6 @@
 		<module>frost-center</module>
 		<module>frost-client</module>
 		<module>frost-executor</module>
-		<module>frost-executor-redis</module>
+		<module>frost-support-redis</module>
 	</modules>
 </project>

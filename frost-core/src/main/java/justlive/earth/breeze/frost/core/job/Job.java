@@ -23,4 +23,11 @@ public @interface Job {
    * @return
    */
   String value() default "";
+
+  /**
+   * 描述
+   * 
+   * @return
+   */
+  String desc() default "";
 }

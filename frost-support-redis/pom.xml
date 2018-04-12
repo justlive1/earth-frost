@@ -8,31 +8,24 @@
 		<artifactId>frost</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-
-	<artifactId>frost-center</artifactId>
-	<name>frost-center</name>
+	<artifactId>frost-support-redis</artifactId>
+	<name>frost-support-redis</name>
 	<url>https://gitee.com/justlive1/earth-frost</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<frost.support>-redis</frost.support>
 	</properties>
+
 	<dependencies>
 
 		<dependency>
 			<groupId>justlive.earth.breeze.frost</groupId>
-			<artifactId>frost-support${frost.support}</artifactId>
+			<artifactId>frost-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
+			<groupId>org.redisson</groupId>
+			<artifactId>redisson</artifactId>
 		</dependency>
 
 		<dependency>
@@ -40,5 +33,6 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 </project>
