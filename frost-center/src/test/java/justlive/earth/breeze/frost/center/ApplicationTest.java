@@ -9,6 +9,12 @@ import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
 import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.model.JobInfo;
 
+/**
+ * 测试分发
+ * 
+ * @author wubo
+ *
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ApplicationTest {

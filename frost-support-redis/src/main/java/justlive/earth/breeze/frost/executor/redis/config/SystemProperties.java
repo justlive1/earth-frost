@@ -21,6 +21,12 @@ public class SystemProperties {
 
   public static final String JOB_GROUP_PREFIX = "frost-job-group";
 
+  public static final String TOPIC = "topic";
+
+  public static final String CACHE = "cache";
+
+  public static final Integer HEARTBEAT = 5;
+
   /**
    * 线程池中最小线程数
    */
@@ -40,4 +46,5 @@ public class SystemProperties {
    * 待执行线程队列
    */
   private Integer queueCapacity = 200;
+
 }

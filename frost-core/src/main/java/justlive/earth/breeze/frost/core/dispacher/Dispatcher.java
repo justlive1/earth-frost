@@ -12,12 +12,15 @@ public interface Dispatcher {
 
   /**
    * 分发Job，失败会抛出运行时异常
+   * 
+   * @param job
    */
   void dispatch(JobInfo job);
 
   /**
    * 校验是否抛出异常，失败会抛出运行时异常
    * 
+   * @param job
    * @return
    */
   String checkDispatch(JobInfo job);

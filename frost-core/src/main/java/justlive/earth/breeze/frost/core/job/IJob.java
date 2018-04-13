@@ -20,6 +20,8 @@ public interface IJob {
 
   /**
    * 执行
+   * 
+   * @param ctx
    */
   void execute(JobContext ctx);
 }

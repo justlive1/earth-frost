@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
@@ -82,7 +83,9 @@ public class RedisConfig {
 
     return new ThreadPoolExecutor(props.getCorePoolSize(), props.getMaximumPoolSize(),
         props.getKeepAliveTime(), TimeUnit.SECONDS,
-        new LinkedBlockingQueue<Runnable>(props.getQueueCapacity()));
+        new LinkedBlockingQueue<Runnable>(props.getQueueCapacity()),
+        new BasicThreadFactory.Builder().namingPattern("redisson-executor-pool-%d").daemon(true)
+            .build());
   }
 
   @Profile("center")

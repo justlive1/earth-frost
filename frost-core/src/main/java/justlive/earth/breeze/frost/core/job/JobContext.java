@@ -12,6 +12,8 @@ public interface JobContext {
 
   /**
    * 获取job信息
+   * 
+   * @return
    */
   JobInfo getInfo();
 

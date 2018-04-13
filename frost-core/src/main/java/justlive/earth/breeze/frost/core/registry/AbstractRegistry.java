@@ -3,6 +3,7 @@ package justlive.earth.breeze.frost.core.registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import justlive.earth.breeze.frost.core.config.ExecutorProperties;
@@ -27,6 +28,13 @@ public abstract class AbstractRegistry implements Registry {
 
   @Autowired
   protected List<IJob> jobs;
+
+  protected JobExecutor jobExecutorBean;
+
+  @PostConstruct
+  protected void init() {
+    jobExecutorBean = this.jobExecutor();
+  }
 
   /**
    * 当前执行器
@@ -60,7 +68,7 @@ public abstract class AbstractRegistry implements Registry {
       if (job.getClass().isAnnotationPresent(Job.class)) {
         Job jobAnnotation = job.getClass().getAnnotation(Job.class);
         JobGroup jobGroup = new JobGroup();
-        // id 
+        // id
         jobGroup.setId(jobAnnotation.value());
         jobGroup.setJobKey(jobAnnotation.value());
         jobGroup.setJobDesc(jobAnnotation.desc());
