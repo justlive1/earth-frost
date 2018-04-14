@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
-import justlive.earth.breeze.frost.core.executor.JobWrapper;
 import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.model.JobInfo;
 import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
+import justlive.earth.breeze.frost.executor.redis.job.JobExecuteWrapper;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 import justlive.earth.breeze.snow.common.base.util.Checks;
 
@@ -23,7 +23,7 @@ import justlive.earth.breeze.snow.common.base.util.Checks;
  * @author wubo
  *
  */
-@Profile("center")
+@Profile(SystemProperties.PROFILE_CENTER)
 @Component
 public class RedisDispatcher implements Dispatcher {
 
@@ -34,7 +34,7 @@ public class RedisDispatcher implements Dispatcher {
   public void dispatch(JobInfo job) {
 
     String key = this.checkDispatch(job);
-    redissonClient.getExecutorService(key).execute(new JobWrapper(job));
+    redissonClient.getExecutorService(key).execute(new JobExecuteWrapper(job));
   }
 
   @Override

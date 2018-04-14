@@ -15,15 +15,17 @@ import lombok.Data;
 @Configuration
 public class SystemProperties {
 
+  public static final String PROFILE_CENTER = "center";
+
+  public static final String PROFILE_EXECUTOR = "executor";
+
   public static final String SEPERATOR = "|";
+
+  public static final String CENTER_PREFIX = "frost-center";
 
   public static final String EXECUTOR_PREFIX = "frost-executor";
 
   public static final String JOB_GROUP_PREFIX = "frost-job-group";
-
-  public static final String TOPIC = "topic";
-
-  public static final String CACHE = "cache";
 
   public static final Integer HEARTBEAT = 5;
 
@@ -46,5 +48,7 @@ public class SystemProperties {
    * 待执行线程队列
    */
   private Integer queueCapacity = 200;
+  
+  private Integer workers = 10;
 
 }

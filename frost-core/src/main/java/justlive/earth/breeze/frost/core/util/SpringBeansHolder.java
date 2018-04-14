@@ -24,4 +24,8 @@ public class SpringBeansHolder implements ApplicationContextAware {
     return CTX.getBean(name, clazz);
   }
 
+  public static <T> T getBean(Class<T> clazz) {
+    return CTX.getBean(clazz);
+  }
+
 }

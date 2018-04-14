@@ -77,7 +77,6 @@ public class RedisConfig {
    * @param props
    * @return
    */
-  @Profile("executor")
   @Bean("redisson-executor")
   ExecutorService executorService(SystemProperties props) {
 
@@ -88,7 +87,7 @@ public class RedisConfig {
             .build());
   }
 
-  @Profile("center")
+  @Profile(SystemProperties.PROFILE_CENTER)
   @Bean("thread-task-executor")
   ThreadPoolTaskExecutor threadPool(SystemProperties props) {
     ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();

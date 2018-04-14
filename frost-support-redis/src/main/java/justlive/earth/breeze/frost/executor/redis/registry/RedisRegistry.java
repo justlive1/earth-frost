@@ -11,7 +11,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import justlive.earth.breeze.frost.core.config.ExecutorProperties;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.registry.AbstractRegistry;
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author wubo
  *
  */
-@Profile("executor")
+@Profile(SystemProperties.PROFILE_EXECUTOR)
 @Slf4j
 @Component
 public class RedisRegistry extends AbstractRegistry {
@@ -34,7 +34,7 @@ public class RedisRegistry extends AbstractRegistry {
   RedissonClient redissonClient;
 
   @Autowired
-  ExecutorProperties executorProperties;
+  JobProperties executorProperties;
 
   RTopic<HeartBeat> topic;
 
@@ -49,12 +49,13 @@ public class RedisRegistry extends AbstractRegistry {
 
     // 订阅心跳检测
     topic = redissonClient.getTopic(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, SystemProperties.TOPIC));
+        SystemProperties.EXECUTOR_PREFIX, HeartBeat.class.getName()));
 
     // 注册job执行器
     for (JobGroup jobGroup : jobExecutorBean.getGroups()) {
       String key = String.join(SystemProperties.SEPERATOR, SystemProperties.JOB_GROUP_PREFIX,
           jobGroup.getGroupKey(), jobGroup.getJobKey());
+      log.info("register job [{}]", key);
       redissonClient.getExecutorService(key).registerWorkers(executorProperties.getParallel());
     }
 
@@ -67,7 +68,7 @@ public class RedisRegistry extends AbstractRegistry {
       }
       RMapCache<String, JobExecutor> cache =
           redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
-              SystemProperties.EXECUTOR_PREFIX, SystemProperties.CACHE));
+              SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
       cache.put(jobExecutorBean.getId(), jobExecutorBean, SystemProperties.HEARTBEAT,
           TimeUnit.SECONDS);
     }, SystemProperties.HEARTBEAT, SystemProperties.HEARTBEAT, TimeUnit.SECONDS);

@@ -6,7 +6,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import justlive.earth.breeze.frost.core.config.ExecutorProperties;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.job.IJob;
 import justlive.earth.breeze.frost.core.job.Job;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class AbstractRegistry implements Registry {
 
   @Autowired
-  protected ExecutorProperties executorProps;
+  protected JobProperties jobProps;
 
   @Autowired
   protected List<IJob> jobs;
@@ -44,16 +44,17 @@ public abstract class AbstractRegistry implements Registry {
   protected JobExecutor jobExecutor() {
     JobExecutor jobExecutor = new JobExecutor();
     jobExecutor.setId(UUID.randomUUID().toString());
-    jobExecutor.setName(executorProps.getName());
-    jobExecutor.setKey(executorProps.getKey());
+    jobExecutor.setName(jobProps.getExecutor().getName());
+    jobExecutor.setKey(jobProps.getExecutor().getKey());
 
-    String address = executorProps.getIp();
+    String address = jobProps.getExecutor().getIp();
     if (!StringUtils.hasText(address)) {
       address = IpUtils.ip();
     }
-    address += IpUtils.SEPERATOR + executorProps.getPort();
+    address += IpUtils.SEPERATOR + jobProps.getExecutor().getPort();
     jobExecutor.setAddress(address);
-    jobExecutor.setGroups(this.jobGroups(executorProps.getKey(), executorProps.getName()));
+    jobExecutor.setGroups(
+        this.jobGroups(jobProps.getExecutor().getKey(), jobProps.getExecutor().getName()));
     return jobExecutor;
   }
 

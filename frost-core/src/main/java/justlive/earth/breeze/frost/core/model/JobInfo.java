@@ -22,7 +22,7 @@ public class JobInfo {
   private String name;
 
   /**
-   * 分组编号
+   * 分组
    */
   private JobGroup group;
 
@@ -34,6 +34,16 @@ public class JobInfo {
   /**
    * 任务状态
    */
-  private Integer status;
+  private String status;
+
+  /**
+   * 任务Id
+   */
+  private String taskId;
+
+  /**
+   * 错误信息
+   */
+  private String error;
 
 }

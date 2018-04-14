@@ -49,6 +49,12 @@
 				<artifactId>snow-common-base</artifactId>
 				<version>${snow.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>justlive.earth.breeze.snow</groupId>
+				<artifactId>snow-common-web</artifactId>
+				<version>${snow.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.redisson</groupId>
