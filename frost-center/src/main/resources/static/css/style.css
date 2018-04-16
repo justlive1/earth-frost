@@ -1,0 +1,13 @@
+.container {
+	padding-bottom: 90px;
+}
+
+footer {
+	bottom: 0;
+	width: 100%;
+	position: absolute;
+}
+
+.navbar-inner {
+	min-height: 75px;
+}
