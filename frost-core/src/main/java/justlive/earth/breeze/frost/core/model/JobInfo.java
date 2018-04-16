@@ -29,7 +29,7 @@ public class JobInfo {
   /**
    * 定时表达式
    */
-  private String triggle;
+  private String cron;
 
   /**
    * 任务状态

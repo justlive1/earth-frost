@@ -24,9 +24,9 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
 
     // Page with login form is served as /login.html and does a POST on /login
-    http.formLogin().loginPage("/ui/login.html").loginProcessingUrl("/ui/login").permitAll();
+    http.formLogin().loginPage("/login.html").loginProcessingUrl("/login").permitAll();
     // The UI does a POST on /logout on logout
-    http.logout().logoutUrl("/ui/logout");
+    http.logout().logoutUrl("/logout");
     // The ui currently doesn't support csrf
     http.csrf().disable();
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
@@ -22,6 +23,29 @@ public class CenterController {
 
   @Autowired
   JobService jobService;
+
+  /**
+   * 登录页面
+   * 
+   * @return
+   */
+  @RequestMapping("/login")
+  public ModelAndView login() {
+
+    return new ModelAndView("login/login.html");
+  }
+
+  /**
+   * 首页
+   * 
+   * @return
+   */
+  @RequestMapping({"/", "index"})
+  public ModelAndView index() {
+
+    return new ModelAndView("index.html");
+  }
+
 
   /**
    * 获取当前执行器列表
@@ -45,6 +69,67 @@ public class CenterController {
     String jobId = jobService.addJob(jobInfo);
     return Response.success(jobId);
   }
+
+  /**
+   * 修改job
+   * 
+   * @param jobInfo
+   * @return
+   */
+  @RequestMapping("/updateJob")
+  public Response<String> updateJob(@RequestBody JobInfo jobInfo) {
+    jobService.updateJob(jobInfo);
+    return Response.success("修改成功");
+  }
+
+  /**
+   * 暂停job
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping("/pauseJob")
+  public Response<String> pauseJob(String id) {
+    jobService.pauseJob(id);
+    return Response.success("暂停成功");
+  }
+
+  /**
+   * 恢复job
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping("/resumeJob")
+  public Response<String> resumeJob(String id) {
+    jobService.resumeJob(id);
+    return Response.success("恢复成功");
+  }
+
+  /**
+   * 删除job
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping("/removeJob")
+  public Response<String> removeJob(String id) {
+    jobService.removeJob(id);
+    return Response.success("删除成功");
+  }
+
+  /**
+   * 触发job
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping("/triggerJob")
+  public Response<String> triggerJob(String id) {
+    jobService.triggerJob(id);
+    return Response.success("触发成功");
+  }
+
 
   /**
    * 获取job列表

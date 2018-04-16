@@ -14,6 +14,13 @@ import justlive.earth.breeze.frost.core.model.JobInfo;
 public interface JobService {
 
   /**
+   * 统计执行器个数
+   * 
+   * @return
+   */
+  int countExecutors();
+
+  /**
    * 获取激活的执行器列表
    * 
    * @return
@@ -34,6 +41,41 @@ public interface JobService {
    * @param jobInfo
    */
   void updateJob(JobInfo jobInfo);
+
+  /**
+   * 暂停job
+   * 
+   * @param jobId
+   */
+  void pauseJob(String jobId);
+
+  /**
+   * 恢复job
+   * 
+   * @param jobId
+   */
+  void resumeJob(String jobId);
+
+  /**
+   * 删除job
+   * 
+   * @param jobId
+   */
+  void removeJob(String jobId);
+
+  /**
+   * 触发job
+   * 
+   * @param jobId
+   */
+  void triggerJob(String jobId);
+
+  /**
+   * 统计job个数
+   * 
+   * @return
+   */
+  int countJobInfos();
 
   /**
    * 获取job列表

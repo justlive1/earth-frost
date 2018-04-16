@@ -28,6 +28,11 @@ public class RedisJobServiceImpl implements JobService {
   JobSchedule jobSchedule;
 
   @Override
+  public int countExecutors() {
+    return jobRepository.countExecutors();
+  }
+
+  @Override
   public List<JobExecutor> queryExecutors() {
     return jobRepository.queryJobExecutors();
   }
@@ -35,12 +40,12 @@ public class RedisJobServiceImpl implements JobService {
   @Override
   public String addJob(JobInfo jobInfo) {
 
-    if (!CronExpression.isValidExpression(jobInfo.getTriggle())) {
+    if (!CronExpression.isValidExpression(jobInfo.getCron())) {
       throw Exceptions.fail("300001", "定时表达式格式有误");
     }
     jobRepository.addJob(jobInfo);
 
-    String taskId = jobSchedule.addJob(jobInfo);
+    String taskId = jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
     jobInfo.setTaskId(taskId);
     jobRepository.updateJob(jobInfo);
 
@@ -50,10 +55,52 @@ public class RedisJobServiceImpl implements JobService {
   @Override
   public void updateJob(JobInfo jobInfo) {
 
-    if (!CronExpression.isValidExpression(jobInfo.getTriggle())) {
+    if (!CronExpression.isValidExpression(jobInfo.getCron())) {
       throw Exceptions.fail("300001", "定时表达式格式有误");
     }
+
+    JobInfo localJobInfo = jobRepository.findJobInfoById(jobInfo.getId());
+    if (localJobInfo == null) {
+      throw Exceptions.fail("300002", "未查询到Job记录");
+    }
+
+    localJobInfo.setCron(jobInfo.getCron());
+    localJobInfo.setName(jobInfo.getName());
+    localJobInfo.setGroup(jobInfo.getGroup());
+
+    jobRepository.updateJob(localJobInfo);
+    String taskId = jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
+    localJobInfo.setTaskId(taskId);
+    jobRepository.updateJob(localJobInfo);
+  }
+
+  @Override
+  public void pauseJob(String jobId) {
+    jobSchedule.pauseJob(jobId);
+  }
+
+  @Override
+  public void resumeJob(String jobId) {
+    String taskId = jobSchedule.resumeJob(jobId);
+    JobInfo jobInfo = jobRepository.findJobInfoById(jobId);
+    jobInfo.setTaskId(taskId);
     jobRepository.updateJob(jobInfo);
+  }
+
+  @Override
+  public void removeJob(String jobId) {
+    jobSchedule.removeJob(jobId);
+    jobRepository.removeJob(jobId);
+  }
+
+  @Override
+  public void triggerJob(String jobId) {
+    jobSchedule.triggerJob(jobId);
+  }
+
+  @Override
+  public int countJobInfos() {
+    return jobRepository.countJobInfos();
   }
 
   @Override
@@ -75,4 +122,5 @@ public class RedisJobServiceImpl implements JobService {
   public List<JobExecuteRecord> queryJobRecords(String jobId, int from, int to) {
     return jobRepository.queryJobRecords(jobId, from, to);
   }
+
 }

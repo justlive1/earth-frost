@@ -61,16 +61,20 @@ public class RedisRegistry extends AbstractRegistry {
 
     // 心跳任务
     beatFuture = scheduledExecutor.scheduleWithFixedDelay(() -> {
-      long subscribes = topic.publish(new HeartBeat(jobExecutorBean.getAddress(),
-          HeartBeat.TYPE.PING.name(), jobExecutorBean.getName()));
-      if (subscribes == 0) {
-        log.warn("未发现调度中心服务");
+      try {
+        long subscribes = topic.publish(new HeartBeat(jobExecutorBean.getAddress(),
+            HeartBeat.TYPE.PING.name(), jobExecutorBean.getName()));
+        if (subscribes == 0) {
+          log.warn("未发现调度中心服务");
+        }
+        RMapCache<String, JobExecutor> cache =
+            redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
+                SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
+        cache.put(jobExecutorBean.getId(), jobExecutorBean, SystemProperties.HEARTBEAT,
+            TimeUnit.SECONDS);
+      } catch (Exception e) {
+        log.error("心跳任务出错 ", e);
       }
-      RMapCache<String, JobExecutor> cache =
-          redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
-              SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
-      cache.put(jobExecutorBean.getId(), jobExecutorBean, SystemProperties.HEARTBEAT,
-          TimeUnit.SECONDS);
     }, SystemProperties.HEARTBEAT, SystemProperties.HEARTBEAT, TimeUnit.SECONDS);
 
     // 注册事件

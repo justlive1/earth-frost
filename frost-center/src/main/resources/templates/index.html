@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html class="no-js">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>frost-center</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width">
+<link rel="shortcut icon" type="image/x-icon" href="ui/img/favicon.png" />
+<link rel="stylesheet" type="text/css" href="ui/core.css" />
+<link rel="stylesheet" type="text/css" href="common/style.css" />
+</head>
+
+<body ng-app="frost">
+
+	<header th:replace="common/common.html :: header"></header>
+	<div ui-view></div>
+	<footer th:replace="common/common.html :: footer"></footer>
+
+	<script src="ui/dependencies.js" type="text/javascript"></script>
+	<script type="text/ng-template" id="executors.html"
+		th:insert="views/executors.html"></script>
+	<script type="text/ng-template" id="jobs.html"
+		th:insert="views/jobs.html"></script>
+	<script type="text/ng-template" id="logs.html"
+		th:insert="views/logs.html"></script>
+	<script type="text/javascript">
+		angular.module("frost", [ "ui.router" ]).config(
+				function($stateProvider, $urlRouterProvider) {
+					$urlRouterProvider.when("", "/executors");
+					$stateProvider.state("executors", {
+						url : "/executors",
+						templateUrl : "executors.html"
+					}).state("jobs", {
+						url : "/jobs",
+						templateUrl : "jobs.html"
+					}).state("logs", {
+						url : "/logs",
+						templateUrl : "logs.html"
+					});
+				});
+	</script>
+</body>
+
+</html>

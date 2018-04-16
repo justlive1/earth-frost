@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	padding-bottom: 90px;
+}
+
+footer {
+	height: 90px;
+	position: absolute;
+}

@@ -30,6 +30,14 @@ public class RedisJobRepositoryImpl implements JobRepository {
   RedissonClient redissonClient;
 
   @Override
+  public int countExecutors() {
+    RMapCache<String, JobExecutor> cache =
+        redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
+    return cache.size();
+  }
+
+  @Override
   public List<JobExecutor> queryJobExecutors() {
     RMapCache<String, JobExecutor> cache =
         redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
@@ -50,6 +58,20 @@ public class RedisJobRepositoryImpl implements JobRepository {
     RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
         SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     map.put(jobInfo.getId(), jobInfo);
+  }
+
+  @Override
+  public void removeJob(String jobId) {
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
+        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    map.remove(jobId);
+  }
+
+  @Override
+  public int countJobInfos() {
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
+        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    return map.size();
   }
 
   @Override

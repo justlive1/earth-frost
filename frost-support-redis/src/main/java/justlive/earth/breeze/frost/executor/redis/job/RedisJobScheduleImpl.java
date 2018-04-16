@@ -14,8 +14,10 @@ import org.springframework.stereotype.Component;
 import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.registry.HeartBeat;
 import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
+import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,6 +41,9 @@ public class RedisJobScheduleImpl implements JobSchedule {
   @Autowired
   JobProperties jobProps;
 
+  @Autowired
+  JobRepository jobRepository;
+
   @PostConstruct
   void init() {
 
@@ -56,14 +61,74 @@ public class RedisJobScheduleImpl implements JobSchedule {
   }
 
   @Override
-  public String addJob(JobInfo jobInfo) {
+  public String addJob(String jobId, String cron) {
 
     RScheduledExecutorService service =
         redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
-    RScheduledFuture<?> future = service.scheduleAsync(new JobDispatchWrapper(jobInfo.getId()),
-        CronSchedule.of(jobInfo.getTriggle()));
+    RScheduledFuture<?> future =
+        service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron));
 
     return future.getTaskId();
   }
 
+
+  @Override
+  public String refreshJob(String jobId, String cron) {
+
+    this.pauseJob(jobId);
+
+    RScheduledExecutorService service =
+        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+    RScheduledFuture<?> future =
+        service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron));
+
+    return future.getTaskId();
+  }
+
+  @Override
+  public void pauseJob(String jobId) {
+
+    JobInfo jobInfo = this.getJobInfo(jobId);
+
+    if (jobInfo.getTaskId() != null) {
+      RScheduledExecutorService service =
+          redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+      service.cancelTask(jobInfo.getTaskId());
+    }
+  }
+
+  @Override
+  public String resumeJob(String jobId) {
+
+    JobInfo jobInfo = this.getJobInfo(jobId);
+
+    RScheduledExecutorService service =
+        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+    RScheduledFuture<?> future =
+        service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(jobInfo.getCron()));
+
+    return future.getTaskId();
+  }
+
+  @Override
+  public void removeJob(String jobId) {
+
+    this.pauseJob(jobId);
+  }
+
+  @Override
+  public void triggerJob(String jobId) {
+
+    RScheduledExecutorService service =
+        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+    service.submit(new JobDispatchWrapper(jobId));
+  }
+
+  private JobInfo getJobInfo(String jobId) {
+    JobInfo jobInfo = jobRepository.findJobInfoById(jobId);
+    if (jobInfo == null) {
+      throw Exceptions.fail("300002", "未查询到Job记录");
+    }
+    return jobInfo;
+  }
 }
