@@ -12,7 +12,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * @author wubo
  *
  */
-@SpringBootApplication(scanBasePackages = "justlive.earth.breeze")
+@SpringBootApplication(scanBasePackages = "justlive.earth.breeze.frost")
 @EnableAutoConfiguration
 public class Application extends SpringBootServletInitializer {
 

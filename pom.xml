@@ -20,6 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<snow.version>0.0.1-SNAPSHOT</snow.version>
+		<cloud.version>0.0.1</cloud.version>
 		<redisson.version>3.6.4</redisson.version>
 	</properties>
 
@@ -55,6 +56,12 @@
 				<artifactId>snow-common-web</artifactId>
 				<version>${snow.version}</version>
 			</dependency>
+			
+			<dependency>
+                <groupId>justlive.earth.breeze.cloud</groupId>
+                <artifactId>cloud-security-support</artifactId>
+                <version>${cloud.version}</version>
+            </dependency>
 
 			<dependency>
 				<groupId>org.redisson</groupId>
