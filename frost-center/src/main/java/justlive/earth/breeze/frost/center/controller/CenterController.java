@@ -29,7 +29,7 @@ public class CenterController {
    * 
    * @return
    */
-  @RequestMapping("/login")
+  @RequestMapping("/login.html")
   public ModelAndView login() {
 
     return new ModelAndView("login/login.html");
@@ -40,7 +40,7 @@ public class CenterController {
    * 
    * @return
    */
-  @RequestMapping({"/", "index"})
+  @RequestMapping({"/", "index.html"})
   public ModelAndView index() {
 
     return new ModelAndView("index.html");

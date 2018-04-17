@@ -25,22 +25,7 @@
 		th:insert="views/jobs.html"></script>
 	<script type="text/ng-template" id="logs.html"
 		th:insert="views/logs.html"></script>
-	<script type="text/javascript">
-		angular.module("frost", [ "ui.router" ]).config(
-				function($stateProvider, $urlRouterProvider) {
-					$urlRouterProvider.when("", "/executors");
-					$stateProvider.state("executors", {
-						url : "/executors",
-						templateUrl : "executors.html"
-					}).state("jobs", {
-						url : "/jobs",
-						templateUrl : "jobs.html"
-					}).state("logs", {
-						url : "/logs",
-						templateUrl : "logs.html"
-					});
-				});
-	</script>
+	<script type="text/javascript" src="js/frost.js"></script>
 </body>
 
 </html>
