@@ -1,7 +1,9 @@
 package justlive.earth.breeze.frost.core.registry;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import justlive.earth.breeze.frost.core.job.Job;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.util.IpUtils;
+import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -53,8 +56,7 @@ public abstract class AbstractRegistry implements Registry {
     }
     address += IpUtils.SEPERATOR + jobProps.getExecutor().getPort();
     jobExecutor.setAddress(address);
-    jobExecutor.setGroups(
-        this.jobGroups(jobProps.getExecutor().getKey(), jobProps.getExecutor().getName()));
+    jobExecutor.setGroups(this.jobGroups(jobProps.getExecutor().getKey()));
     return jobExecutor;
   }
 
@@ -63,19 +65,23 @@ public abstract class AbstractRegistry implements Registry {
    * 
    * @return
    */
-  protected List<JobGroup> jobGroups(String groupKey, String groupDesc) {
+  protected List<JobGroup> jobGroups(String groupKey) {
     List<JobGroup> list = new ArrayList<>();
+    Set<String> existNames = new HashSet<>();
     for (IJob job : jobs) {
       if (job.getClass().isAnnotationPresent(Job.class)) {
         Job jobAnnotation = job.getClass().getAnnotation(Job.class);
-        JobGroup jobGroup = new JobGroup();
-        // id
-        jobGroup.setId(jobAnnotation.value());
-        jobGroup.setJobKey(jobAnnotation.value());
-        jobGroup.setJobDesc(jobAnnotation.desc());
-        jobGroup.setGroupKey(groupKey);
-        jobGroup.setGroupDesc(groupDesc);
-        list.add(jobGroup);
+        if (existNames.add(jobAnnotation.value())) {
+          JobGroup jobGroup = new JobGroup();
+          // id
+          jobGroup.setId(jobAnnotation.value());
+          jobGroup.setJobKey(jobAnnotation.value());
+          jobGroup.setJobDesc(jobAnnotation.desc());
+          jobGroup.setGroupKey(groupKey);
+          list.add(jobGroup);
+        } else {
+          throw Exceptions.fail("30000", "job [%s] 已存在", jobAnnotation.value());
+        }
       } else {
         log.warn("[{}] missing @Job", job.getClass());
       }

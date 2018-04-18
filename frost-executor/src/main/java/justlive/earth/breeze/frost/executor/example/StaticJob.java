@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-@Job("staticJob")
+@Job(value = "staticJob", desc = "统计job")
 @Component
 public class StaticJob implements IJob {
 

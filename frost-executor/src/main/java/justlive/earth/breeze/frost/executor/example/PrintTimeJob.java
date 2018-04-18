@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-@Job("printTimeJob")
+@Job(value = "printTimeJob", desc = "打印时间job例子")
 @Component
 public class PrintTimeJob implements IJob {
 

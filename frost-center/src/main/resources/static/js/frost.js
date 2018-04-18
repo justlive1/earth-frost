@@ -1,7 +1,7 @@
 var frostApp = angular.module("frost", [ "ui.router" ]);
 
 frostApp.config(function($stateProvider, $urlRouterProvider) {
-	$urlRouterProvider.when("", "/executors");
+	$urlRouterProvider.otherwise("/executors");
 	$stateProvider.state("executors", {
 		url : "/executors",
 		templateUrl : "executors.html",
@@ -20,43 +20,37 @@ frostApp.config(function($stateProvider, $urlRouterProvider) {
 function executorsController($scope, $http) {
 	$scope.toggleExpandAll = function() {
 		$scope.expandAll = !$scope.expandAll;
+		$scope.executors.forEach(r => r.group.collapsed = !$scope.expandAll);
 	};
 
 	$scope.queryExecutors = function() {
 		$http.get('queryExecutors').success(function(data) {
 			if (data.code === "00000") {
 				$scope.executorList = data.data;
+				var map = new Map();
+				var rs = [];
 				$scope.executorList.forEach(r => {
-					
+					if(!map.has(r.key)) {
+						map.set(r.key, []);
+					}
+					map.get(r.key).push(r);
 				});
+				map.forEach((v,k) => {
+					rs.push({
+						group: { 
+							groupKey: k,
+							count: v.length
+						},
+						apps: v
+					});
+				});
+				$scope.executors = rs;
 			}
 		});
 	};
 
 	$scope.queryExecutors()
 
-	$scope.executors = [ {
-		group : {
-			groupKey : "frost-executor1",
-			count : 2
-		},
-		apps : [ {
-			groupKey : "",
-			name : "e1-1"
-		}, {
-			groupKey : "",
-			name : "e1-2"
-		} ]
-	}, {
-		group : {
-			groupKey : "frost-executor2",
-			count : 1
-		},
-		apps : [ {
-			groupKey : "frost-executor2",
-			name : "e2"
-		} ]
-	} ];
 }
 
 function jobsController($scope) {

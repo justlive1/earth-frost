@@ -22,11 +22,6 @@ public class JobGroup {
   private String groupKey;
 
   /**
-   * 分组描述
-   */
-  private String groupDesc;
-
-  /**
    * jobKey
    */
   private String jobKey;

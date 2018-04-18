@@ -15,7 +15,7 @@
 				<th class="name-column"><span>执行器分组</span></th>
 				<th class="name-column"><span>名称</span></th>
 				<th class="info-column">信息</th>
-				<th class="status-column">详情</th>
+				<th class="status-column">操作</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -33,9 +33,21 @@
 				<td class="group-column" ng-click="executor.group.collapsed = true"
 					ng-class="{'hidden': !$first}" rowspan="{{executor.group.count}}"><i
 					ng-show="executor.group.count > 1" class="fa fa-minus"></i></td>
-				<td class="name-column" ng-bind="executor.group.groupKey"></td>
+				<td class="name-column">{{executor.group.groupKey}}<br /> <span
+					class="muted">{{app.address}}</span></td>
 				<td class="name-column">{{app.name}}</td>
-				<td class="info-column">{{app.groupKey}}:{{app.name}}</td>
+				<td class="info-column">
+					<div>
+						<span style="display: inherit;" class="status-UNKNOWN">{{app.groups.length}}
+							Jobs <i class="fa fa-caret-{{app.info? 'up':'down'}}" ng-show="app.groups.length > 2"
+							ng-click="app.info = !app.info; "></i>
+						</span>
+						<div style="margin-left: 25px;" ng-repeat="job in app.groups"
+							ng-show="$index < 2">{{job.jobKey}}-{{job.jobDesc}}</div>
+						<div style="margin-left: 25px;" ng-repeat="job in app.groups"
+							ng-show="$index >= 2 && app.info">{{job.jobKey}}-{{job.jobDesc}}</div>
+					</div>
+				</td>
 				<td class="status-column">
 					<div class="btn-group">
 						<a ng-href="#/logs/{{app.id}}/details"
