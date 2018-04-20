@@ -43,6 +43,7 @@ public class RedisJobServiceImpl implements JobService {
     if (!CronExpression.isValidExpression(jobInfo.getCron())) {
       throw Exceptions.fail("300001", "定时表达式格式有误");
     }
+    jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
     jobRepository.addJob(jobInfo);
 
     String taskId = jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
@@ -69,13 +70,25 @@ public class RedisJobServiceImpl implements JobService {
     localJobInfo.setGroup(jobInfo.getGroup());
 
     jobRepository.updateJob(localJobInfo);
-    String taskId = jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
-    localJobInfo.setTaskId(taskId);
-    jobRepository.updateJob(localJobInfo);
+
+    if (JobInfo.STATUS.NORMAL.name().equals(localJobInfo.getStatus())) {
+      String taskId = jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
+      localJobInfo.setTaskId(taskId);
+      jobRepository.updateJob(localJobInfo);
+    }
   }
 
   @Override
   public void pauseJob(String jobId) {
+
+    JobInfo localJobInfo = jobRepository.findJobInfoById(jobId);
+    if (localJobInfo == null) {
+      throw Exceptions.fail("300002", "未查询到Job记录");
+    }
+
+    localJobInfo.setStatus(JobInfo.STATUS.PAUSED.name());
+    jobRepository.updateJob(localJobInfo);
+
     jobSchedule.pauseJob(jobId);
   }
 
@@ -84,6 +97,7 @@ public class RedisJobServiceImpl implements JobService {
     String taskId = jobSchedule.resumeJob(jobId);
     JobInfo jobInfo = jobRepository.findJobInfoById(jobId);
     jobInfo.setTaskId(taskId);
+    jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
     jobRepository.updateJob(jobInfo);
   }
 

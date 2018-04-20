@@ -1,3 +1,54 @@
 <!DOCTYPE html>
-
-<h1>jobs</h1>
+<div class="container-fluid">
+	<h3>任务管理</h3>
+	<div>
+		<input placeholder="Filter" class="input-xxlarge pull-left"
+			type="search" ng-model="searchFilter" />
+		<div class="control-group pull-left" style="margin-left: 10px;">
+			<button class="btn btn-warning" ng-click="addJob()">新增任务</button>
+		</div>
+	</div>
+	<table class="table application-list">
+		<thead>
+			<tr>
+				<th class="name-column"><span>任务编号</span></th>
+				<th class="name-column"><span>名称</span></th>
+				<th class="info-column">分组信息</th>
+				<th class="cron-column">Cron</th>
+				<th class="status-column">状态</th>
+				<th class="operation-column">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="job in jobs | filter : doFilter">
+				<td class="name-column" ng-bind="job.id"></td>
+				<td class="name-column" ng-bind="job.name"></td>
+				<td class="info-column">[{{job.group.groupKey}}]-[{{job.group.jobKey}}]</td>
+				<td class="cron-column" ng-bind="job.cron"></td>
+				<td class="status-column"><span class="status-{{job.status}}">{{job.status}}</span></td>
+				<td class="operation-column">
+					<button type="button" class="btn" tooltip-placement="bottom"
+						uib-tooltip="执行" ng-click="triggleJob(job.id)">
+						<i class="fa fa-play"></i>
+					</button>
+					<button type="button" class="btn" tooltip-placement="bottom"
+						uib-tooltip="暂停" ng-click="pauseJob(job.id)">
+						<i class="fa fa-pause"></i>
+					</button>
+					<button type="button" class="btn" tooltip-placement="bottom"
+						uib-tooltip="恢复" ng-click="resumeJob(job.id)">
+						<i class="fa fa-history"></i>
+					</button>
+					<button type="button" class="btn" tooltip-placement="bottom"
+						uib-tooltip="日志" >
+						<i class="fa fa-files-o"></i>
+					</button>
+					<button type="button" class="btn" tooltip-placement="bottom"
+						uib-tooltip="删除" ng-click="removeJob(job.id)">
+						<i class="fa fa-trash"></i>
+					</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -19,7 +19,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr ng-repeat-start="executor in executors"
+			<tr ng-repeat-start="executor in executors | filter : doFilter"
 				ng-show="executor.group.count > 1 && (executor.group.collapsed || executor.group.collapsed == undefined)">
 				<td class="group-column" ng-click="executor.group.collapsed = false"><i
 					class="fa fa-plus"></i></td>
@@ -50,7 +50,7 @@
 				</td>
 				<td class="status-column">
 					<div class="btn-group">
-						<a ng-href="#/logs/{{app.id}}/details"
+						<a ng-href="#/logs/{{app.id}}"
 							class="btn btn-success ng-binding"><i
 							class="fa fa-info fa-fw"></i>Details</a>
 					</div>

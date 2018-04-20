@@ -149,6 +149,14 @@ table.application-list {
 	width: 240px;
 }
 
+.application-list .cron-column {
+	width: 140px;
+}
+
+.application-list .operation-column {
+	width: 340px;
+}
+
 .application-list td.status-column>div {
 	text-align: center;
 	padding-bottom: 3px;
@@ -198,7 +206,7 @@ table.application-list {
 }
 
 /* ---------- */
-.status-UP {
+.status-UP, .status-NORMAL {
 	color: #00AA00;
 	font-weight: bold;
 }
@@ -213,7 +221,7 @@ table.application-list {
 	font-weight: bold;
 }
 
-.status-UNKNOWN {
+.status-UNKNOWN, .status-PAUSED {
 	font-weight: bold;
 	color: #FF8800;
 }
@@ -847,4 +855,33 @@ footer {
 
 .navbar-inner {
 	min-height: 70px;
+}
+
+.width155 {
+	width: 155px !important;
+}
+
+.width235 {
+	width: 235px !important;
+}
+
+.width248 {
+	width: 248px !important;
+}
+
+.line-height20 {
+	line-height: 20px !important;
+}
+
+.margin-left60 {
+	margin-left: 60px !important;
+}
+
+.margin-left180 {
+	margin-left: 180px !important;
+}
+
+.modal-confirm {
+	width: 250px;
+	margin-left: -125px;
 }

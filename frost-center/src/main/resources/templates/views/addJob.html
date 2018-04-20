@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<div class="modal-header">
+	<div class="modal-title">新增任务</div>
+</div>
+
+<div class="modal-body">
+	<form class="form-horizontal">
+		<div class="control-group">
+			<label class="control-label width155"> 执行器 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<select class="input-large width248"
+						ng-change="$ctrl.executorChange()"
+						ng-model="modalDatas.executorId">
+						<option ng-repeat="executor in modalDatas.executorList"
+							value="{{executor.id}}">{{executor.name}}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label width155"> 任务描述 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="text" ng-model="modalDatas.name"
+						class="input-large width235">
+				</div>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label width155"> 执行逻辑 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<select class="input-large width248" ng-model="modalDatas.jobKey">
+						<option ng-repeat="job in modalDatas.jobs" value="{{job.jobKey}}">{{job.jobDesc}}({{job.jobKey}})</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="control-group">
+			<label class="control-label width155"> Cron </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="text" ng-model="modalDatas.cron"
+						class="input-large width235">
+				</div>
+			</div>
+		</div>
+		<div class="control-group error">
+			<div class="help-inline error-message margin-left180">{{modalDatas.error}}</div>
+		</div>
+	</form>
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-info" type="button" ng-click="$ctrl.ok()">确定</button>
+	<button class="btn" type="button" ng-click="$ctrl.cancel()">取消</button>
+</div>

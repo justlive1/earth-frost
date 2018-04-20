@@ -11,6 +11,17 @@ import lombok.Data;
 @Data
 public class JobInfo {
 
+  public enum STATUS {
+    /**
+     * 正常
+     */
+    NORMAL,
+    /**
+     * 暂停
+     */
+    PAUSED
+  }
+
   /**
    * 编号
    */
@@ -40,10 +51,5 @@ public class JobInfo {
    * 任务Id
    */
   private String taskId;
-
-  /**
-   * 错误信息
-   */
-  private String error;
 
 }

@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
+import justlive.earth.breeze.snow.common.web.base.CodedExceptionResolver;
 
 /**
  * 启动器
@@ -19,6 +21,11 @@ public class Application extends SpringBootServletInitializer {
   @Override
   protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
     return builder.sources(Application.class);
+  }
+
+  @Bean
+  CodedExceptionResolver codedExceptionResolver() {
+    return new CodedExceptionResolver();
   }
 
   public static void main(String[] args) {
