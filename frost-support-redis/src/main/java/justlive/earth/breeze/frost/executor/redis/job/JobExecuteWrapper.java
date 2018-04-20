@@ -1,15 +1,18 @@
 package justlive.earth.breeze.frost.executor.redis.job;
 
+import java.time.ZonedDateTime;
+import java.util.Date;
 import justlive.earth.breeze.frost.core.job.AbstractWrapper;
 import justlive.earth.breeze.frost.core.job.DefaultJobContext;
 import justlive.earth.breeze.frost.core.job.IJob;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobInfo;
-import justlive.earth.breeze.frost.core.service.JobService;
+import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
 import justlive.earth.breeze.snow.common.base.exception.CodedException;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * job包装
@@ -19,41 +22,48 @@ import lombok.NoArgsConstructor;
  */
 
 @NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class JobExecuteWrapper extends AbstractWrapper {
 
+  @NonNull
   private JobInfo jobInfo;
+
+  private JobExecuteRecord jobRecord;
 
   @Override
   public void doRun() {
 
+    JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
+    jobRecord = jobRepository.findJobExecuteRecordById(jobInfo.getLogId());
+    if (jobRecord == null) {
+      jobRecord = this.record(jobInfo.getId());
+    }
+    jobRecord.setExecuteTime(Date.from(ZonedDateTime.now().toInstant()));
     IJob job = SpringBeansHolder.getBean(jobInfo.getGroup().getJobKey(), IJob.class);
     job.execute(new DefaultJobContext(jobInfo));
   }
 
   @Override
   public void success() {
-    JobService jobService = SpringBeansHolder.getBean(JobService.class);
-    JobExecuteRecord record = this.record(jobInfo.getId());
-    record.setStatus(JobExecuteRecord.STATUS.EXECUTE_SUCCESS.value());
-    record.setMessage(JobExecuteRecord.STATUS.EXECUTE_SUCCESS.msg());
-    jobService.addJobRecord(record);
+    JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
+    jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.SUCCESS.name());
+    jobRecord.setExecuteMsg("执行成功");
+    jobRepository.updateJobRecord(jobRecord);
   }
 
   @Override
   public void exception(Exception e) {
     super.exception(e);
 
-    JobService jobService = SpringBeansHolder.getBean(JobService.class);
+    JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
 
-    JobExecuteRecord record = this.record(jobInfo.getId());
-    record.setStatus(JobExecuteRecord.STATUS.FAIL.value());
+    jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.FAIL.name());
     if (e instanceof CodedException) {
-      record.setMessage(((CodedException) e).getErrorCode().toString());
+      jobRecord.setExecuteMsg(((CodedException) e).getErrorCode().toString());
     } else {
-      record.setMessage(e.getMessage());
+      jobRecord.setExecuteMsg(e.getMessage());
     }
 
-    jobService.addJobRecord(record);
+    jobRepository.updateJobRecord(jobRecord);
   }
 }

@@ -1,6 +1,7 @@
 var frostApp = angular.module("frost", [ "ui.router",'ui.bootstrap' ]);
 
-frostApp.config(function($stateProvider, $urlRouterProvider) {
+frostApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
+	$locationProvider.html5Mode(false); 
 	$urlRouterProvider.otherwise("/executors");
 	$stateProvider.state("executors", {
 		url : "/executors",
@@ -49,9 +50,10 @@ frostApp.controller('appModalInstanceCtrl', function ($scope, $uibModalInstance,
 	}
   });
 
-function executorsController($scope, $http, $filter) {
+function executorsController($rootScope, $scope, $http, $filter) {
 	
 	$scope.searchFilter = '';
+	$rootScope.navActive = 0;
 	 
 	$scope.toggleExpandAll = function() {
 		$scope.expandAll = !$scope.expandAll;
@@ -96,9 +98,10 @@ function executorsController($scope, $http, $filter) {
 	
 }
 
-function jobsController($scope, $http, $filter, $uibModal) {
+function jobsController($rootScope, $scope, $http, $filter, $uibModal) {
 
 	$scope.searchFilter = '';
+	$rootScope.navActive = 1;
 	 
 	$scope.queryJobs = function() {
 		$http.get('queryJobInfos').success(function(data) {
@@ -154,7 +157,7 @@ function jobsController($scope, $http, $filter, $uibModal) {
 		});
 		
 		modal.result.then(function(data) {
-			 delete $scope.modalDatas.error
+			 delete $scope.modalDatas.error;
 		});
 		
 		$scope.modalDatas.ok = function () {
@@ -180,7 +183,7 @@ function jobsController($scope, $http, $filter, $uibModal) {
 	};
 	
 	$scope.triggleJob = function (id) {
-		openConfirm($scope, $uibModal, "确定执行", function(data) {
+		openConfirm($scope, $uibModal, "确定执行?", function(data) {
 			var flag = true;
 			$http.post('triggerJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
 				if (resp.success) {
@@ -195,7 +198,7 @@ function jobsController($scope, $http, $filter, $uibModal) {
 	};
 	
 	$scope.pauseJob = function (id) {
-		openConfirm($scope, $uibModal, "确定暂停", function(data) {
+		openConfirm($scope, $uibModal, "确定暂停?", function(data) {
 			var flag = true;
 			$http.post('pauseJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
 				 if (resp.success) {
@@ -210,7 +213,7 @@ function jobsController($scope, $http, $filter, $uibModal) {
 	};
 	
 	$scope.resumeJob = function (id) {
-		openConfirm($scope, $uibModal, "确定恢复", function(data) {
+		openConfirm($scope, $uibModal, "确定恢复?", function(data) {
 			var flag = true;
 			$http.post('resumeJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
 				if (resp.success) {
@@ -225,7 +228,7 @@ function jobsController($scope, $http, $filter, $uibModal) {
 	};
 	
 	$scope.removeJob = function (id) {
-		openConfirm($scope, $uibModal, "确定删除", function(data) {
+		openConfirm($scope, $uibModal, "确定删除?", function(data) {
 			var flag = true;
 			$http.post('removeJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
 				if (resp.success) {
@@ -241,8 +244,19 @@ function jobsController($scope, $http, $filter, $uibModal) {
 	
 }
 
-function logsController($scope, $stateParams) {
-	console.log($stateParams.id);
+
+function logsController($rootScope, $scope, $http, $stateParams) {
+	
+	$rootScope.navActive = 2;
+	
+	$scope.search = function() {
+		$http.post('queryJobExecuteRecords', null, {async: false, params: {id: $stateParams.id, from: $scope.from, to: $scope.to}}).success(function(data) {
+			if (data.success) {
+				$scope.logs = data.data;
+			}
+		});
+	}
+	
 }
 
 function openConfirm($scope, $uibModal, msg, ok) {
@@ -267,7 +281,7 @@ function openConfirm($scope, $uibModal, msg, ok) {
 	});
 	
 	modal.result.then(function(data) {
-		 delete $scope.modalDatas.error
+		 delete $scope.modalDatas.error;
 	});
 	
 }

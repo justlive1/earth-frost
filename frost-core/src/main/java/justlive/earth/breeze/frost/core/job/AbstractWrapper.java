@@ -1,7 +1,6 @@
 package justlive.earth.breeze.frost.core.job;
 
-import java.time.ZonedDateTime;
-import java.util.Date;
+import java.util.UUID;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,7 +58,7 @@ public abstract class AbstractWrapper implements Runnable {
   protected JobExecuteRecord record(String jobId) {
     JobExecuteRecord record = new JobExecuteRecord();
     record.setJobId(jobId);
-    record.setCreateAt(Date.from(ZonedDateTime.now().toInstant()));
+    record.setId(UUID.randomUUID().toString());
     return record;
   }
 }

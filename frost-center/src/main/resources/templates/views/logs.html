@@ -1,3 +1,40 @@
 <!DOCTYPE html>
-
-<h1>logs</h1>
+<div class="container-fluid">
+	<h3>任务日志</h3>
+	<div>
+		<input placeholder="Filter" class="input-xxlarge pull-left"
+			type="search" ng-model="searchFilter" />
+		<input placeholder="from" class="input-large pull-left"
+			type="search" ng-model="from" />
+		<input placeholder="to" class="input-large pull-left"
+			type="search" ng-model="to" />
+		<div class="control-group pull-left" style="margin-left: 10px;">
+			<button class="btn btn-info" ng-click="search()">搜索</button>
+		</div>
+	</div>
+	<table class="table application-list">
+		<thead>
+			<tr>
+				<th class="name-column"><span>任务编号</span></th>
+				<th class="name-column"><span>调度时间</span></th>
+				<th class="cron-column">调度状态</th>
+				<th class="info-column">调度备注</th>
+				<th class="cron-column">执行状态</th>
+				<th class="info-column">执行备注</th>
+				<th class="operation-column">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="log in logs | filter : doFilter">
+				<td class="name-column" ng-bind="log.jobId"></td>
+				<td class="name-column" ng-bind="log.dispachTime"></td>
+				<td class="cron-column"><span class="status-{{log.dispachStatus}}">{{log.dispachStatus}}</span></td>
+				<td class="info-column" ng-bind="log.dispachMsg"></td>
+				<td class="cron-column"><span class="status-{{log.executeStatus}}">{{log.executeStatus}}</span></td>
+				<td class="info-column" ng-bind="log.executeMsg"></td>
+				<td class="operation-column">
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

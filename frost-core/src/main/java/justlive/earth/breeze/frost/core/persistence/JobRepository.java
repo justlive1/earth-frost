@@ -84,4 +84,19 @@ public interface JobRepository {
    * @return
    */
   List<JobExecuteRecord> queryJobRecords(String jobId, int from, int to);
+
+  /**
+   * 根据id获取job执行记录
+   * 
+   * @param id
+   * @return
+   */
+  JobExecuteRecord findJobExecuteRecordById(String id);
+
+  /**
+   * 修改job执行记录
+   * 
+   * @param record
+   */
+  void updateJobRecord(JobExecuteRecord record);
 }

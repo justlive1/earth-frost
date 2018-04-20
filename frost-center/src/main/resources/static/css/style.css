@@ -206,7 +206,7 @@ table.application-list {
 }
 
 /* ---------- */
-.status-UP, .status-NORMAL {
+.status-UP, .status-NORMAL, .status-SUCCESS {
 	color: #00AA00;
 	font-weight: bold;
 }
@@ -216,7 +216,7 @@ table.application-list {
 	font-weight: bold;
 }
 
-.status-DOWN, .status-OUT_OF_SERVICE {
+.status-DOWN, .status-OUT_OF_SERVICE, .status-FAIL {
 	color: #DD0000;
 	font-weight: bold;
 }
@@ -884,4 +884,8 @@ footer {
 .modal-confirm {
 	width: 250px;
 	margin-left: -125px;
+}
+
+.modal-footer-confirm {
+	padding: 5px 15px 5px;
 }

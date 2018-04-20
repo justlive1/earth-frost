@@ -52,4 +52,9 @@ public class JobInfo {
    */
   private String taskId;
 
+  /**
+   * 日志Id
+   */
+  private String logId;
+
 }

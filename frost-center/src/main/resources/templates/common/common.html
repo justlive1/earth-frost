@@ -5,9 +5,9 @@
 		<div class="container-fluid">
 			<a class="brand" href="#">frost-center</a>
 			<ul class="nav pull-right">
-				<li class="navbar-link {{(nav.active == undefined || nav.active == 0)? 'active':''}}"><a href="#/executors" ng-click="nav.active = 0">执行器管理</a></li>
-				<li class="navbar-link {{nav.active == 1? 'active':''}}"><a href="#/jobs" ng-click="nav.active = 1">任务管理</a></li>
-				<li class="navbar-link {{nav.active == 2? 'active':''}}"><a href="#/logs" ng-click="nav.active = 2">任务日志</a></li>
+				<li class="navbar-link {{navActive == 0? 'active':''}}"><a href="#/executors" ng-click="navActive = 0">执行器管理</a></li>
+				<li class="navbar-link {{navActive == 1? 'active':''}}"><a href="#/jobs" ng-click="navActive = 1">任务管理</a></li>
+				<li class="navbar-link {{navActive == 2? 'active':''}}"><a href="#/logs" ng-click="navActive = 2">任务日志</a></li>
 				<li class="navbar-link">
                     <a class="ng-binding" href="logout"><i class="fa fa-2x fa-sign-out" aria-hidden="true"></i></a>
                 </li>
