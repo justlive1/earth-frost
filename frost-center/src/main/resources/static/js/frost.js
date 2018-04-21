@@ -175,14 +175,18 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 				 }
 			 };
 			 var flag = true;
-			 $http.post('addJob', job, {async: false}).success(function(data){
-				 if (data.success) {
-					 $scope.queryJobs();
-				 } else {
-					 $scope.modalDatas.error = data.message;
-					 flag = false;
-				 }
-			 });
+			 postJson('addJob', job, function(data){
+					 if (data.success) {
+						 $scope.queryJobs();
+					 } else {
+						 $scope.modalDatas.error = data.message;
+						 flag = false;
+					 }
+				 },
+				 function(XMLHttpRequest, textStatus, errorThrown){
+					 $scope.modalDatas.error = errorThrown;
+				 });
+			 
 			 return flag;
 		};
 	};
@@ -190,14 +194,19 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.triggleJob = function (id) {
 		openConfirm($scope, $uibModal, "确定执行?", function(data) {
 			var flag = true;
-			$http.post('triggerJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
-				if (resp.success) {
+			
+			postForm('triggerJob', {id: id}, function(resp){
+				 if (resp.success) {
 					$scope.queryJobs();
-				} else {
+				 } else {
 					$scope.modalDatas.error = resp.message;
 					flag = false;
-				}
-			});
+				 }
+			 },
+			 function(XMLHttpRequest, textStatus, errorThrown){
+				 $scope.modalDatas.error = errorThrown;
+			 });
+			
 			return flag;
 		});
 	};
@@ -205,13 +214,16 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.pauseJob = function (id) {
 		openConfirm($scope, $uibModal, "确定暂停?", function(data) {
 			var flag = true;
-			$http.post('pauseJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
+			postForm('pauseJob', {id: id}, function(resp){
 				 if (resp.success) {
-					 $scope.queryJobs();
+					$scope.queryJobs();
 				 } else {
-					 $scope.modalDatas.error = resp.message;
-					 flag = false;
+					$scope.modalDatas.error = resp.message;
+					flag = false;
 				 }
+			 },
+			 function(XMLHttpRequest, textStatus, errorThrown){
+				 $scope.modalDatas.error = errorThrown;
 			 });
 			return flag;
 		});
@@ -220,14 +232,17 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.resumeJob = function (id) {
 		openConfirm($scope, $uibModal, "确定恢复?", function(data) {
 			var flag = true;
-			$http.post('resumeJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
-				if (resp.success) {
+			postForm('resumeJob', {id: id}, function(resp){
+				 if (resp.success) {
 					$scope.queryJobs();
-				} else {
+				 } else {
 					$scope.modalDatas.error = resp.message;
 					flag = false;
-				}
-			});
+				 }
+			 },
+			 function(XMLHttpRequest, textStatus, errorThrown){
+				 $scope.modalDatas.error = errorThrown;
+			 });
 			return flag;
 		});
 	};
@@ -235,14 +250,17 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.removeJob = function (id) {
 		openConfirm($scope, $uibModal, "确定删除?", function(data) {
 			var flag = true;
-			$http.post('removeJob', {id: id}, {async: false, params: {id: id}}).success(function(resp){
-				if (resp.success) {
+			postForm('removeJob', {id: id}, function(resp){
+				 if (resp.success) {
 					$scope.queryJobs();
-				} else {
+				 } else {
 					$scope.modalDatas.error = resp.message;
 					flag = false;
-				}
-			});
+				 }
+			 },
+			 function(XMLHttpRequest, textStatus, errorThrown){
+				 $scope.modalDatas.error = errorThrown;
+			 });
 			return flag;
 		});
 	};
@@ -275,7 +293,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 			groupKey: groupKey,
 			jobKey: jobKey
 		};
-		$http.post('queryJobExecuteRecords', null, {async: false, params: params}).success(function(data) {
+		$http.post('queryJobExecuteRecords', null, {params: params}).success(function(data) {
 			if (data.success) {
 				$scope.logs = data.data;
 			}
@@ -353,5 +371,28 @@ function openConfirm($scope, $uibModal, msg, ok) {
 		 delete $scope.modalDatas.error;
 	});
 	
+}
+
+function postJson(url, data, success, error) {
+	 $.ajax({
+		 url: url, 
+		 data: JSON.stringify(data), 
+		 async: false,
+		 type: 'post',
+		 contentType: 'application/json',
+		 success: success,
+		 error: error
+	 });
+}
+
+function postForm(url, data, success, error) {
+	$.ajax({
+		 url: url, 
+		 data: data, 
+		 async: false,
+		 type: 'post',
+		 success: success,
+		 error: error
+	 });
 }
 
