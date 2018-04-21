@@ -2,9 +2,9 @@
 <div class="container-fluid">
 	<h3>任务管理</h3>
 	<div>
-		<input placeholder="Filter" class="input-xxlarge pull-left"
+		<input placeholder="Filter" class="input-xxlarge pull-right"
 			type="search" ng-model="searchFilter" />
-		<div class="control-group pull-left" style="margin-left: 10px;">
+		<div class="control-group pull-left">
 			<button class="btn btn-warning" ng-click="addJob()">新增任务</button>
 		</div>
 	</div>
@@ -40,7 +40,7 @@
 						<i class="fa fa-history"></i>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
-						uib-tooltip="日志" >
+						uib-tooltip="日志" ng-click="jumpToLogs(job.id)">
 						<i class="fa fa-files-o"></i>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"

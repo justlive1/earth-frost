@@ -2,7 +2,7 @@
 <div class="container-fluid">
 	<h3>执行器管理</h3>
 	<div>
-		<input placeholder="Filter" class="input-xxlarge" type="search"
+		<input placeholder="Filter" class="input-xxlarge pull-right" type="search"
 			ng-model="searchFilter" />
 	</div>
 	<table class="table application-list">
@@ -50,9 +50,9 @@
 				</td>
 				<td class="status-column">
 					<div class="btn-group">
-						<a ng-href="#/logs/{{app.id}}"
+						<a ng-href="javascript:void(0);" ng-click="jumpToLogs(app.id)"
 							class="btn btn-success ng-binding"><i
-							class="fa fa-info fa-fw"></i>Details</a>
+							class="fa fa-info fa-fw"></i>详情</a>
 					</div>
 				</td>
 			</tr>

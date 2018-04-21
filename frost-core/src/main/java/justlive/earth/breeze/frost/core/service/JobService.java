@@ -103,7 +103,13 @@ public interface JobService {
   /**
    * 获取job执行记录列表
    * 
+   * @param groupKey
+   * @param jobKey
+   * @param jobId
+   * @param from
+   * @param to
    * @return
    */
-  List<JobExecuteRecord> queryJobRecords(String jobId, int from, int to);
+  List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId, int from,
+      int to);
 }

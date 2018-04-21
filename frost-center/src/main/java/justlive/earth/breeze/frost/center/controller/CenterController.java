@@ -145,14 +145,17 @@ public class CenterController {
   /**
    * 获取job执行记录列表
    * 
+   * @param groupKey
+   * @param jobKey
    * @param jobId
    * @param from
    * @param to
    * @return
    */
   @RequestMapping("/queryJobExecuteRecords")
-  public Response<List<JobExecuteRecord>> queryJobExecuteRecords(String jobId, int from, int to) {
-    List<JobExecuteRecord> records = jobService.queryJobRecords(jobId, from, to);
+  public Response<List<JobExecuteRecord>> queryJobExecuteRecords(String groupKey, String jobKey,
+      String jobId, int from, int to) {
+    List<JobExecuteRecord> records = jobService.queryJobRecords(groupKey, jobKey, jobId, from, to);
     return Response.success(records);
   }
 

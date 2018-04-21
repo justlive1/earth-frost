@@ -1,11 +1,10 @@
 package justlive.earth.breeze.frost.executor.redis.persistence;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RList;
 import org.redisson.api.RListMultimap;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
@@ -16,9 +15,11 @@ import com.google.common.collect.Lists;
 import justlive.earth.breeze.frost.core.model.HashRef;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
+import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.model.JobInfo;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
+import justlive.earth.breeze.frost.executor.redis.model.JobRecordStatus;
 import justlive.earth.breeze.snow.common.base.util.Checks;
 
 /**
@@ -103,24 +104,62 @@ public class RedisJobRepositoryImpl implements JobRepository {
     RMap<String, HashRef> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
         SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
     map.put(record.getId(), ref);
+
+    RListMultimap<String, String> hashedListmap =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
+    // 全部
+    hashedListmap.put(JobExecuteRecord.class.getName(), record.getId());
+    JobGroup group = findJobInfoById(record.getJobId()).getGroup();
+    // groupKey
+    hashedListmap.put(group.getGroupKey(), record.getId());
+    // jobKey
+    hashedListmap.put(
+        String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()),
+        record.getId());
+
     return record.getId();
   }
 
   @Override
-  public List<JobExecuteRecord> queryJobRecords(String jobId, int from, int to) {
+  public List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
+      int from, int to) {
     RListMultimap<String, JobExecuteRecord> listMultimap =
         redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
             SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+    List<JobExecuteRecord> records = Lists.newArrayList();
     if (StringUtils.isNoneBlank(jobId)) {
       List<JobExecuteRecord> list = listMultimap.get(jobId);
       if (list.size() <= from) {
-        return Collections.emptyList();
+        return records;
       }
-      return Lists.newArrayList(listMultimap.get(jobId).subList(from, Math.min(to, list.size())));
+      RListMultimap<String, JobRecordStatus> recordStatus =
+          redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+              SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+      for (JobExecuteRecord record : list.subList(from, Math.min(to, list.size()))) {
+        recordStatus.get(record.getId()).forEach(r -> r.fill(record));
+        records.add(record);
+      }
+      return records;
     }
-    // TODO 查询优化
-    return listMultimap.values().stream().skip(from).limit(Math.min(to, listMultimap.size()))
-        .collect(Collectors.toList());
+    RListMultimap<String, String> hashedListmap =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
+    String key = JobExecuteRecord.class.getName();
+    if (StringUtils.isNoneBlank(groupKey)) {
+      key = groupKey;
+    }
+    if (StringUtils.isNoneBlank(jobKey)) {
+      key = String.join(SystemProperties.SEPERATOR, key, jobKey);
+    }
+    RList<String> list = hashedListmap.get(key);
+    if (list.size() <= from) {
+      return records;
+    }
+    for (String id : list.subList(from, Math.min(to, list.size()))) {
+      records.add(findJobExecuteRecordById(id));
+    }
+    return records;
   }
 
   @Override
@@ -132,26 +171,21 @@ public class RedisJobRepositoryImpl implements JobRepository {
     RListMultimap<String, JobExecuteRecord> listMultimap =
         redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
             SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
-    return listMultimap.get(ref.getKey()).get(ref.getIndex());
+    JobExecuteRecord record = listMultimap.get(ref.getKey()).get(ref.getIndex());
+    RListMultimap<String, JobRecordStatus> recordStatus =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+    recordStatus.get(id).forEach(r -> r.fill(record));
+    return record;
   }
 
   @Override
   public void updateJobRecord(JobExecuteRecord record) {
-    JobExecuteRecord localRecord = findJobExecuteRecordById(record.getId());
-    localRecord.setDispachMsg(record.getDispachMsg());
-    localRecord.setDispachStatus(record.getDispachStatus());
-    localRecord.setDispachTime(record.getDispachTime());
-    localRecord.setExecuteMsg(record.getExecuteMsg());
-    localRecord.setExecuteStatus(record.getExecuteStatus());
-    localRecord.setExecuteTime(record.getExecuteTime());
-
-    RMap<String, HashRef> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
-    HashRef ref = map.get(record.getId());
-
-    RListMultimap<String, JobExecuteRecord> listMultimap =
+    // 日志只会增加不会减少，使用此种方式避开处理事务和异步问题
+    RListMultimap<String, JobRecordStatus> listMultimap =
         redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
-    listMultimap.get(localRecord.getJobId()).set(ref.getIndex(), localRecord);
+            SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+    JobRecordStatus status = new JobRecordStatus(record);
+    listMultimap.put(record.getId(), status);
   }
 }

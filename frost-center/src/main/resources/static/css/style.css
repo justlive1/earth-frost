@@ -141,6 +141,10 @@ table.application-list {
 	width: 140px;
 }
 
+.application-list .time-column {
+	width: 150px;
+}
+
 .application-list .info-column {
 	width: auto;
 }
@@ -150,7 +154,7 @@ table.application-list {
 }
 
 .application-list .cron-column {
-	width: 140px;
+	width: 100px;
 }
 
 .application-list .operation-column {
@@ -888,4 +892,8 @@ footer {
 
 .modal-footer-confirm {
 	padding: 5px 15px 5px;
+}
+
+.inline-block {
+	display: inline-block;
 }

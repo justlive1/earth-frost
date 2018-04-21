@@ -39,6 +39,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     record = this.record(id);
     record.setDispachTime(Date.from(ZonedDateTime.now().toInstant()));
     job.setLogId(record.getId());
+    jobRepository.addJobRecord(record);
     jobRepository.updateJob(job);
     Dispatcher dispatcher = SpringBeansHolder.getBean(Dispatcher.class);
     dispatcher.dispatch(job);
@@ -50,7 +51,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     record.setDispachStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     record.setDispachMsg("调度成功");
-    jobRepository.addJobRecord(record);
+    jobRepository.updateJobRecord(record);
   }
 
   @Override
@@ -65,6 +66,6 @@ public class JobDispatchWrapper extends AbstractWrapper {
       record.setDispachMsg(e.getMessage());
     }
 
-    jobRepository.addJobRecord(record);
+    jobRepository.updateJobRecord(record);
   }
 }

@@ -133,8 +133,9 @@ public class RedisJobServiceImpl implements JobService {
   }
 
   @Override
-  public List<JobExecuteRecord> queryJobRecords(String jobId, int from, int to) {
-    return jobRepository.queryJobRecords(jobId, from, to);
+  public List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
+      int from, int to) {
+    return jobRepository.queryJobRecords(groupKey, jobKey, jobId, from, to);
   }
 
 }

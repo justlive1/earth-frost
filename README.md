@@ -8,6 +8,14 @@ earth-frost是一个轻量级分布式任务调度框架。
 - 使用redis作为数据库
 - 基于订阅模式实现服务注册和发现
 
+![登录页面](https://gitee.com/justlive1/earth-frost/raw/master/images/login.png)
+![执行器列表](https://gitee.com/justlive1/earth-frost/raw/master/images/executor.png)
+![任务列表](https://gitee.com/justlive1/earth-frost/raw/master/images/job.png)
+![添加任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addjob.png)
+![调度记录](https://gitee.com/justlive1/earth-frost/raw/master/images/record.png)
+
+
+
 ## 功能
 - 简单易上手，支持web界面进行任务的CRUD … coding
 - 支持动态修改任务的开始，停止  … ok

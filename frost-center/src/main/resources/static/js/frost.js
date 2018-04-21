@@ -13,10 +13,10 @@ frostApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) 
 		controller : jobsController
 	}).state("logs", {
 		url : "/logs",
-		templateUrl : "logs.html",
-		controller : logsController
-	}).state("logs-id", {
-		url : "/logs/:id",
+		params : {
+			executorId: null,
+			jobId: null
+		},
 		templateUrl : "logs.html",
 		controller : logsController
 	});
@@ -50,7 +50,7 @@ frostApp.controller('appModalInstanceCtrl', function ($scope, $uibModalInstance,
 	}
   });
 
-function executorsController($rootScope, $scope, $http, $filter) {
+function executorsController($rootScope, $scope, $http, $filter, $state) {
 	
 	$scope.searchFilter = '';
 	$rootScope.navActive = 0;
@@ -96,9 +96,12 @@ function executorsController($rootScope, $scope, $http, $filter) {
 	    return $filter('filter')([projection], $scope.searchFilter).length > 0;
 	};
 	
+	$scope.jumpToLogs = function (id) {
+		$state.go("logs", {executorId: id});
+	}
 }
 
-function jobsController($rootScope, $scope, $http, $filter, $uibModal) {
+function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 
 	$scope.searchFilter = '';
 	$rootScope.navActive = 1;
@@ -118,6 +121,8 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal) {
 	      return true;
 	    }
 	    var projection = angular.copy(value);
+	    delete projection.logId;
+	    delete projection.taskId;
 	    return $filter('filter')([projection], $scope.searchFilter).length > 0;
 	};
 	
@@ -242,19 +247,83 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal) {
 		});
 	};
 	
+	$scope.jumpToLogs = function (id) {
+		$state.go("logs", {jobId: id});
+	};
 }
 
 
-function logsController($rootScope, $scope, $http, $stateParams) {
+function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 	
 	$rootScope.navActive = 2;
+	$scope.from = 0;
+	$scope.to = 100;
+	
 	
 	$scope.search = function() {
-		$http.post('queryJobExecuteRecords', null, {async: false, params: {id: $stateParams.id, from: $scope.from, to: $scope.to}}).success(function(data) {
+		var jobKey = '', groupKey = '';
+		if ($scope.executorId){
+			groupKey = $scope.executorMap.get($scope.executorId).key;
+			if ($scope.jobKey) {
+				jobKey = $scope.jobKey;
+			}
+		}
+		var params = {
+			jobId: $scope.jobId, 
+			from: $scope.from, 
+			to: $scope.to,
+			groupKey: groupKey,
+			jobKey: jobKey
+		};
+		$http.post('queryJobExecuteRecords', null, {async: false, params: params}).success(function(data) {
 			if (data.success) {
 				$scope.logs = data.data;
 			}
 		});
+	};
+	
+	$scope.doFilter = function (value) {
+	    if (!$scope.searchFilter) {
+	      return true;
+	    }
+	    var projection = angular.copy(value);
+	    delete projection.id;
+	    return $filter('filter')([projection], $scope.searchFilter).length > 0;
+	};
+	
+	$scope.filterJobs = function (value) {
+		if ($scope.groupKey && value.group.groupKey != $scope.groupKey) {
+			return false;
+		}
+		if ($scope.jobKey && value.group.jobKey != $scope.jobKey) {
+			return false;
+		}
+		return true;
+	}
+	
+	$http.get('queryExecutors').success(function(data) {
+		if (data.success) {
+			$scope.executorList = data.data;
+			var map = new Map();
+			data.data.forEach(r => map.set(r.id, r));
+			$scope.executorMap = map;
+			$scope.executorId = $stateParams.executorId;
+		}
+		$http.get('queryJobInfos').success(function(data) {
+			if (data.success) {
+				$scope.jobInfos = data.data;
+			}
+			$scope.jobId = $stateParams.jobId;
+			$scope.search();
+		});
+	});
+	
+	
+	$scope.executorChange = function() {
+		if($scope.executorId){
+			var executor = $scope.executorMap.get($scope.executorId);
+			$scope.jobs = executor.groups;
+		}
 	}
 	
 }
