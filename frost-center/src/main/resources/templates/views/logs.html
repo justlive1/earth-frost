@@ -35,7 +35,8 @@
 				<div class="input-prepend" style="margin-bottom: 0">
 					<select class="input-large width248" ng-model="jobId">
 						<option value="">全部</option>
-						<option ng-repeat="info in jobInfos | filter : filterJobs" value="{{info.id}}">{{info.name}}</option>
+						<option ng-repeat="info in jobInfos | filter : filterJobs"
+							value="{{info.id}}">{{info.name}}</option>
 					</select>
 				</div>
 			</div>
@@ -73,4 +74,7 @@
 			</tr>
 		</tbody>
 	</table>
+	<ul uib-pagination total-items="totalCount" ng-change="search()"
+		previous-text="上一页" next-text="下一页" ng-model="pageIndex" max-size="5"
+		class="pagination-sm" boundary-link-numbers="true"></ul>
 </div>

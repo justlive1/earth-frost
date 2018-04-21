@@ -4,6 +4,7 @@ import java.util.List;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.Page;
 
 /**
  * 调度中心服务接口
@@ -106,10 +107,10 @@ public interface JobService {
    * @param groupKey
    * @param jobKey
    * @param jobId
-   * @param from
-   * @param to
+   * @param pageIndex
+   * @param pageSize
    * @return
    */
-  List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId, int from,
-      int to);
+  Page<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId, int pageIndex,
+      int pageSize);
 }

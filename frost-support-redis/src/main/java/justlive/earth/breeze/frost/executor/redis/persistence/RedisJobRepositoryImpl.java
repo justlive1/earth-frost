@@ -122,6 +122,29 @@ public class RedisJobRepositoryImpl implements JobRepository {
   }
 
   @Override
+  public int countJobRecords(String groupKey, String jobKey, String jobId) {
+    RListMultimap<String, JobExecuteRecord> listMultimap =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+    if (StringUtils.isNoneBlank(jobId)) {
+      List<JobExecuteRecord> list = listMultimap.get(jobId);
+      return list.size();
+    }
+    RListMultimap<String, String> hashedListmap =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
+    String key = JobExecuteRecord.class.getName();
+    if (StringUtils.isNoneBlank(groupKey)) {
+      key = groupKey;
+    }
+    if (StringUtils.isNoneBlank(jobKey)) {
+      key = String.join(SystemProperties.SEPERATOR, key, jobKey);
+    }
+    RList<String> list = hashedListmap.get(key);
+    return list.size();
+  }
+
+  @Override
   public List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
       int from, int to) {
     RListMultimap<String, JobExecuteRecord> listMultimap =

@@ -8,6 +8,7 @@ import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.Page;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.service.JobService;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
@@ -133,9 +134,22 @@ public class RedisJobServiceImpl implements JobService {
   }
 
   @Override
-  public List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
-      int from, int to) {
-    return jobRepository.queryJobRecords(groupKey, jobKey, jobId, from, to);
+  public Page<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
+      int pageIndex, int pageSize) {
+    Page<JobExecuteRecord> page = new Page<>();
+    page.setPageIndex(pageIndex);
+    page.setPageSize(pageSize);
+
+    int totalCount = jobRepository.countJobRecords(groupKey, jobKey, jobId);
+    page.setTotalCount(totalCount);
+
+    if (totalCount == 0) {
+      return page;
+    }
+    List<JobExecuteRecord> list =
+        jobRepository.queryJobRecords(groupKey, jobKey, jobId, page.getFrom(), page.getTo());
+    page.setItems(list);
+    return page;
   }
 
 }

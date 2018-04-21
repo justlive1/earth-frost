@@ -79,6 +79,16 @@ public interface JobRepository {
   String addJobRecord(JobExecuteRecord record);
 
   /**
+   * 获取job执行记录总数
+   * 
+   * @param groupKey
+   * @param jobKey
+   * @param jobId
+   * @return
+   */
+  int countJobRecords(String groupKey, String jobKey, String jobId);
+
+  /**
    * 获取job执行记录列表
    * 
    * @param groupKey

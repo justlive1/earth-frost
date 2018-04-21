@@ -274,9 +274,9 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 	
 	$rootScope.navActive = 2;
-	$scope.from = 0;
-	$scope.to = 100;
 	
+	$scope.pageIndex = 1;
+	$scope.pageSize = 10;
 	
 	$scope.search = function() {
 		var jobKey = '', groupKey = '';
@@ -288,14 +288,15 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 		}
 		var params = {
 			jobId: $scope.jobId, 
-			from: $scope.from, 
-			to: $scope.to,
+			pageIndex: $scope.pageIndex, 
+			pageSize: $scope.pageSize,
 			groupKey: groupKey,
 			jobKey: jobKey
 		};
 		$http.post('queryJobExecuteRecords', null, {params: params}).success(function(data) {
 			if (data.success) {
-				$scope.logs = data.data;
+				$scope.totalCount = data.data.totalCount;
+				$scope.logs = data.data.items;
 			}
 		});
 	};
@@ -342,7 +343,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 			var executor = $scope.executorMap.get($scope.executorId);
 			$scope.jobs = executor.groups;
 		}
-	}
+	};
 	
 }
 

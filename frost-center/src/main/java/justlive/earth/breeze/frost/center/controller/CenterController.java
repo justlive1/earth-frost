@@ -4,11 +4,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.Page;
 import justlive.earth.breeze.frost.core.service.JobService;
 import justlive.earth.breeze.snow.common.base.domain.Response;
 
@@ -153,9 +155,11 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobExecuteRecords")
-  public Response<List<JobExecuteRecord>> queryJobExecuteRecords(String groupKey, String jobKey,
-      String jobId, int from, int to) {
-    List<JobExecuteRecord> records = jobService.queryJobRecords(groupKey, jobKey, jobId, from, to);
+  public Response<Page<JobExecuteRecord>> queryJobExecuteRecords(String groupKey, String jobKey,
+      String jobId, @RequestParam(defaultValue = "1") int pageIndex,
+      @RequestParam(defaultValue = "10") int pageSize) {
+    Page<JobExecuteRecord> records =
+        jobService.queryJobRecords(groupKey, jobKey, jobId, pageIndex, pageSize);
     return Response.success(records);
   }
 
