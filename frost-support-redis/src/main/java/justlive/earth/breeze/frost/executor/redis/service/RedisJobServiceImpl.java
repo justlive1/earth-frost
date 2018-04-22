@@ -105,6 +105,7 @@ public class RedisJobServiceImpl implements JobService {
   @Override
   public void removeJob(String jobId) {
     jobSchedule.removeJob(jobId);
+    jobRepository.removeJobRecords(jobId);
     jobRepository.removeJob(jobId);
   }
 

@@ -115,4 +115,11 @@ public interface JobRepository {
    * @param record
    */
   void updateJobRecord(JobExecuteRecord record);
+
+  /**
+   * 删除job执行记录
+   * 
+   * @param jobId
+   */
+  void removeJobRecords(String jobId);
 }

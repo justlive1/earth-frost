@@ -145,6 +145,17 @@ public class CenterController {
   }
 
   /**
+   * 获取job
+   * 
+   * @param id
+   * @return
+   */
+  @RequestMapping("/findJobInfoById")
+  public Response<JobInfo> findJobInfoById(String id) {
+    return Response.success(jobService.findJobInfoById(id));
+  }
+
+  /**
    * 获取job执行记录列表
    * 
    * @param groupKey

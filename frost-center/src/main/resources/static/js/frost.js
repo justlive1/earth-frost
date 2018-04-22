@@ -268,6 +268,89 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.jumpToLogs = function (id) {
 		$state.go("logs", {jobId: id});
 	};
+	
+	$scope.updateJob = function(id) {
+		
+		$scope.modalDatas = {};
+		
+		postForm('queryExecutors', null, function(data) {
+			if (data.success) {
+				$scope.modalDatas.executorList = data.data;
+				var map = new Map(), groupMap = new Map();
+				data.data.forEach(r => {
+					map.set(r.id, r);
+					groupMap.set(r.key, r);
+				});
+				$scope.modalDatas.executorMap = map;
+				$scope.modalDatas.executorGroupMap = groupMap;
+				
+				if(data.data.length > 0){
+					$scope.modalDatas.executorId = data.data[0].id;
+					$scope.modalDatas.jobs = data.data[0].groups;
+					if (data.data[0].groups && data.data[0].groups.length >　0){
+						$scope.modalDatas.jobKey = data.data[0].groups[0].jobKey;
+					}
+				}
+			}
+		});
+		
+		postForm('findJobInfoById', {id: id}, function(data) {
+			if (data.success && data.data) {
+				$scope.modalDatas.jobKey = data.data.group.jobKey;
+				$scope.modalDatas.jobKeyDesc = data.data.group.jobKeyDesc;
+				$scope.modalDatas.cron = data.data.cron;
+				$scope.modalDatas.name = data.data.name;
+				var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
+				if(executor){
+					$scope.modalDatas.executorId = executor.id;
+				}
+			}
+		});
+		
+		var modal = $uibModal.open({
+		    animation: true,
+		    ariaLabelledBy: 'modal-title',
+		    ariaDescribedBy: 'modal-body',
+			templateUrl: "addJob.html",
+			controller: 'appModalInstanceCtrl',
+			controllerAs: '$ctrl',
+		    resolve: {
+		      modalDatas: function () {
+		        return $scope.modalDatas;
+		      }
+		    }
+		});
+		
+		modal.result.then(function(data) {
+			 delete $scope.modalDatas.error;
+		});
+		
+		$scope.modalDatas.ok = function () {
+			var job = {
+				 id: id,
+				 name: $scope.modalDatas.name,
+				 cron: $scope.modalDatas.cron,
+				 group: {
+					 jobKey: $scope.modalDatas.jobKey,
+					 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+				 }
+			 };
+			 var flag = true;
+			 postJson('updateJob', job, function(data){
+					 if (data.success) {
+						 $scope.queryJobs();
+					 } else {
+						 $scope.modalDatas.error = data.message;
+						 flag = false;
+					 }
+				 },
+				 function(XMLHttpRequest, textStatus, errorThrown){
+					 $scope.modalDatas.error = errorThrown;
+				 });
+			 
+			 return flag;
+		};
+	};
 }
 
 
