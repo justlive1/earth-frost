@@ -1,9 +1,8 @@
-package justlive.earth.breeze.frost.executor.redis.job;
+package justlive.earth.breeze.frost.core.job;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
-import justlive.earth.breeze.frost.core.job.AbstractWrapper;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobInfo;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;

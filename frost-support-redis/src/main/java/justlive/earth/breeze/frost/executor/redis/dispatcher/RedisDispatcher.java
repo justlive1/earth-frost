@@ -1,6 +1,7 @@
 package justlive.earth.breeze.frost.executor.redis.dispatcher;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 import org.redisson.RedissonExecutorService;
 import org.redisson.api.RScheduledExecutorService;
 import org.redisson.api.RTopic;
@@ -10,10 +11,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
+import justlive.earth.breeze.frost.core.job.JobBeanExecuteWrapper;
+import justlive.earth.breeze.frost.core.job.JobScriptExecuteWrapper;
 import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.model.JobInfo;
 import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
-import justlive.earth.breeze.frost.executor.redis.job.JobExecuteWrapper;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 import justlive.earth.breeze.snow.common.base.util.Checks;
 
@@ -34,7 +36,12 @@ public class RedisDispatcher implements Dispatcher {
   public void dispatch(JobInfo job) {
 
     String key = this.checkDispatch(job);
-    redissonClient.getExecutorService(key).execute(new JobExecuteWrapper(job));
+    if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), job.getType())) {
+      redissonClient.getExecutorService(SystemProperties.JOB_SCRIPT_PREFIX)
+          .execute(new JobScriptExecuteWrapper(job));
+    } else {
+      redissonClient.getExecutorService(key).execute(new JobBeanExecuteWrapper(job));
+    }
   }
 
   @Override

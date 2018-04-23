@@ -4,6 +4,7 @@ import java.util.List;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.JobScript;
 
 /**
  * job持久化
@@ -122,4 +123,11 @@ public interface JobRepository {
    * @param jobId
    */
   void removeJobRecords(String jobId);
+  
+  /**
+   * 增加任务脚本
+   * 
+   * @param script
+   */
+  void addJobScript(JobScript script);
 }

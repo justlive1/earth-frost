@@ -22,6 +22,17 @@ public class JobInfo {
     PAUSED
   }
 
+  public enum TYPE {
+    /**
+     * bean实例
+     */
+    BEAN,
+    /**
+     * 脚本
+     */
+    SCRIPT
+  }
+
   /**
    * 编号
    */
@@ -46,6 +57,16 @@ public class JobInfo {
    * 任务状态
    */
   private String status;
+
+  /**
+   * 任务类型
+   */
+  private String type;
+
+  /**
+   * 脚本
+   */
+  private String script;
 
   /**
    * 任务Id

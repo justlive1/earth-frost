@@ -129,6 +129,7 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.addJob = function() {
 		
 		$scope.modalDatas = {};
+		$scope.modalDatas.type = 'bean';
 		
 		$http.get('queryExecutors').success(function(data) {
 			if (data.success) {
@@ -169,12 +170,36 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 			var job = {
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
-				 group: {
-					 jobKey: $scope.modalDatas.jobKey,
-					 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
-				 }
+				 type: $scope.modalDatas.type
 			 };
 			 var flag = true;
+			 if($scope.modalDatas.type == 'script'){
+				 job.script = `
+package justlive.earth.breeze.frost.executor.example;
+ 
+import java.util.Random;
+import org.springframework.stereotype.Component;
+import justlive.earth.breeze.frost.core.job.IJob;
+import justlive.earth.breeze.frost.core.job.Job;
+import justlive.earth.breeze.frost.core.job.JobContext;
+ 
+@Job(value = "DemoScriptJob", desc = "示例脚本job")
+@Component
+public class DemoScriptJob implements IJob {
+ 
+ @Override
+ public void execute(JobContext ctx) {
+ System.out.println("hello world");
+ }
+ 
+}`;
+			 } else {
+				 job.group = {
+					 jobKey: $scope.modalDatas.jobKey,
+					 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+				 };
+			 }
+			 //
 			 postJson('addJob', job, function(data){
 					 if (data.success) {
 						 $scope.queryJobs();

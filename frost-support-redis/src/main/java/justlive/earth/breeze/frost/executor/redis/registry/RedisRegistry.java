@@ -59,6 +59,12 @@ public class RedisRegistry extends AbstractRegistry {
       redissonClient.getExecutorService(key).registerWorkers(executorProperties.getParallel());
     }
 
+    // script执行器
+    if (jobProps.getExecutor().getScriptJobEnabled()) {
+      redissonClient.getExecutorService(SystemProperties.JOB_SCRIPT_PREFIX)
+          .registerWorkers(executorProperties.getParallel());
+    }
+
     // 心跳任务
     beatFuture = scheduledExecutor.scheduleWithFixedDelay(() -> {
       try {

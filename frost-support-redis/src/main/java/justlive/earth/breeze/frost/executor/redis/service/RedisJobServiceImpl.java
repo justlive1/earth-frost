@@ -8,6 +8,7 @@ import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.JobScript;
 import justlive.earth.breeze.frost.core.model.Page;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.service.JobService;
@@ -153,4 +154,8 @@ public class RedisJobServiceImpl implements JobService {
     return page;
   }
 
+  @Override
+  public void addJobScript(JobScript script) {
+    jobRepository.addJobScript(script);
+  }
 }

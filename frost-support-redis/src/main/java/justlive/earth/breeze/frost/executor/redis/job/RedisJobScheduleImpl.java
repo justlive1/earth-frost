@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import justlive.earth.breeze.frost.core.config.JobProperties;
+import justlive.earth.breeze.frost.core.job.JobDispatchWrapper;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.model.JobInfo;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;

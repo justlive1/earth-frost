@@ -46,6 +46,11 @@ public class JobProperties {
      * 执行器监听端口
      */
     private Integer port;
+
+    /**
+     * 是否开启脚本任务执行
+     */
+    private Boolean scriptJobEnabled = true;
   }
 
 }

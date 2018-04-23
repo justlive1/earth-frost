@@ -1,6 +1,8 @@
 package justlive.earth.breeze.frost.executor.redis.persistence;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,7 @@ import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobGroup;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.JobScript;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
 import justlive.earth.breeze.frost.executor.redis.model.JobRecordStatus;
@@ -55,6 +58,20 @@ public class RedisJobRepositoryImpl implements JobRepository {
     RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
         SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     jobInfo.setId(UUID.randomUUID().toString());
+    // script
+    if (JobInfo.TYPE.SCRIPT.name().equals(jobInfo.getType())) {
+      RListMultimap<String, JobScript> scriptList =
+          redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+              SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+      JobScript script = new JobScript();
+      script.setId(UUID.randomUUID().toString());
+      script.setJobId(jobInfo.getId());
+      script.setScript(jobInfo.getScript());
+      script.setTime(Date.from(ZonedDateTime.now().toInstant()));
+      script.setVersion("default");
+      scriptList.put(jobInfo.getId(), script);
+    }
+    jobInfo.setScript(null);
     map.put(jobInfo.getId(), jobInfo);
   }
 
@@ -90,7 +107,20 @@ public class RedisJobRepositoryImpl implements JobRepository {
   public JobInfo findJobInfoById(String id) {
     RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
         SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
-    return map.get(id);
+    JobInfo jobInfo = map.get(id);
+    if (jobInfo == null) {
+      return jobInfo;
+    }
+    RListMultimap<String, JobScript> scriptList =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+    RList<JobScript> list = scriptList.get(id);
+    int size = scriptList.size();
+    if (size > 0) {
+      JobScript script = list.get(size - 1);
+      jobInfo.setScript(script.getScript());
+    }
+    return jobInfo;
   }
 
   @Override
@@ -238,5 +268,13 @@ public class RedisJobRepositoryImpl implements JobRepository {
           .remove(key);
       statusMultimap.removeAll(key);
     }
+  }
+
+  @Override
+  public void addJobScript(JobScript script) {
+    RListMultimap<String, JobScript> scriptList =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+    scriptList.put(script.getJobId(), script);
   }
 }

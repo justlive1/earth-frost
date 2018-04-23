@@ -4,6 +4,7 @@ import java.util.List;
 import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.core.model.JobExecutor;
 import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.core.model.JobScript;
 import justlive.earth.breeze.frost.core.model.Page;
 
 /**
@@ -111,6 +112,15 @@ public interface JobService {
    * @param pageSize
    * @return
    */
-  Page<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId, int pageIndex,
-      int pageSize);
+  Page<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
+      int pageIndex, int pageSize);
+  
+  /**
+   * 增加任务脚本
+   * 
+   * @param script
+   */
+  void addJobScript(JobScript script);
+  
+  
 }

@@ -26,6 +26,8 @@ public class SystemProperties {
   public static final String EXECUTOR_PREFIX = "frost-executor";
 
   public static final String JOB_GROUP_PREFIX = "frost-job-group";
+  
+  public static final String JOB_SCRIPT_PREFIX = "frost-job-script";
 
   public static final Integer HEARTBEAT = 5;
 
