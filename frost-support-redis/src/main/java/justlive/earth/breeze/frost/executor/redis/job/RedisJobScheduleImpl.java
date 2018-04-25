@@ -52,8 +52,9 @@ public class RedisJobScheduleImpl implements JobSchedule {
     RTopic<HeartBeat> topic = redissonClient.getTopic(String.join(SystemProperties.SEPERATOR,
         SystemProperties.EXECUTOR_PREFIX, HeartBeat.class.getName()));
     topic.addListener((channel, msg) -> {
-      if (log.isDebugEnabled())
+      if (log.isDebugEnabled()) {
         log.debug("heartBeat: {}", msg);
+      }
     });
 
     RScheduledExecutorService service =

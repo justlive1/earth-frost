@@ -854,11 +854,16 @@ dl.health-status td {
 footer {
 	bottom: 0;
 	width: 100%;
-	position: absolute;
+	position: fixed;
+	z-index: 999;
 }
 
 .navbar-inner {
 	min-height: 70px;
+}
+
+.width135 {
+    width: 135px !important;
 }
 
 .width155 {
@@ -885,6 +890,10 @@ footer {
 	margin-left: 180px !important;
 }
 
+.modal-body .form-horizontal .controls {
+    margin-left: 140px;
+}
+
 .modal-confirm {
 	width: 250px;
 	margin-left: -125px;
@@ -892,6 +901,10 @@ footer {
 
 .modal-footer-confirm {
 	padding: 5px 15px 5px;
+}
+
+.record.container-fluid {
+	padding-bottom: 100px;
 }
 
 .inline-block {

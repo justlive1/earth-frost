@@ -37,6 +37,7 @@ public interface JobSchedule {
    * 恢复job
    * 
    * @param jobId
+   * @return
    */
   String resumeJob(String jobId);
 

@@ -129,7 +129,7 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.addJob = function() {
 		
 		$scope.modalDatas = {};
-		$scope.modalDatas.type = 'bean';
+		$scope.modalDatas.type = 'BEAN';
 		
 		$http.get('queryExecutors').success(function(data) {
 			if (data.success) {
@@ -173,7 +173,7 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 				 type: $scope.modalDatas.type
 			 };
 			 var flag = true;
-			 if($scope.modalDatas.type == 'script'){
+			 if($scope.modalDatas.type == 'SCRIPT'){
 				 job.script = `
 package justlive.earth.breeze.frost.executor.example;
  
@@ -193,6 +193,13 @@ public class DemoScriptJob implements IJob {
  }
  
 }`;
+				 
+				 if ($scope.modalDatas.useExecutor) {
+					 job.group = {
+						 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+					 };
+				 }
+				 
 			 } else {
 				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,
@@ -321,13 +328,19 @@ public class DemoScriptJob implements IJob {
 		
 		postForm('findJobInfoById', {id: id}, function(data) {
 			if (data.success && data.data) {
-				$scope.modalDatas.jobKey = data.data.group.jobKey;
-				$scope.modalDatas.jobKeyDesc = data.data.group.jobKeyDesc;
+				$scope.modalDatas.type = data.data.type;
 				$scope.modalDatas.cron = data.data.cron;
 				$scope.modalDatas.name = data.data.name;
-				var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
-				if(executor){
-					$scope.modalDatas.executorId = executor.id;
+				if (data.data.group) {
+					var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
+					if(executor){
+						$scope.modalDatas.executorId = executor.id;
+					}
+					if ($scope.modalDatas.type == 'SCRIPT') {
+						$scope.modalDatas.useExecutor = true;
+					} else {
+						$scope.modalDatas.jobKey = data.data.group.jobKey;
+					}
 				}
 			}
 		});
@@ -355,11 +368,20 @@ public class DemoScriptJob implements IJob {
 				 id: id,
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
-				 group: {
+				 type: $scope.modalDatas.type
+			 };
+			 if (job.type == 'SCRIPT') {
+				 if ($scope.modalDatas.useExecutor) {
+					 job.group = {
+						 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+					 };
+				 } 
+			 } else {
+				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,
 					 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
-				 }
-			 };
+				 };
+			 }
 			 var flag = true;
 			 postJson('updateJob', job, function(data){
 					 if (data.success) {

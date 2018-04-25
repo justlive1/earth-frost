@@ -21,7 +21,7 @@ public class JobScriptExecuteWrapper extends AbstractJobExecuteWrapper {
 
   @Override
   public void doRun() {
-    if (Objects.equals(jobInfo.getType(), JobInfo.TYPE.SCRIPT.name())) {
+    if (!Objects.equals(jobInfo.getType(), JobInfo.TYPE.SCRIPT.name())) {
       throw Exceptions.fail("30002", "执行job类型不匹配");
     }
     this.before();

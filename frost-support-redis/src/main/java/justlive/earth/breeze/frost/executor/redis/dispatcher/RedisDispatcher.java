@@ -37,8 +37,7 @@ public class RedisDispatcher implements Dispatcher {
 
     String key = this.checkDispatch(job);
     if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), job.getType())) {
-      redissonClient.getExecutorService(SystemProperties.JOB_SCRIPT_PREFIX)
-          .execute(new JobScriptExecuteWrapper(job));
+      redissonClient.getExecutorService(key).execute(new JobScriptExecuteWrapper(job));
     } else {
       redissonClient.getExecutorService(key).execute(new JobBeanExecuteWrapper(job));
     }
@@ -47,9 +46,19 @@ public class RedisDispatcher implements Dispatcher {
   @Override
   public String checkDispatch(JobInfo job) {
 
-    JobGroup jobGroup = Checks.notNull(Checks.notNull(job).getGroup());
-    String key = String.join(SystemProperties.SEPERATOR, SystemProperties.JOB_GROUP_PREFIX,
-        jobGroup.getGroupKey(), jobGroup.getJobKey());
+    String key;
+    if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), job.getType())) {
+      if (job.getGroup() != null && job.getGroup().getGroupKey() != null) {
+        key = String.join(SystemProperties.SEPERATOR, SystemProperties.JOB_SCRIPT_PREFIX,
+            job.getGroup().getGroupKey());
+      } else {
+        key = SystemProperties.JOB_SCRIPT_PREFIX;
+      }
+    } else {
+      JobGroup jobGroup = Checks.notNull(Checks.notNull(job).getGroup());
+      key = String.join(SystemProperties.SEPERATOR, SystemProperties.JOB_GROUP_PREFIX,
+          jobGroup.getGroupKey(), jobGroup.getJobKey());
+    }
 
     // redisson 当没有worker时候，调用countActiveWorkers会阻塞
     // 由于计算count是基于订阅模式下的publish触发增加各自worker到workersCounterAtomicLong事件

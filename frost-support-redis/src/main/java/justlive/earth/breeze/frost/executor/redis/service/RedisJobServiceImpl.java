@@ -1,5 +1,6 @@
 package justlive.earth.breeze.frost.executor.redis.service;
 
+import java.util.Collections;
 import java.util.List;
 import org.redisson.executor.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,8 +149,11 @@ public class RedisJobServiceImpl implements JobService {
     if (totalCount == 0) {
       return page;
     }
-    List<JobExecuteRecord> list =
-        jobRepository.queryJobRecords(groupKey, jobKey, jobId, page.getFrom(), page.getTo());
+    // 倒序
+    int from = Math.max(totalCount - page.getTo(), 0);
+    int to = totalCount - page.getFrom();
+    List<JobExecuteRecord> list = jobRepository.queryJobRecords(groupKey, jobKey, jobId, from, to);
+    Collections.reverse(list);
     page.setItems(list);
     return page;
   }
@@ -158,4 +162,5 @@ public class RedisJobServiceImpl implements JobService {
   public void addJobScript(JobScript script) {
     jobRepository.addJobScript(script);
   }
+
 }

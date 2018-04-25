@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RList;
@@ -115,7 +116,7 @@ public class RedisJobRepositoryImpl implements JobRepository {
         redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
             SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
     RList<JobScript> list = scriptList.get(id);
-    int size = scriptList.size();
+    int size = list.size();
     if (size > 0) {
       JobScript script = list.get(size - 1);
       jobInfo.setScript(script.getScript());
@@ -140,14 +141,19 @@ public class RedisJobRepositoryImpl implements JobRepository {
             SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
     // 全部
     hashedListmap.put(JobExecuteRecord.class.getName(), record.getId());
-    JobGroup group = findJobInfoById(record.getJobId()).getGroup();
-    // groupKey
-    hashedListmap.put(group.getGroupKey(), record.getId());
-    // jobKey
-    hashedListmap.put(
-        String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()),
-        record.getId());
-
+    JobInfo info = findJobInfoById(record.getJobId());
+    JobGroup group = info.getGroup();
+    if (Objects.equals(JobInfo.TYPE.BEAN.name(), info.getType())) {
+      // groupKey
+      hashedListmap.put(group.getGroupKey(), record.getId());
+      // jobKey
+      hashedListmap.put(
+          String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()),
+          record.getId());
+    } else if (group != null && group.getGroupKey() != null) {
+      // groupKey
+      hashedListmap.put(group.getGroupKey(), record.getId());
+    }
     return record.getId();
   }
 
@@ -182,7 +188,7 @@ public class RedisJobRepositoryImpl implements JobRepository {
             SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
     List<JobExecuteRecord> records = Lists.newArrayList();
     if (StringUtils.isNoneBlank(jobId)) {
-      List<JobExecuteRecord> list = listMultimap.get(jobId);
+      RList<JobExecuteRecord> list = listMultimap.get(jobId);
       if (list.size() <= from) {
         return records;
       }
