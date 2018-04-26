@@ -2,9 +2,9 @@ package justlive.earth.breeze.frost.core.job;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
-import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
-import justlive.earth.breeze.frost.core.model.JobInfo;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
 import justlive.earth.breeze.snow.common.base.exception.CodedException;

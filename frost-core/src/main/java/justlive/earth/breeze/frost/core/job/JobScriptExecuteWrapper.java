@@ -1,7 +1,7 @@
 package justlive.earth.breeze.frost.core.job;
 
 import java.util.Objects;
-import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.util.ScriptJobFactory;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 

@@ -2,7 +2,7 @@ package justlive.earth.breeze.frost.executor.redis.model;
 
 import java.util.Date;
 import java.util.Objects;
-import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
+import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

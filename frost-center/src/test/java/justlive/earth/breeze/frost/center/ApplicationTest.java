@@ -5,9 +5,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import justlive.earth.breeze.frost.api.model.JobGroup;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
-import justlive.earth.breeze.frost.core.model.JobGroup;
-import justlive.earth.breeze.frost.core.model.JobInfo;
 
 /**
  * 测试分发

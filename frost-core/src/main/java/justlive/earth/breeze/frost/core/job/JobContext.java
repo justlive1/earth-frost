@@ -1,6 +1,6 @@
 package justlive.earth.breeze.frost.core.job;
 
-import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 
 /**
  * job上下文

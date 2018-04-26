@@ -29,6 +29,12 @@
 
 			<dependency>
 				<groupId>justlive.earth.breeze.frost</groupId>
+				<artifactId>frost-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>justlive.earth.breeze.frost</groupId>
 				<artifactId>frost-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -50,18 +56,18 @@
 				<artifactId>snow-common-base</artifactId>
 				<version>${snow.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>justlive.earth.breeze.snow</groupId>
 				<artifactId>snow-common-web</artifactId>
 				<version>${snow.version}</version>
 			</dependency>
-			
+
 			<dependency>
-                <groupId>justlive.earth.breeze.cloud</groupId>
-                <artifactId>cloud-security-support</artifactId>
-                <version>${cloud.version}</version>
-            </dependency>
+				<groupId>justlive.earth.breeze.cloud</groupId>
+				<artifactId>cloud-security-support</artifactId>
+				<version>${cloud.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.redisson</groupId>
@@ -82,6 +88,7 @@
 	</build>
 
 	<modules>
+		<module>frost-api</module>
 		<module>frost-core</module>
 		<module>frost-center</module>
 		<module>frost-client</module>

@@ -1,4 +1,4 @@
-package justlive.earth.breeze.frost.core.model;
+package justlive.earth.breeze.frost.api.model;
 
 import java.util.Date;
 import lombok.Data;

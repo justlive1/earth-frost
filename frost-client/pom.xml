@@ -17,6 +17,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>justlive.earth.breeze.frost</groupId>
+			<artifactId>frost-api</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

@@ -1,11 +1,11 @@
 package justlive.earth.breeze.frost.core.service;
 
 import java.util.List;
-import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
-import justlive.earth.breeze.frost.core.model.JobExecutor;
-import justlive.earth.breeze.frost.core.model.JobInfo;
-import justlive.earth.breeze.frost.core.model.JobScript;
-import justlive.earth.breeze.frost.core.model.Page;
+import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
+import justlive.earth.breeze.frost.api.model.JobExecutor;
+import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobScript;
+import justlive.earth.breeze.frost.api.model.Page;
 
 /**
  * 调度中心服务接口

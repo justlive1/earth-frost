@@ -1,6 +1,6 @@
 package justlive.earth.breeze.frost.core.dispacher;
 
-import justlive.earth.breeze.frost.core.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 
 /**
  * 分发接口

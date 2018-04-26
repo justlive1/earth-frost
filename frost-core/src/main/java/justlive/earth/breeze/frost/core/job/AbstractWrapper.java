@@ -1,7 +1,7 @@
 package justlive.earth.breeze.frost.core.job;
 
 import java.util.UUID;
-import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
+import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import lombok.extern.slf4j.Slf4j;
 
 /**

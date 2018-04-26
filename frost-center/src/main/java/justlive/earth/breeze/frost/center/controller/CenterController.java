@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import justlive.earth.breeze.frost.core.model.JobExecuteRecord;
-import justlive.earth.breeze.frost.core.model.JobExecutor;
-import justlive.earth.breeze.frost.core.model.JobInfo;
-import justlive.earth.breeze.frost.core.model.Page;
+import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
+import justlive.earth.breeze.frost.api.model.JobExecutor;
+import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.Page;
 import justlive.earth.breeze.frost.core.service.JobService;
 import justlive.earth.breeze.snow.common.base.domain.Response;
 
