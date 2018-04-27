@@ -19,6 +19,13 @@ frostApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) 
 		},
 		templateUrl : "logs.html",
 		controller : logsController
+	}).state("script", {
+		url : "/script",
+		params : {
+			jobId: null
+		},
+		templateUrl : "script.html",
+		controller : scriptController
 	});
 });
 
@@ -174,8 +181,8 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 			 };
 			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){
-				 job.script = `
-package justlive.earth.breeze.frost.executor.example;
+				 job.script = 
+`package justlive.earth.breeze.frost.executor.example;
  
 import java.util.Random;
 import org.springframework.stereotype.Component;
@@ -301,6 +308,10 @@ public class DemoScriptJob implements IJob {
 		$state.go("logs", {jobId: id});
 	};
 	
+	$scope.jumpToScript = function (id) {
+		$state.go("script", {jobId: id});
+	};
+	
 	$scope.updateJob = function(id) {
 		
 		$scope.modalDatas = {};
@@ -398,6 +409,7 @@ public class DemoScriptJob implements IJob {
 			 return flag;
 		};
 	};
+	
 }
 
 
@@ -475,6 +487,46 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 		}
 	};
 	
+}
+
+function scriptController($scope, $stateParams, $uibModal) {
+	
+	var myTextarea = document.getElementById('editor');
+	
+	$scope.jobId = $stateParams.jobId;
+	
+	postForm('findJobInfoById', {id: $stateParams.jobId}, function(data) {
+		if (data.success && data.data) {
+			myTextarea.value = data.data.script;
+		}
+	});
+	
+	$scope.codeMirrorEditor = CodeMirror.fromTextArea(myTextarea, {
+	    mode: "text/x-java",
+	    lineNumbers: true
+	});
+	
+	$scope.save = function () {
+		if (!$scope.version) {
+			$scope.versionError = true;
+			return;
+		}
+		
+		$scope.versionError = false;
+		
+		var script = $scope.codeMirrorEditor.doc.getValue();
+		
+		postJson("addJobScript", {jobId: $scope.jobId, script: script, version: $scope.version}, function(data){
+			if(data.success){
+				openConfirm($scope, $uibModal, data.data);
+			} else {
+				openConfirm($scope, $uibModal, data.message);
+			}
+		},
+		function(XMLHttpRequest, textStatus, errorThrown){
+			$scope.modalDatas.error = errorThrown;
+		});
+	};
 }
 
 function openConfirm($scope, $uibModal, msg, ok) {

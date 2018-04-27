@@ -44,6 +44,11 @@
 						<i class="fa fa-file-text-o"></i>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
+						uib-tooltip="脚本" ng-click="jumpToScript(job.id)"
+						ng-if="job.type == 'SCRIPT'">
+						<i class="fa fa-code"></i>
+					</button>
+					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="日志" ng-click="jumpToLogs(job.id)">
 						<i class="fa fa-files-o"></i>
 					</button>

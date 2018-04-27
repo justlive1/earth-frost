@@ -863,7 +863,7 @@ footer {
 }
 
 .width135 {
-    width: 135px !important;
+	width: 135px !important;
 }
 
 .width155 {
@@ -891,7 +891,7 @@ footer {
 }
 
 .modal-body .form-horizontal .controls {
-    margin-left: 140px;
+	margin-left: 140px;
 }
 
 .modal-confirm {
@@ -973,4 +973,8 @@ footer {
 	text-decoration: none;
 	background-color: #fff;
 	border: 1px solid #ddd;
+}
+
+.CodeMirror {
+	height: 500px !important;	
 }

@@ -10,6 +10,7 @@ import org.springframework.web.servlet.ModelAndView;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobScript;
 import justlive.earth.breeze.frost.api.model.Page;
 import justlive.earth.breeze.frost.core.service.JobService;
 import justlive.earth.breeze.snow.common.base.domain.Response;
@@ -174,4 +175,15 @@ public class CenterController {
     return Response.success(records);
   }
 
+  /**
+   * 增加任务脚本
+   * 
+   * @param script
+   * @return
+   */
+  @RequestMapping("/addJobScript")
+  public Response<String> addJobScript(@RequestBody JobScript script) {
+    jobService.addJobScript(script);
+    return Response.success("操作成功");
+  }
 }
