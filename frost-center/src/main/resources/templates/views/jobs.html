@@ -23,7 +23,7 @@
 			<tr ng-repeat="job in jobs | filter : doFilter">
 				<td class="name-column" ng-bind="job.id"></td>
 				<td class="name-column" ng-bind="job.name"></td>
-				<td class="info-column">[{{job.group.groupKey}}]-[{{job.group.jobKey}}]</td>
+				<td class="info-column">[{{job.group.groupKey?job.group.groupKey:'…'}}]-[{{job.group.jobKey?job.group.jobKey:'…'}}]</td>
 				<td class="cron-column" ng-bind="job.cron"></td>
 				<td class="status-column"><span class="status-{{job.status}}">{{job.status}}</span></td>
 				<td class="operation-column">

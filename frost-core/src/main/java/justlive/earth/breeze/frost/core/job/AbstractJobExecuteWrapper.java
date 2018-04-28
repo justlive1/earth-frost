@@ -2,9 +2,12 @@ package justlive.earth.breeze.frost.core.job;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import org.springframework.util.StringUtils;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
+import justlive.earth.breeze.frost.core.util.IpUtils;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
 import justlive.earth.breeze.snow.common.base.exception.CodedException;
 
@@ -33,7 +36,15 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
   public void success() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.SUCCESS.name());
-    jobRecord.setExecuteMsg("执行成功");
+
+    JobProperties props = SpringBeansHolder.getBean(JobProperties.class);
+    String address = props.getExecutor().getIp();
+    if (!StringUtils.hasText(address)) {
+      address = IpUtils.ip();
+    }
+    address += IpUtils.SEPERATOR + props.getExecutor().getPort();
+
+    jobRecord.setExecuteMsg(String.format("执行成功 [%s]", address));
     jobRepository.updateJobRecord(jobRecord);
   }
 
