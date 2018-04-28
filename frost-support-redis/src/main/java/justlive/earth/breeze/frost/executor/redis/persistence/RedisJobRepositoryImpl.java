@@ -281,6 +281,19 @@ public class RedisJobRepositoryImpl implements JobRepository {
     RListMultimap<String, JobScript> scriptList =
         redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
             SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+    script.setId(UUID.randomUUID().toString());
+    script.setTime(Date.from(ZonedDateTime.now().toInstant()));
     scriptList.put(script.getJobId(), script);
+    if (scriptList.get(script.getJobId()).size() > 20) {
+      scriptList.get(script.getJobId()).remove(0);
+    }
+  }
+
+  @Override
+  public List<JobScript> queryJobScripts(String jobId) {
+    RListMultimap<String, JobScript> scriptList =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+    return scriptList.getAll(jobId);
   }
 }

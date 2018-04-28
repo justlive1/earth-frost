@@ -489,15 +489,26 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 	
 }
 
-function scriptController($scope, $stateParams, $uibModal) {
+function scriptController($scope, $stateParams, $state, $uibModal) {
 	
 	var myTextarea = document.getElementById('editor');
 	
 	$scope.jobId = $stateParams.jobId;
 	
+	$scope.queryVersions = function () {
+		postForm('queryJobScripts', {jobId: $stateParams.jobId}, function(data) {
+			if (data.success && data.data) {
+				$scope.scriptList = data.data;
+				$scope.scriptMap = new Map();
+				data.data.forEach(r => $scope.scriptMap.set(r.id, r));
+			}
+		});
+	};
+	
 	postForm('findJobInfoById', {id: $stateParams.jobId}, function(data) {
 		if (data.success && data.data) {
 			myTextarea.value = data.data.script;
+			$scope.queryVersions();
 		}
 	});
 	
@@ -505,6 +516,12 @@ function scriptController($scope, $stateParams, $uibModal) {
 	    mode: "text/x-java",
 	    lineNumbers: true
 	});
+	
+	$scope.switchScript = function (id) {
+		var script = $scope.scriptMap.get(id);
+		$scope.codeMirrorEditor.doc.setValue(script.script);
+		$scope.version = script.version;
+	};
 	
 	$scope.save = function () {
 		if (!$scope.version) {
@@ -522,6 +539,7 @@ function scriptController($scope, $stateParams, $uibModal) {
 			} else {
 				openConfirm($scope, $uibModal, data.message);
 			}
+			$scope.queryVersions();
 		},
 		function(XMLHttpRequest, textStatus, errorThrown){
 			$scope.modalDatas.error = errorThrown;

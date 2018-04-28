@@ -162,5 +162,10 @@ public class RedisJobServiceImpl implements JobService {
   public void addJobScript(JobScript script) {
     jobRepository.addJobScript(script);
   }
+  
+  @Override
+  public List<JobScript> queryJobScripts(String jobId) {
+    return jobRepository.queryJobScripts(jobId);
+  }
 
 }

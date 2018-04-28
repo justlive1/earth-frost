@@ -114,13 +114,19 @@ public interface JobService {
    */
   Page<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
       int pageIndex, int pageSize);
-  
+
   /**
    * 增加任务脚本
    * 
    * @param script
    */
   void addJobScript(JobScript script);
-  
-  
+
+  /**
+   * 查询脚本列表
+   * 
+   * @param jobId
+   * @return
+   */
+  List<JobScript> queryJobScripts(String jobId);
 }

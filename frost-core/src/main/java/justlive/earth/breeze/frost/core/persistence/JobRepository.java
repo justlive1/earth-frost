@@ -123,11 +123,19 @@ public interface JobRepository {
    * @param jobId
    */
   void removeJobRecords(String jobId);
-  
+
   /**
    * 增加任务脚本
    * 
    * @param script
    */
   void addJobScript(JobScript script);
+
+  /**
+   * 查询任务脚本
+   * 
+   * @param jobId
+   * @return
+   */
+  List<JobScript> queryJobScripts(String jobId);
 }

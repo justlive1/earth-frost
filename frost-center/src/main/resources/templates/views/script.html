@@ -17,6 +17,16 @@
 				<i class="fa fa-save"></i>
 			</button>
 		</div>
+		<div class="control-group inline-block" uib-dropdown>
+			<button type="button" id="version-btn" class="btn btn-info"
+				uib-dropdown-toggle>
+				切换版本 <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu" uib-dropdown-menu role="menu"
+				aria-labelledby="version-btn">
+				<li role="menuitem" ng-repeat="vs in scriptList" ng-click="switchScript(vs.id)"><a>{{vs.version}}</a></li>
+			</ul>
+		</div>
 	</div>
 
 	<form class="form-horizontal">

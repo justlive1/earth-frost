@@ -20,8 +20,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<snow.version>0.0.1-SNAPSHOT</snow.version>
-		<cloud.version>0.0.1</cloud.version>
 		<redisson.version>3.6.4</redisson.version>
+		<spring-boot-admin.version>1.5.7</spring-boot-admin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -64,9 +64,15 @@
 			</dependency>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.cloud</groupId>
-				<artifactId>cloud-security-support</artifactId>
-				<version>${cloud.version}</version>
+				<groupId>de.codecentric</groupId>
+				<artifactId>spring-boot-admin-server-ui</artifactId>
+				<version>${spring-boot-admin.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>de.codecentric</groupId>
+				<artifactId>spring-boot-admin-server-ui-login</artifactId>
+				<version>${spring-boot-admin.version}</version>
 			</dependency>
 
 			<dependency>

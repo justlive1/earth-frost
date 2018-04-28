@@ -186,4 +186,15 @@ public class CenterController {
     jobService.addJobScript(script);
     return Response.success("操作成功");
   }
+
+  /**
+   * 查询任务脚本
+   * 
+   * @param jobId
+   * @return
+   */
+  @RequestMapping("/queryJobScripts")
+  public Response<List<JobScript>> queryJobScripts(String jobId) {
+    return Response.success(jobService.queryJobScripts(jobId));
+  }
 }
