@@ -69,6 +69,11 @@ public class JobInfo {
   private String script;
 
   /**
+   * 参数
+   */
+  private String param;
+
+  /**
    * 任务Id
    */
   private String taskId;

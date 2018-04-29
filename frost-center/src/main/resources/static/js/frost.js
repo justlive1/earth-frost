@@ -177,7 +177,8 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 			var job = {
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
-				 type: $scope.modalDatas.type
+				 type: $scope.modalDatas.type,
+				 param: $scope.modalDatas.param
 			 };
 			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){
@@ -191,7 +192,6 @@ import justlive.earth.breeze.frost.core.job.Job;
 import justlive.earth.breeze.frost.core.job.JobContext;
  
 @Job(value = "DemoScriptJob", desc = "示例脚本job")
-@Component
 public class DemoScriptJob implements IJob {
  
  @Override
@@ -342,6 +342,7 @@ public class DemoScriptJob implements IJob {
 				$scope.modalDatas.type = data.data.type;
 				$scope.modalDatas.cron = data.data.cron;
 				$scope.modalDatas.name = data.data.name;
+				$scope.modalDatas.param = data.data.param;
 				if (data.data.group) {
 					var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
 					if(executor){
