@@ -73,14 +73,4 @@ public class JobInfo {
    */
   private String param;
 
-  /**
-   * 任务Id
-   */
-  private String taskId;
-
-  /**
-   * 日志Id
-   */
-  private String logId;
-
 }

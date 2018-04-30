@@ -112,11 +112,40 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 
 	$scope.searchFilter = '';
 	$rootScope.navActive = 1;
+	
+	$scope.defaultScript = 
+`package justlive.earth.breeze.frost.executor.example;
+ 
+import java.util.Random;
+import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import justlive.earth.breeze.frost.core.job.IJob;
+import justlive.earth.breeze.frost.core.job.Job;
+import justlive.earth.breeze.frost.core.job.JobContext;
+
+ 
+@Job(value = "DemoScriptJob", desc = "示例脚本job")
+public class DemoScriptJob implements IJob {
+ 
+ @Autowired
+ InjectExampleBean bean;
+ 
+ @Override
+ public void execute(JobContext ctx) {
+   System.out.println(String.format("参数：%s", ctx.getParam()));
+   bean.say();
+ }
+ 
+}`;
 	 
+	$scope.pageIndex = 1;
+	$scope.pageSize = 10;
+	
 	$scope.queryJobs = function() {
-		$http.get('queryJobInfos').success(function(data) {
+		postForm('queryJobInfos', {pageIndex: $scope.pageIndex, pageSize: $scope.pageSize}, function(data) {
 			if (data.success) {
-				$scope.jobs = data.data;
+				$scope.totalCount = data.data.totalCount;
+				$scope.jobs = data.data.items;
 			}
 		});
 	};
@@ -182,24 +211,7 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 			 };
 			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){
-				 job.script = 
-`package justlive.earth.breeze.frost.executor.example;
- 
-import java.util.Random;
-import org.springframework.stereotype.Component;
-import justlive.earth.breeze.frost.core.job.IJob;
-import justlive.earth.breeze.frost.core.job.Job;
-import justlive.earth.breeze.frost.core.job.JobContext;
- 
-@Job(value = "DemoScriptJob", desc = "示例脚本job")
-public class DemoScriptJob implements IJob {
- 
- @Override
- public void execute(JobContext ctx) {
- System.out.println("hello world");
- }
- 
-}`;
+				 job.script = $scope.defaultScript;
 				 
 				 if ($scope.modalDatas.useExecutor) {
 					 job.group = {
@@ -380,7 +392,8 @@ public class DemoScriptJob implements IJob {
 				 id: id,
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
-				 type: $scope.modalDatas.type
+				 type: $scope.modalDatas.type,
+				 param: $scope.modalDatas.param
 			 };
 			 if (job.type == 'SCRIPT') {
 				 if ($scope.modalDatas.useExecutor) {
@@ -388,6 +401,7 @@ public class DemoScriptJob implements IJob {
 						 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
 					 };
 				 } 
+				 job.script = $scope.defaultScript;
 			 } else {
 				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,
@@ -454,6 +468,9 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 	};
 	
 	$scope.filterJobs = function (value) {
+		if (!value.group && $scope.jobKey) {
+			return false;
+		}
 		if ($scope.groupKey && value.group.groupKey != $scope.groupKey) {
 			return false;
 		}
@@ -471,7 +488,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 			$scope.executorMap = map;
 			$scope.executorId = $stateParams.executorId;
 		}
-		$http.get('queryJobInfos').success(function(data) {
+		$http.get('queryAllJobs').success(function(data) {
 			if (data.success) {
 				$scope.jobInfos = data.data;
 			}

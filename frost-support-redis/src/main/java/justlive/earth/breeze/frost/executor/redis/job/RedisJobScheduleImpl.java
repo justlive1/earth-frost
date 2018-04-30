@@ -3,6 +3,8 @@ package justlive.earth.breeze.frost.executor.redis.job;
 import java.util.concurrent.ExecutorService;
 import javax.annotation.PostConstruct;
 import org.redisson.api.CronSchedule;
+import org.redisson.api.RList;
+import org.redisson.api.RListMultimap;
 import org.redisson.api.RScheduledExecutorService;
 import org.redisson.api.RScheduledFuture;
 import org.redisson.api.RTopic;
@@ -70,7 +72,13 @@ public class RedisJobScheduleImpl implements JobSchedule {
     RScheduledFuture<?> future =
         service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron));
 
-    return future.getTaskId();
+    String taskId = future.getTaskId();
+    RListMultimap<String, String> listmap =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobSchedule.class.getName()));
+    listmap.put(jobId, taskId);
+
+    return taskId;
   }
 
 
@@ -78,38 +86,29 @@ public class RedisJobScheduleImpl implements JobSchedule {
   public String refreshJob(String jobId, String cron) {
 
     this.pauseJob(jobId);
-
-    RScheduledExecutorService service =
-        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
-    RScheduledFuture<?> future =
-        service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron));
-
-    return future.getTaskId();
+    return this.addJob(jobId, cron);
   }
 
   @Override
   public void pauseJob(String jobId) {
 
-    JobInfo jobInfo = this.getJobInfo(jobId);
-
-    if (jobInfo.getTaskId() != null) {
-      RScheduledExecutorService service =
-          redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
-      service.cancelTask(jobInfo.getTaskId());
+    RListMultimap<String, String> listmap =
+        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
+            SystemProperties.EXECUTOR_PREFIX, JobSchedule.class.getName()));
+    RList<String> list = listmap.get(jobId);
+    RScheduledExecutorService service =
+        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+    for (String id : list) {
+      service.cancelTask(id);
     }
+    listmap.removeAll(jobId);
   }
 
   @Override
   public String resumeJob(String jobId) {
 
     JobInfo jobInfo = this.getJobInfo(jobId);
-
-    RScheduledExecutorService service =
-        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
-    RScheduledFuture<?> future =
-        service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(jobInfo.getCron()));
-
-    return future.getTaskId();
+    return this.addJob(jobId, jobInfo.getCron());
   }
 
   @Override

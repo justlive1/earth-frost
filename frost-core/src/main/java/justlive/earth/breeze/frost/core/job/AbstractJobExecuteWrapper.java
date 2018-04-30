@@ -25,9 +25,10 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
   protected void before() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    jobRecord = jobRepository.findJobExecuteRecordById(jobInfo.getLogId());
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobRecord = jobRepository.findJobExecuteRecordById(jobLogger.findLoggerId(jobInfo.getId()));
     if (jobRecord == null) {
-      jobRecord = this.record(jobInfo.getId());
+      jobRecord = this.record(jobInfo.getId(), jobLogger.bindLog(jobInfo.getId()));
     }
     jobRecord.setExecuteTime(Date.from(ZonedDateTime.now().toInstant()));
   }

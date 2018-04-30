@@ -21,4 +21,8 @@ public class DefaultJobContext implements JobContext {
     return jobInfo;
   }
 
+  @Override
+  public String getParam() {
+    return jobInfo.getParam();
+  }
 }

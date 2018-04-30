@@ -61,7 +61,14 @@ public interface JobRepository {
    * 
    * @return
    */
-  List<JobInfo> queryJobInfos();
+  List<JobInfo> queryJobInfos(int from, int to);
+
+  /**
+   * 获取所有任务
+   * 
+   * @return
+   */
+  List<JobInfo> queryAllJobs();
 
   /**
    * 根据id获取job

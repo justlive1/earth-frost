@@ -140,8 +140,22 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobInfos")
-  public Response<List<JobInfo>> queryJobInfos() {
-    List<JobInfo> jobInfos = jobService.queryJobInfos();
+  public Response<Page<JobInfo>> queryJobInfos(@RequestParam(defaultValue = "1") int pageIndex,
+      @RequestParam(defaultValue = "10") int pageSize) {
+    Page<JobInfo> jobInfos = jobService.queryJobInfos(pageIndex, pageSize);
+    return Response.success(jobInfos);
+  }
+
+  /**
+   * 获取所有任务
+   * 
+   * @param pageIndex
+   * @param pageSize
+   * @return
+   */
+  @RequestMapping("/queryAllJobs")
+  public Response<List<JobInfo>> queryAllJobs() {
+    List<JobInfo> jobInfos = jobService.queryAllJobs();
     return Response.success(jobInfos);
   }
 

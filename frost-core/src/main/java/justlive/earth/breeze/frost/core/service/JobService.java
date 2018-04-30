@@ -82,9 +82,18 @@ public interface JobService {
   /**
    * 获取job列表
    * 
+   * @param pageIndex
+   * @param pageSize
    * @return
    */
-  List<JobInfo> queryJobInfos();
+  Page<JobInfo> queryJobInfos(int pageIndex, int pageSize);
+
+  /**
+   * 获取所有job
+   * 
+   * @return
+   */
+  List<JobInfo> queryAllJobs();
 
   /**
    * 根据id获取job
@@ -129,4 +138,5 @@ public interface JobService {
    * @return
    */
   List<JobScript> queryJobScripts(String jobId);
+
 }

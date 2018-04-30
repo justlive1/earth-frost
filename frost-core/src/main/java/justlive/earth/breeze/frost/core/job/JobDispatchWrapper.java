@@ -35,11 +35,11 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     JobInfo job = jobRepository.findJobInfoById(id);
-    record = this.record(id);
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    String loggerId = jobLogger.bindLog(id);
+    record = this.record(id, loggerId);
     record.setDispachTime(Date.from(ZonedDateTime.now().toInstant()));
-    job.setLogId(record.getId());
     jobRepository.addJobRecord(record);
-    jobRepository.updateJob(job);
     Dispatcher dispatcher = SpringBeansHolder.getBean(Dispatcher.class);
     dispatcher.dispatch(job);
 

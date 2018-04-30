@@ -1,6 +1,5 @@
 package justlive.earth.breeze.frost.core.job;
 
-import java.util.UUID;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,12 +52,13 @@ public abstract class AbstractWrapper implements Runnable {
    * job执行记录
    * 
    * @param jobId
+   * @param loggerId
    * @return
    */
-  protected JobExecuteRecord record(String jobId) {
+  protected JobExecuteRecord record(String jobId, String loggerId) {
     JobExecuteRecord record = new JobExecuteRecord();
     record.setJobId(jobId);
-    record.setId(UUID.randomUUID().toString());
+    record.setId(loggerId);
     return record;
   }
 }

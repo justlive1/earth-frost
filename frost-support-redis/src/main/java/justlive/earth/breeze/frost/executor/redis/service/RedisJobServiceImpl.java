@@ -10,6 +10,7 @@ import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.api.model.JobScript;
 import justlive.earth.breeze.frost.api.model.Page;
+import justlive.earth.breeze.frost.core.job.JobLogger;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.service.JobService;
@@ -29,6 +30,9 @@ public class RedisJobServiceImpl implements JobService {
 
   @Autowired(required = false)
   JobSchedule jobSchedule;
+  
+  @Autowired
+  JobLogger jobLogger;
 
   @Override
   public int countExecutors() {
@@ -48,10 +52,7 @@ public class RedisJobServiceImpl implements JobService {
     }
     jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
     jobRepository.addJob(jobInfo);
-
-    String taskId = jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
-    jobInfo.setTaskId(taskId);
-    jobRepository.updateJob(jobInfo);
+    jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
 
     return jobInfo.getId();
   }
@@ -71,13 +72,14 @@ public class RedisJobServiceImpl implements JobService {
     localJobInfo.setCron(jobInfo.getCron());
     localJobInfo.setName(jobInfo.getName());
     localJobInfo.setGroup(jobInfo.getGroup());
+    localJobInfo.setParam(jobInfo.getParam());
+    localJobInfo.setType(jobInfo.getType());
+    localJobInfo.setScript(jobInfo.getScript());
 
     jobRepository.updateJob(localJobInfo);
 
     if (JobInfo.STATUS.NORMAL.name().equals(localJobInfo.getStatus())) {
-      String taskId = jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
-      localJobInfo.setTaskId(taskId);
-      jobRepository.updateJob(localJobInfo);
+      jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
     }
   }
 
@@ -90,17 +92,17 @@ public class RedisJobServiceImpl implements JobService {
     }
 
     localJobInfo.setStatus(JobInfo.STATUS.PAUSED.name());
-    jobRepository.updateJob(localJobInfo);
-
+    localJobInfo.setScript(null);
     jobSchedule.pauseJob(jobId);
+    jobRepository.updateJob(localJobInfo);
   }
 
   @Override
   public void resumeJob(String jobId) {
-    String taskId = jobSchedule.resumeJob(jobId);
+    jobSchedule.resumeJob(jobId);
     JobInfo jobInfo = jobRepository.findJobInfoById(jobId);
-    jobInfo.setTaskId(taskId);
     jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
+    jobInfo.setScript(null);
     jobRepository.updateJob(jobInfo);
   }
 
@@ -109,6 +111,7 @@ public class RedisJobServiceImpl implements JobService {
     jobSchedule.removeJob(jobId);
     jobRepository.removeJobRecords(jobId);
     jobRepository.removeJob(jobId);
+    jobLogger.removeLogger(jobId);
   }
 
   @Override
@@ -122,8 +125,31 @@ public class RedisJobServiceImpl implements JobService {
   }
 
   @Override
-  public List<JobInfo> queryJobInfos() {
-    return jobRepository.queryJobInfos();
+  public Page<JobInfo> queryJobInfos(int pageIndex, int pageSize) {
+    Page<JobInfo> page = new Page<>();
+    page.setPageIndex(pageIndex);
+    page.setPageSize(pageSize);
+
+    int totalCount = this.countJobInfos();
+    page.setTotalCount(totalCount);
+
+    if (totalCount == 0) {
+      return page;
+    }
+    // 倒序
+    int from = Math.max(totalCount - page.getTo(), 0);
+    int to = totalCount - page.getFrom();
+
+    List<JobInfo> list = jobRepository.queryJobInfos(from, to);
+    Collections.reverse(list);
+    page.setItems(list);
+
+    return page;
+  }
+
+  @Override
+  public List<JobInfo> queryAllJobs() {
+    return jobRepository.queryAllJobs();
   }
 
   @Override
@@ -162,7 +188,7 @@ public class RedisJobServiceImpl implements JobService {
   public void addJobScript(JobScript script) {
     jobRepository.addJobScript(script);
   }
-  
+
   @Override
   public List<JobScript> queryJobScripts(String jobId) {
     return jobRepository.queryJobScripts(jobId);

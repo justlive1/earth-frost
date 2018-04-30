@@ -19,6 +19,6 @@ public class PrintParamJob implements IJob {
 
   @Override
   public void execute(JobContext ctx) {
-    log.info("执行参数: {}", ctx.getInfo().getParam());
+    log.info("执行参数: {}", ctx.getParam());
   }
 }

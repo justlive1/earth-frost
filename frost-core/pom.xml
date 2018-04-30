@@ -24,7 +24,7 @@
 			<groupId>justlive.earth.breeze.frost</groupId>
 			<artifactId>frost-api</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>justlive.earth.breeze.snow</groupId>
 			<artifactId>snow-common-base</artifactId>
@@ -38,6 +38,11 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
 		</dependency>
 
 		<dependency>

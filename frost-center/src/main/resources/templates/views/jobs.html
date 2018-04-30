@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<div class="container-fluid">
+<div class="record container-fluid">
 	<h3>任务管理</h3>
 	<div>
 		<input placeholder="Filter" class="input-xlarge pull-right"
@@ -60,4 +60,7 @@
 			</tr>
 		</tbody>
 	</table>
+	<ul uib-pagination total-items="totalCount" ng-change="queryJobs()"
+		previous-text="上一页" next-text="下一页" ng-model="pageIndex" max-size="5"
+		class="pagination-sm" boundary-link-numbers="true"></ul>
 </div>
