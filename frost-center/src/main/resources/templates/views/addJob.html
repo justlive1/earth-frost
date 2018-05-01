@@ -75,6 +75,14 @@
 				</div>
 			</div>
 		</div>
+		<div class="control-group" ng-if="modalDatas.opt == 1">
+			<label class="control-label width135"> 自动运行 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="checkbox" ng-model="modalDatas.auto">
+				</div>
+			</div>
+		</div>
 		<div class="control-group error">
 			<div class="help-inline error-message margin-left180">{{modalDatas.error}}</div>
 		</div>

@@ -20,8 +20,13 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
   @Override
   public void doRun() {
     this.before();
-    IJob job = SpringBeansHolder.getBean(jobInfo.getGroup().getJobKey(), IJob.class);
+    IJob job = getIJob();
     job.execute(new DefaultJobContext(jobInfo));
+  }
+
+  @Override
+  protected IJob getIJob() {
+    return SpringBeansHolder.getBean(jobInfo.getGroup().getJobKey(), IJob.class);
   }
 
 }

@@ -5,6 +5,8 @@ import java.util.Date;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
+import justlive.earth.breeze.frost.core.notify.Event;
+import justlive.earth.breeze.frost.core.notify.EventPublisher;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
 import justlive.earth.breeze.snow.common.base.exception.CodedException;
@@ -66,5 +68,9 @@ public class JobDispatchWrapper extends AbstractWrapper {
     }
 
     jobRepository.updateJobRecord(record);
+
+    EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
+    publisher.publish(new Event(jobRepository.findJobInfoById(id), Event.TYPE.DISPATCH_FAIL.name(),
+        record.getDispachMsg(), record.getDispachTime().getTime()));
   }
 }

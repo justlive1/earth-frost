@@ -6,6 +6,8 @@ import org.springframework.util.StringUtils;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.config.JobProperties;
+import justlive.earth.breeze.frost.core.notify.Event;
+import justlive.earth.breeze.frost.core.notify.EventPublisher;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.util.IpUtils;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
@@ -37,15 +39,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
   public void success() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.SUCCESS.name());
-
-    JobProperties props = SpringBeansHolder.getBean(JobProperties.class);
-    String address = props.getExecutor().getIp();
-    if (!StringUtils.hasText(address)) {
-      address = IpUtils.ip();
-    }
-    address += IpUtils.SEPERATOR + props.getExecutor().getPort();
-
-    jobRecord.setExecuteMsg(String.format("执行成功 [%s]", address));
+    jobRecord.setExecuteMsg(String.format("执行成功 [%s]", address()));
     jobRepository.updateJobRecord(jobRecord);
   }
 
@@ -56,12 +50,34 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
 
     jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.FAIL.name());
+    String cause;
     if (e instanceof CodedException) {
-      jobRecord.setExecuteMsg(((CodedException) e).getErrorCode().toString());
+      cause = ((CodedException) e).getErrorCode().toString();
     } else {
-      jobRecord.setExecuteMsg(e.getMessage());
+      cause = e.getMessage();
     }
+    jobRecord.setExecuteMsg(String.format("执行失败 [%s] [%s]", address(), cause));
 
     jobRepository.updateJobRecord(jobRecord);
+
+    IJob job = getIJob();
+    if (job.exception()) {
+      EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
+      publisher.publish(new Event(jobInfo, Event.TYPE.EXECUTE_FAIL.name(),
+          jobRecord.getExecuteMsg(), jobRecord.getExecuteTime().getTime()));
+    }
+
+  }
+
+  protected abstract IJob getIJob();
+
+  private String address() {
+    JobProperties props = SpringBeansHolder.getBean(JobProperties.class);
+    String address = props.getExecutor().getIp();
+    if (!StringUtils.hasText(address)) {
+      address = IpUtils.ip();
+    }
+    address += IpUtils.SEPERATOR + props.getExecutor().getPort();
+    return address;
   }
 }

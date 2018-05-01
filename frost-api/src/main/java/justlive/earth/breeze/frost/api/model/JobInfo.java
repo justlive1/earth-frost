@@ -73,4 +73,9 @@ public class JobInfo {
    */
   private String param;
 
+  /**
+   * 是否自动执行
+   */
+  private boolean auto;
+
 }

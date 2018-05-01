@@ -54,7 +54,8 @@ frostApp.controller('appModalInstanceCtrl', function ($scope, $uibModalInstance,
 				$scope.modalDatas.jobKey = executor.groups[0].jobKey;
 			}
 		}
-	}
+	};
+    
   });
 
 function executorsController($rootScope, $scope, $http, $filter, $state) {
@@ -164,7 +165,7 @@ public class DemoScriptJob implements IJob {
 	
 	$scope.addJob = function() {
 		
-		$scope.modalDatas = {};
+		$scope.modalDatas = { opt: 1};
 		$scope.modalDatas.type = 'BEAN';
 		
 		$http.get('queryExecutors').success(function(data) {
@@ -207,7 +208,8 @@ public class DemoScriptJob implements IJob {
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
 				 type: $scope.modalDatas.type,
-				 param: $scope.modalDatas.param
+				 param: $scope.modalDatas.param,
+				 auto: $scope.modalDatas.auto
 			 };
 			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){

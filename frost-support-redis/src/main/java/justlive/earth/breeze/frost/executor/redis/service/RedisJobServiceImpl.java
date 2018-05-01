@@ -30,7 +30,7 @@ public class RedisJobServiceImpl implements JobService {
 
   @Autowired(required = false)
   JobSchedule jobSchedule;
-  
+
   @Autowired
   JobLogger jobLogger;
 
@@ -50,9 +50,15 @@ public class RedisJobServiceImpl implements JobService {
     if (!CronExpression.isValidExpression(jobInfo.getCron())) {
       throw Exceptions.fail("300001", "定时表达式格式有误");
     }
-    jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
+    if (jobInfo.isAuto()) {
+      jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
+    } else {
+      jobInfo.setStatus(JobInfo.STATUS.PAUSED.name());
+    }
     jobRepository.addJob(jobInfo);
-    jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
+    if (jobInfo.isAuto()) {
+      jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
+    }
 
     return jobInfo.getId();
   }
