@@ -4,9 +4,9 @@
 </div>
 
 <div class="modal-body">
-	<form class="form-horizontal">
-		<div class="control-group">
-			<label class="control-label width135"> 任务类型 </label>
+	<form class="form-horizontal" name="jobForm">
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 任务类型 </label>
 			<div class="controls">
 				<div class="input-prepend">
 					<select class="input-large width248" ng-model="modalDatas.type">
@@ -16,8 +16,8 @@
 				</div>
 			</div>
 		</div>
-		<div class="control-group">
-			<label class="control-label width135"> 执行器 </label>
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 执行器 </label>
 			<div class="controls">
 				<div class="input-prepend">
 					<select class="input-large width248"
@@ -37,17 +37,17 @@
 				</div>
 			</div>
 		</div>
-		<div class="control-group">
-			<label class="control-label width135"> 任务描述 </label>
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 任务描述 </label>
 			<div class="controls">
 				<div class="input-prepend">
-					<input type="text" ng-model="modalDatas.name"
+					<input type="text" ng-model="modalDatas.name" placeholder="请输入描述"
 						class="input-large width235">
 				</div>
 			</div>
 		</div>
-		<div class="control-group">
-			<label class="control-label width135"> 执行逻辑 </label>
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 执行逻辑 </label>
 			<div class="controls">
 				<div class="input-prepend">
 					<select class="input-large width248" ng-model="modalDatas.jobKey"
@@ -57,29 +57,51 @@
 				</div>
 			</div>
 		</div>
-		<div class="control-group">
-			<label class="control-label width135"> Cron </label>
+		<div class="control-group inline-block">
+			<label class="control-label width100"> Cron </label>
 			<div class="controls">
 				<div class="input-prepend">
-					<input type="text" ng-model="modalDatas.cron"
-						class="input-large width235">
+					<input type="text" ng-model="modalDatas.cron" name="cron"
+						placeholder="请输入cron" class="input-large width235" required>
 				</div>
 			</div>
 		</div>
-		<div class="control-group">
-			<label class="control-label width135"> 参数 </label>
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 参数 </label>
 			<div class="controls">
 				<div class="input-prepend">
 					<input type="text" ng-model="modalDatas.param"
-						class="input-large width235">
+						placeholder="请输入运行参数" class="input-large width235">
 				</div>
 			</div>
 		</div>
-		<div class="control-group" ng-if="modalDatas.opt == 1">
-			<label class="control-label width135"> 自动运行 </label>
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 失败处理 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<select class="input-large width248"
+						ng-model="modalDatas.failStrategy">
+						<option value="NOTIFY">失败通知</option>
+						<option value="RETRY">失败重试</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="control-group inline-block" ng-if="modalDatas.opt == 1">
+			<label class="control-label width100"> 自动运行 </label>
 			<div class="controls">
 				<div class="input-prepend">
 					<input type="checkbox" ng-model="modalDatas.auto">
+				</div>
+			</div>
+		</div>
+		<div class="control-group inline-block"
+			ng-if="modalDatas.failStrategy == 'NOTIFY'">
+			<label class="control-label width100"> 通知邮件 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="text" ng-model="modalDatas.notifyMails"
+						placeholder="多个邮件地址逗号分隔" class="input-large width235">
 				</div>
 			</div>
 		</div>
@@ -90,6 +112,7 @@
 </div>
 
 <div class="modal-footer">
-	<button class="btn btn-info" type="button" ng-click="$ctrl.ok()">确定</button>
+	<button class="btn btn-info" type="button" ng-click="$ctrl.ok()"
+		ng-disabled="jobForm.cron.$invalid">确定</button>
 	<button class="btn" type="button" ng-click="$ctrl.cancel()">取消</button>
 </div>

@@ -33,6 +33,17 @@ public class JobInfo {
     SCRIPT
   }
 
+  public enum STRATEGY {
+    /**
+     * 通知
+     */
+    NOTIFY,
+    /**
+     * 重试
+     */
+    RETRY;
+  }
+
   /**
    * 编号
    */
@@ -77,5 +88,15 @@ public class JobInfo {
    * 是否自动执行
    */
   private boolean auto;
+
+  /**
+   * 失败策略
+   */
+  private String failStrategy;
+
+  /**
+   * 失败通知邮件地址（每个任务特别的通知人）
+   */
+  private String[] notifyMails;
 
 }

@@ -1,9 +1,13 @@
 package justlive.earth.breeze.frost.core.notify;
 
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
 
   public enum TYPE {
@@ -20,22 +24,22 @@ public class Event {
   /**
    * job
    */
-  private final JobInfo job;
+  private JobInfo job;
 
   /**
    * 类型
    */
-  private final String type;
+  private String type;
 
   /**
    * 消息
    */
-  private final String message;
+  private String message;
 
   /**
    * 时间戳
    */
-  private final long timestamp;
+  private long timestamp;
 
 
 }

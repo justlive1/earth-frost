@@ -167,6 +167,7 @@ public class DemoScriptJob implements IJob {
 		
 		$scope.modalDatas = { opt: 1};
 		$scope.modalDatas.type = 'BEAN';
+		$scope.modalDatas.failStrategy = 'NOTIFY';
 		
 		$http.get('queryExecutors').success(function(data) {
 			if (data.success) {
@@ -192,6 +193,7 @@ public class DemoScriptJob implements IJob {
 			templateUrl: "addJob.html",
 			controller: 'appModalInstanceCtrl',
 			controllerAs: '$ctrl',
+			windowClass: 'modal-addJob',
 		    resolve: {
 		      modalDatas: function () {
 		        return $scope.modalDatas;
@@ -204,12 +206,18 @@ public class DemoScriptJob implements IJob {
 		});
 		
 		$scope.modalDatas.ok = function () {
+			var mails = null;
+			if($scope.modalDatas.notifyMails) {
+				mails = $scope.modalDatas.notifyMails.split(',');
+			}
 			var job = {
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
 				 type: $scope.modalDatas.type,
 				 param: $scope.modalDatas.param,
-				 auto: $scope.modalDatas.auto
+				 auto: $scope.modalDatas.auto,
+				 failStrategy: $scope.modalDatas.failStrategy,
+				 notifyMails: mails
 			 };
 			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){
@@ -236,8 +244,9 @@ public class DemoScriptJob implements IJob {
 						 flag = false;
 					 }
 				 },
-				 function(XMLHttpRequest, textStatus, errorThrown){
-					 $scope.modalDatas.error = errorThrown;
+				 function(req, textStatus, errorThrown){
+					 $scope.modalDatas.error = req.responseJSON.message;
+					 flag = false;
 				 });
 			 
 			 return flag;
@@ -353,10 +362,17 @@ public class DemoScriptJob implements IJob {
 		
 		postForm('findJobInfoById', {id: id}, function(data) {
 			if (data.success && data.data) {
+				var mails = null;
+				if (data.data.notifyMails) {
+					mails = data.data.notifyMails.join();
+				}
 				$scope.modalDatas.type = data.data.type;
+				$scope.modalDatas.preType = data.data.type;
 				$scope.modalDatas.cron = data.data.cron;
 				$scope.modalDatas.name = data.data.name;
 				$scope.modalDatas.param = data.data.param;
+				$scope.modalDatas.failStrategy = data.data.failStrategy;
+				$scope.modalDatas.notifyMails = mails;
 				if (data.data.group) {
 					var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
 					if(executor){
@@ -378,6 +394,7 @@ public class DemoScriptJob implements IJob {
 			templateUrl: "addJob.html",
 			controller: 'appModalInstanceCtrl',
 			controllerAs: '$ctrl',
+			windowClass: 'modal-addJob',
 		    resolve: {
 		      modalDatas: function () {
 		        return $scope.modalDatas;
@@ -390,12 +407,18 @@ public class DemoScriptJob implements IJob {
 		});
 		
 		$scope.modalDatas.ok = function () {
+			var mails = null;
+			if($scope.modalDatas.notifyMails) {
+				mails = $scope.modalDatas.notifyMails.split(',');
+			}
 			var job = {
 				 id: id,
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
 				 type: $scope.modalDatas.type,
-				 param: $scope.modalDatas.param
+				 param: $scope.modalDatas.param,
+				 failStrategy: $scope.modalDatas.failStrategy,
+				 notifyMails: mails
 			 };
 			 if (job.type == 'SCRIPT') {
 				 if ($scope.modalDatas.useExecutor) {
@@ -403,7 +426,9 @@ public class DemoScriptJob implements IJob {
 						 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
 					 };
 				 } 
-				 job.script = $scope.defaultScript;
+				 if ($scope.modalDatas.preType != job.type) {
+					 job.script = $scope.defaultScript;
+				 }
 			 } else {
 				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,

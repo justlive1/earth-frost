@@ -5,6 +5,7 @@ import justlive.earth.breeze.frost.core.notify.Event;
 import justlive.earth.breeze.frost.core.notify.EventListener;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 /**
  * 事件执行包装
@@ -12,10 +13,11 @@ import lombok.AllArgsConstructor;
  * @author wubo
  *
  */
+@NoArgsConstructor
 @AllArgsConstructor
 public class EventExecuteWrapper extends AbstractWrapper {
 
-  private final Event event;
+  private Event event;
 
   @Override
   public void doRun() {

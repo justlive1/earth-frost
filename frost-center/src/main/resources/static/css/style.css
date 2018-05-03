@@ -862,6 +862,10 @@ footer {
 	min-height: 70px;
 }
 
+.width100 {
+    width: 100px !important;
+}
+
 .width135 {
 	width: 135px !important;
 }
@@ -897,6 +901,15 @@ footer {
 .modal-confirm {
 	width: 250px;
 	margin-left: -125px;
+}
+
+.modal-addJob {
+	width: 850px;
+	margin-left: -425px;
+}
+
+.modal-addJob .modal-body .form-horizontal .controls {
+	margin-left: 110px;
 }
 
 .modal-footer-confirm {
@@ -976,5 +989,5 @@ footer {
 }
 
 .CodeMirror {
-	height: 500px !important;	
+	height: 500px !important;
 }

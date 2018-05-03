@@ -8,6 +8,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import com.google.common.base.Objects;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 
 public class MailEventNotifier extends AbstractEventNotifier {
 
@@ -54,13 +56,27 @@ public class MailEventNotifier extends AbstractEventNotifier {
     EvaluationContext context = new StandardEvaluationContext(event);
 
     SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(to);
+    String[] mails = event.getJob().getNotifyMails();
+    String[] dest;
+    if (mails != null) {
+      dest = Arrays.copyOf(mails, mails.length + to.length);
+      System.arraycopy(to, 0, dest, mails.length, to.length);
+    } else {
+      dest = to;
+    }
+    message.setTo(dest);
     message.setFrom(from);
     message.setSubject(subject.getValue(context, String.class));
     message.setText(text.getValue(context, String.class));
     message.setCc(cc);
 
     sender.send(message);
+  }
+
+  @Override
+  protected boolean shouldNotify(Event event) {
+    return event.getJob().getFailStrategy() == null
+        || Objects.equal(event.getJob().getFailStrategy(), JobInfo.STRATEGY.NOTIFY.name());
   }
 
   public void setTo(String[] to) {
