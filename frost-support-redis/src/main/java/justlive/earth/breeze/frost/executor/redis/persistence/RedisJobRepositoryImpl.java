@@ -105,10 +105,10 @@ public class RedisJobRepositoryImpl implements JobRepository {
 
   @Override
   public void removeJob(String jobId) {
-    String key = String.join(SystemProperties.SEPERATOR, SystemProperties.EXECUTOR_PREFIX,
-        JobInfo.class.getName());
-    RMap<String, JobInfo> map = redissonClient.getMap(key);
-    RList<String> list = redissonClient.getList(key);
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
+        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RList<String> list = redissonClient.getList(String.join(SystemProperties.SEPERATOR,
+        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
     list.remove(jobId);
     map.remove(jobId);
   }
@@ -304,10 +304,12 @@ public class RedisJobRepositoryImpl implements JobRepository {
       map.remove(key);
       hashedListmap.get(JobExecuteRecord.class.getName()).remove(key);
       hashedListmap.get(JobExecuteRecord.class.getName()).remove(key);
-      hashedListmap.get(group.getGroupKey()).remove(key);
-      hashedListmap
-          .get(String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()))
-          .remove(key);
+      if (group != null) {
+        hashedListmap.get(group.getGroupKey()).remove(key);
+        hashedListmap
+            .get(String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()))
+            .remove(key);
+      }
       statusMultimap.removeAll(key);
     }
   }
