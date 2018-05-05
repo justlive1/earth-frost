@@ -1,6 +1,6 @@
 package justlive.earth.breeze.frost.core.dispacher;
 
-import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 
 /**
  * 分发接口
@@ -13,15 +13,15 @@ public interface Dispatcher {
   /**
    * 分发Job，失败会抛出运行时异常
    * 
-   * @param job
+   * @param param
    */
-  void dispatch(JobInfo job);
+  void dispatch(JobExecuteParam param);
 
   /**
    * 校验是否抛出异常，失败会抛出运行时异常
    * 
-   * @param job
+   * @param param
    * @return
    */
-  String checkDispatch(JobInfo job);
+  void checkDispatch(JobExecuteParam param);
 }

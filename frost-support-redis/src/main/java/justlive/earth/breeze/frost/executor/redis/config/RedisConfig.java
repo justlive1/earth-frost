@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.StringUtils;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 
 /**
  * redis配置
@@ -87,7 +88,7 @@ public class RedisConfig {
             .build());
   }
 
-  @Profile(SystemProperties.PROFILE_CENTER)
+  @Profile(JobProperties.PROFILE_CENTER)
   @Bean("thread-task-executor")
   ThreadPoolTaskExecutor threadPool(SystemProperties props) {
     ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();

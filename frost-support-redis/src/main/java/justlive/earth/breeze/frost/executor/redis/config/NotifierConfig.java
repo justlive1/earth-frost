@@ -10,11 +10,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.MailSender;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.notify.CompositeNotifier;
 import justlive.earth.breeze.frost.core.notify.EventListener;
 import justlive.earth.breeze.frost.core.notify.EventPublisher;
 import justlive.earth.breeze.frost.core.notify.MailEventNotifier;
 import justlive.earth.breeze.frost.core.notify.Notifier;
+import justlive.earth.breeze.frost.core.notify.RetryEventNotifier;
 import justlive.earth.breeze.frost.executor.redis.notify.RedisEventPublisherImpl;
 
 /**
@@ -26,7 +28,6 @@ import justlive.earth.breeze.frost.executor.redis.notify.RedisEventPublisherImpl
 @Configuration
 public class NotifierConfig {
 
-
   @Bean
   EventPublisher publisher() {
 
@@ -35,7 +36,7 @@ public class NotifierConfig {
 
 
   @Bean
-  @Profile(SystemProperties.PROFILE_CENTER)
+  @Profile(JobProperties.PROFILE_CENTER)
   @ConditionalOnProperty(value = "frost.notifier.mail.enabled", havingValue = "true",
       matchIfMissing = true)
   @ConfigurationProperties("frost.notifier.mail")
@@ -44,20 +45,26 @@ public class NotifierConfig {
   }
 
   @Bean
-  @Profile(SystemProperties.PROFILE_CENTER)
+  @Profile(JobProperties.PROFILE_CENTER)
+  RetryEventNotifier retryEventNotifier() {
+    return new RetryEventNotifier();
+  }
+
+  @Bean
+  @Profile(JobProperties.PROFILE_CENTER)
   @ConditionalOnBean(Notifier.class)
   CompositeNotifier compositeNotifier(Map<String, Notifier> notifiers) {
     return new CompositeNotifier(notifiers.values());
   }
 
   @Bean
-  @Profile(SystemProperties.PROFILE_CENTER)
+  @Profile(JobProperties.PROFILE_CENTER)
   @ConditionalOnBean(CompositeNotifier.class)
   EventListener listener(CompositeNotifier notifier, SystemProperties props,
       RedissonClient redissonClient) {
     RScheduledExecutorService executor =
-        redissonClient.getExecutorService(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.CENTER_PREFIX, EventPublisher.class.getName()));
+        redissonClient.getExecutorService(String.join(JobProperties.SEPERATOR,
+            JobProperties.CENTER_PREFIX, EventPublisher.class.getName()));
     executor.registerWorkers(props.getWorkers());
 
     return new EventListener(notifier);

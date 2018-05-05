@@ -20,6 +20,9 @@ public abstract class AbstractEventNotifier implements Notifier {
   public void notify(Event event) {
     if (enabled && shouldNotify(event)) {
       try {
+        if (getLogger().isDebugEnabled()) {
+          getLogger().debug("通知事件:{}", event);
+        }
         doNotify(event);
       } catch (Exception ex) {
         getLogger().error("事件通知失败 {} ", event, ex);

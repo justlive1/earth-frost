@@ -16,7 +16,6 @@ import justlive.earth.breeze.frost.api.model.JobGroup;
 import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.registry.AbstractRegistry;
 import justlive.earth.breeze.frost.core.registry.HeartBeat;
-import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author wubo
  *
  */
-@Profile(SystemProperties.PROFILE_EXECUTOR)
+@Profile(JobProperties.PROFILE_EXECUTOR)
 @Slf4j
 @Component
 public class RedisRegistry extends AbstractRegistry {
@@ -48,12 +47,12 @@ public class RedisRegistry extends AbstractRegistry {
   public void register() {
 
     // 订阅心跳检测
-    topic = redissonClient.getTopic(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, HeartBeat.class.getName()));
+    topic = redissonClient.getTopic(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, HeartBeat.class.getName()));
 
     // 注册job执行器
     for (JobGroup jobGroup : jobExecutorBean.getGroups()) {
-      String key = String.join(SystemProperties.SEPERATOR, SystemProperties.JOB_GROUP_PREFIX,
+      String key = String.join(JobProperties.SEPERATOR, JobProperties.JOB_GROUP_PREFIX,
           jobGroup.getGroupKey(), jobGroup.getJobKey());
       log.info("register job [{}]", key);
       redissonClient.getExecutorService(key).registerWorkers(executorProperties.getParallel());
@@ -61,11 +60,11 @@ public class RedisRegistry extends AbstractRegistry {
 
     // script执行器
     if (jobProps.getExecutor().getScriptJobEnabled()) {
-      redissonClient.getExecutorService(SystemProperties.JOB_SCRIPT_PREFIX)
+      redissonClient.getExecutorService(JobProperties.JOB_SCRIPT_PREFIX)
           .registerWorkers(executorProperties.getParallel());
       redissonClient
-          .getExecutorService(String.join(SystemProperties.SEPERATOR,
-              SystemProperties.JOB_SCRIPT_PREFIX, jobExecutorBean.getKey()))
+          .getExecutorService(String.join(JobProperties.SEPERATOR,
+              JobProperties.JOB_SCRIPT_PREFIX, jobExecutorBean.getKey()))
           .registerWorkers(executorProperties.getParallel());
     }
 
@@ -78,14 +77,14 @@ public class RedisRegistry extends AbstractRegistry {
           log.warn("未发现调度中心服务");
         }
         RMapCache<String, JobExecutor> cache =
-            redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
-                SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
-        cache.put(jobExecutorBean.getId(), jobExecutorBean, SystemProperties.HEARTBEAT,
+            redissonClient.getMapCache(String.join(JobProperties.SEPERATOR,
+                JobProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
+        cache.put(jobExecutorBean.getId(), jobExecutorBean, JobProperties.HEARTBEAT,
             TimeUnit.SECONDS);
       } catch (Exception e) {
         log.error("心跳任务出错 ", e);
       }
-    }, SystemProperties.HEARTBEAT, SystemProperties.HEARTBEAT, TimeUnit.SECONDS);
+    }, JobProperties.HEARTBEAT, JobProperties.HEARTBEAT, TimeUnit.SECONDS);
 
     // 注册事件
     topic.publish(new HeartBeat(jobExecutorBean.getAddress(), HeartBeat.TYPE.REGISTER.name(),

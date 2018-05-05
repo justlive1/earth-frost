@@ -1,6 +1,6 @@
 package justlive.earth.breeze.frost.core.job;
 
-import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import justlive.earth.breeze.frost.core.util.SpringBeansHolder;
 
 /**
@@ -13,8 +13,8 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
 
   public JobBeanExecuteWrapper() {}
 
-  public JobBeanExecuteWrapper(JobInfo jobInfo) {
-    this.jobInfo = jobInfo;
+  public JobBeanExecuteWrapper(JobExecuteParam jobExecuteParam) {
+    this.jobExecuteParam = jobExecuteParam;
   }
 
   @Override
@@ -26,7 +26,7 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
 
   @Override
   protected IJob getIJob() {
-    return SpringBeansHolder.getBean(jobInfo.getGroup().getJobKey(), IJob.class);
+    return SpringBeansHolder.getBean(jobExecuteParam.getHandlerId(), IJob.class);
   }
 
 }

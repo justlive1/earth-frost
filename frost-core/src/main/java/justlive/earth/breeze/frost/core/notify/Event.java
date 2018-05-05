@@ -1,6 +1,5 @@
 package justlive.earth.breeze.frost.core.notify;
 
-import justlive.earth.breeze.frost.api.model.JobInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,13 +17,21 @@ public class Event {
     /**
      * 执行失败
      */
-    EXECUTE_FAIL
+    EXECUTE_FAIL,
+    /**
+     * 调度失败重试
+     */
+    DISPATCH_FAIL_RETRY,
+    /**
+     * 执行失败重试
+     */
+    EXECUTE_FAIL_RETRY;
   }
 
   /**
-   * job
+   * data
    */
-  private JobInfo job;
+  private Object data;
 
   /**
    * 类型

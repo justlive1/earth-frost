@@ -19,7 +19,6 @@ import justlive.earth.breeze.frost.core.job.JobDispatchWrapper;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.frost.core.registry.HeartBeat;
-import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-@Profile(SystemProperties.PROFILE_CENTER)
+@Profile(JobProperties.PROFILE_CENTER)
 @Component
 public class RedisJobScheduleImpl implements JobSchedule {
 
@@ -51,8 +50,8 @@ public class RedisJobScheduleImpl implements JobSchedule {
   void init() {
 
     // 心跳
-    RTopic<HeartBeat> topic = redissonClient.getTopic(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, HeartBeat.class.getName()));
+    RTopic<HeartBeat> topic = redissonClient.getTopic(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, HeartBeat.class.getName()));
     topic.addListener((channel, msg) -> {
       if (log.isDebugEnabled()) {
         log.debug("heartBeat: {}", msg);
@@ -60,7 +59,7 @@ public class RedisJobScheduleImpl implements JobSchedule {
     });
 
     RScheduledExecutorService service =
-        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+        redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
     service.registerWorkers(jobProps.getParallel(), executorService);
   }
 
@@ -68,14 +67,13 @@ public class RedisJobScheduleImpl implements JobSchedule {
   public String addJob(String jobId, String cron) {
 
     RScheduledExecutorService service =
-        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+        redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
     RScheduledFuture<?> future =
         service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron));
 
     String taskId = future.getTaskId();
-    RListMultimap<String, String> listmap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobSchedule.class.getName()));
+    RListMultimap<String, String> listmap = redissonClient.getListMultimap(String
+        .join(JobProperties.SEPERATOR, JobProperties.EXECUTOR_PREFIX, JobSchedule.class.getName()));
     listmap.put(jobId, taskId);
 
     return taskId;
@@ -92,12 +90,11 @@ public class RedisJobScheduleImpl implements JobSchedule {
   @Override
   public void pauseJob(String jobId) {
 
-    RListMultimap<String, String> listmap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobSchedule.class.getName()));
+    RListMultimap<String, String> listmap = redissonClient.getListMultimap(String
+        .join(JobProperties.SEPERATOR, JobProperties.EXECUTOR_PREFIX, JobSchedule.class.getName()));
     RList<String> list = listmap.get(jobId);
     RScheduledExecutorService service =
-        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+        redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
     for (String id : list) {
       service.cancelTask(id);
     }
@@ -121,8 +118,16 @@ public class RedisJobScheduleImpl implements JobSchedule {
   public void triggerJob(String jobId) {
 
     RScheduledExecutorService service =
-        redissonClient.getExecutorService(SystemProperties.CENTER_PREFIX);
+        redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
     service.submit(new JobDispatchWrapper(jobId));
+  }
+
+  @Override
+  public void retryJob(String jobId, String loggerId) {
+
+    RScheduledExecutorService service =
+        redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
+    service.submit(new JobDispatchWrapper(jobId, loggerId));
   }
 
   private JobInfo getJobInfo(String jobId) {

@@ -3,6 +3,7 @@ package justlive.earth.breeze.frost.core.job;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import org.springframework.util.StringUtils;
+import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.config.JobProperties;
@@ -21,17 +22,16 @@ import justlive.earth.breeze.snow.common.base.exception.CodedException;
  */
 public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
+  protected JobExecuteParam jobExecuteParam;
+
   protected JobInfo jobInfo;
 
   protected JobExecuteRecord jobRecord;
 
   protected void before() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
-    jobRecord = jobRepository.findJobExecuteRecordById(jobLogger.findLoggerId(jobInfo.getId()));
-    if (jobRecord == null) {
-      jobRecord = this.record(jobInfo.getId(), jobLogger.bindLog(jobInfo.getId()));
-    }
+    jobInfo = jobRepository.findJobInfoById(jobExecuteParam.getJobId());
+    jobRecord = this.record(jobExecuteParam.getJobId(), jobExecuteParam.getLoggerId());
     jobRecord.setExecuteTime(Date.from(ZonedDateTime.now().toInstant()));
   }
 
@@ -47,8 +47,6 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
   public void exception(Exception e) {
     super.exception(e);
 
-    JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-
     jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.FAIL.name());
     String cause;
     if (e instanceof CodedException) {
@@ -58,6 +56,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     }
     jobRecord.setExecuteMsg(String.format("执行失败 [%s] [%s]", address(), cause));
 
+    JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRepository.updateJobRecord(jobRecord);
 
     IJob job = getIJob();
@@ -65,6 +64,11 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
       EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
       publisher.publish(new Event(jobInfo, Event.TYPE.EXECUTE_FAIL.name(),
           jobRecord.getExecuteMsg(), jobRecord.getExecuteTime().getTime()));
+      if (!jobExecuteParam.isFailRetry()) {
+        jobExecuteParam.setFailRetry(true);
+        publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_FAIL_RETRY.name(),
+            jobRecord.getExecuteMsg(), jobRecord.getExecuteTime().getTime()));
+      }
     }
 
   }

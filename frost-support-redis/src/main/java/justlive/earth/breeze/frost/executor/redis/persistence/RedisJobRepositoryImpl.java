@@ -20,9 +20,9 @@ import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobGroup;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.api.model.JobScript;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.model.HashRef;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
-import justlive.earth.breeze.frost.executor.redis.config.SystemProperties;
 import justlive.earth.breeze.frost.executor.redis.model.JobRecordStatus;
 import justlive.earth.breeze.snow.common.base.util.Checks;
 
@@ -41,32 +41,32 @@ public class RedisJobRepositoryImpl implements JobRepository {
   @Override
   public int countExecutors() {
     RMapCache<String, JobExecutor> cache =
-        redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
+        redissonClient.getMapCache(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
     return cache.size();
   }
 
   @Override
   public List<JobExecutor> queryJobExecutors() {
     RMapCache<String, JobExecutor> cache =
-        redissonClient.getMapCache(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
+        redissonClient.getMapCache(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecutor.class.getName()));
     return new ArrayList<>(cache.values());
   }
 
   @Override
   public void addJob(JobInfo jobInfo) {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     jobInfo.setId(UUID.randomUUID().toString());
-    RList<String> sortList = redissonClient.getList(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
+    RList<String> sortList = redissonClient.getList(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
     sortList.add(jobInfo.getId());
     // script
     if (JobInfo.TYPE.SCRIPT.name().equals(jobInfo.getType())) {
       RListMultimap<String, JobScript> scriptList =
-          redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-              SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+          redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+              JobProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
       JobScript script = new JobScript();
       script.setId(UUID.randomUUID().toString());
       script.setJobId(jobInfo.getId());
@@ -81,12 +81,12 @@ public class RedisJobRepositoryImpl implements JobRepository {
 
   @Override
   public void updateJob(JobInfo jobInfo) {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     // script
     RListMultimap<String, JobScript> scriptList =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
     if (jobInfo.getScript() != null && JobInfo.TYPE.SCRIPT.name().equals(jobInfo.getType())) {
       JobScript script = new JobScript();
       script.setId(UUID.randomUUID().toString());
@@ -105,27 +105,27 @@ public class RedisJobRepositoryImpl implements JobRepository {
 
   @Override
   public void removeJob(String jobId) {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
-    RList<String> list = redissonClient.getList(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RList<String> list = redissonClient.getList(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
     list.remove(jobId);
     map.remove(jobId);
   }
 
   @Override
   public int countJobInfos() {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     return map.size();
   }
 
   @Override
   public List<JobInfo> queryJobInfos(int from, int to) {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
-    RList<String> list = redissonClient.getList(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RList<String> list = redissonClient.getList(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName(), RList.class.getSimpleName()));
     List<JobInfo> result = Lists.newArrayList();
     for (String id : list.subList(from, Math.min(to, list.size()))) {
       result.add(map.get(id));
@@ -135,22 +135,22 @@ public class RedisJobRepositoryImpl implements JobRepository {
 
   @Override
   public List<JobInfo> queryAllJobs() {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     return Lists.newArrayList(map.readAllValues());
   }
 
   @Override
   public JobInfo findJobInfoById(String id) {
-    RMap<String, JobInfo> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
+    RMap<String, JobInfo> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, JobInfo.class.getName()));
     JobInfo jobInfo = map.get(id);
     if (jobInfo == null) {
       return jobInfo;
     }
     RListMultimap<String, JobScript> scriptList =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
     RList<JobScript> list = scriptList.get(id);
     int size = list.size();
     if (size > 0) {
@@ -163,17 +163,17 @@ public class RedisJobRepositoryImpl implements JobRepository {
   @Override
   public String addJobRecord(JobExecuteRecord record) {
     RListMultimap<String, JobExecuteRecord> listMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
     listMultimap.put(record.getJobId(), record);
     HashRef ref =
         new HashRef(record.getJobId(), listMultimap.get(record.getJobId()).indexOf(record));
-    RMap<String, HashRef> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
+    RMap<String, HashRef> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
     map.put(record.getId(), ref);
 
     RListMultimap<String, String> hashedListmap = redissonClient
-        .getListMultimap(String.join(SystemProperties.SEPERATOR, SystemProperties.EXECUTOR_PREFIX,
+        .getListMultimap(String.join(JobProperties.SEPERATOR, JobProperties.EXECUTOR_PREFIX,
             HashRef.class.getName(), RListMultimap.class.getSimpleName()));
     // 全部
     hashedListmap.put(JobExecuteRecord.class.getName(), record.getId());
@@ -184,7 +184,7 @@ public class RedisJobRepositoryImpl implements JobRepository {
       hashedListmap.put(group.getGroupKey(), record.getId());
       // jobKey
       hashedListmap.put(
-          String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()),
+          String.join(JobProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()),
           record.getId());
     } else if (group != null && group.getGroupKey() != null) {
       // groupKey
@@ -196,21 +196,21 @@ public class RedisJobRepositoryImpl implements JobRepository {
   @Override
   public int countJobRecords(String groupKey, String jobKey, String jobId) {
     RListMultimap<String, JobExecuteRecord> listMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
     if (StringUtils.isNoneBlank(jobId)) {
       List<JobExecuteRecord> list = listMultimap.get(jobId);
       return list.size();
     }
     RListMultimap<String, String> hashedListmap = redissonClient
-        .getListMultimap(String.join(SystemProperties.SEPERATOR, SystemProperties.EXECUTOR_PREFIX,
+        .getListMultimap(String.join(JobProperties.SEPERATOR, JobProperties.EXECUTOR_PREFIX,
             HashRef.class.getName(), RListMultimap.class.getSimpleName()));
     String key = JobExecuteRecord.class.getName();
     if (StringUtils.isNoneBlank(groupKey)) {
       key = groupKey;
     }
     if (StringUtils.isNoneBlank(jobKey)) {
-      key = String.join(SystemProperties.SEPERATOR, key, jobKey);
+      key = String.join(JobProperties.SEPERATOR, key, jobKey);
     }
     RList<String> list = hashedListmap.get(key);
     return list.size();
@@ -220,8 +220,8 @@ public class RedisJobRepositoryImpl implements JobRepository {
   public List<JobExecuteRecord> queryJobRecords(String groupKey, String jobKey, String jobId,
       int from, int to) {
     RListMultimap<String, JobExecuteRecord> listMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
     List<JobExecuteRecord> records = Lists.newArrayList();
     if (StringUtils.isNoneBlank(jobId)) {
       RList<JobExecuteRecord> list = listMultimap.get(jobId);
@@ -229,8 +229,8 @@ public class RedisJobRepositoryImpl implements JobRepository {
         return records;
       }
       RListMultimap<String, JobRecordStatus> recordStatus =
-          redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-              SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+          redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+              JobProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
       for (JobExecuteRecord record : list.subList(from, Math.min(to, list.size()))) {
         recordStatus.get(record.getId()).forEach(r -> r.fill(record));
         records.add(record);
@@ -238,14 +238,14 @@ public class RedisJobRepositoryImpl implements JobRepository {
       return records;
     }
     RListMultimap<String, String> hashedListmap = redissonClient
-        .getListMultimap(String.join(SystemProperties.SEPERATOR, SystemProperties.EXECUTOR_PREFIX,
+        .getListMultimap(String.join(JobProperties.SEPERATOR, JobProperties.EXECUTOR_PREFIX,
             HashRef.class.getName(), RListMultimap.class.getSimpleName()));
     String key = JobExecuteRecord.class.getName();
     if (StringUtils.isNoneBlank(groupKey)) {
       key = groupKey;
     }
     if (StringUtils.isNoneBlank(jobKey)) {
-      key = String.join(SystemProperties.SEPERATOR, key, jobKey);
+      key = String.join(JobProperties.SEPERATOR, key, jobKey);
     }
     RList<String> list = hashedListmap.get(key);
     if (list.size() <= from) {
@@ -259,17 +259,17 @@ public class RedisJobRepositoryImpl implements JobRepository {
 
   @Override
   public JobExecuteRecord findJobExecuteRecordById(String id) {
-    RMap<String, HashRef> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
+    RMap<String, HashRef> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
     HashRef ref = map.get(id);
     Checks.notNull(ref);
     RListMultimap<String, JobExecuteRecord> listMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
     JobExecuteRecord record = listMultimap.get(ref.getKey()).get(ref.getIndex());
     RListMultimap<String, JobRecordStatus> recordStatus =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
     recordStatus.get(id).forEach(r -> r.fill(record));
     return record;
   }
@@ -278,8 +278,8 @@ public class RedisJobRepositoryImpl implements JobRepository {
   public void updateJobRecord(JobExecuteRecord record) {
     // 日志只会增加不会减少，使用此种方式避开处理事务和异步问题
     RListMultimap<String, JobRecordStatus> listMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
     JobRecordStatus status = new JobRecordStatus(record);
     listMultimap.put(record.getId(), status);
   }
@@ -287,17 +287,17 @@ public class RedisJobRepositoryImpl implements JobRepository {
   @Override
   public void removeJobRecords(String jobId) {
     RListMultimap<String, JobExecuteRecord> listMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobExecuteRecord.class.getName()));
     List<JobExecuteRecord> list = listMultimap.removeAll(jobId);
-    RMap<String, HashRef> map = redissonClient.getMap(String.join(SystemProperties.SEPERATOR,
-        SystemProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
+    RMap<String, HashRef> map = redissonClient.getMap(String.join(JobProperties.SEPERATOR,
+        JobProperties.EXECUTOR_PREFIX, HashRef.class.getName()));
     RListMultimap<String, String> hashedListmap = redissonClient
-        .getListMultimap(String.join(SystemProperties.SEPERATOR, SystemProperties.EXECUTOR_PREFIX,
+        .getListMultimap(String.join(JobProperties.SEPERATOR, JobProperties.EXECUTOR_PREFIX,
             HashRef.class.getName(), RListMultimap.class.getSimpleName()));
     RListMultimap<String, JobRecordStatus> statusMultimap =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
     JobGroup group = findJobInfoById(jobId).getGroup();
     for (JobExecuteRecord r : list) {
       String key = r.getId();
@@ -307,7 +307,7 @@ public class RedisJobRepositoryImpl implements JobRepository {
       if (group != null) {
         hashedListmap.get(group.getGroupKey()).remove(key);
         hashedListmap
-            .get(String.join(SystemProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()))
+            .get(String.join(JobProperties.SEPERATOR, group.getGroupKey(), group.getJobKey()))
             .remove(key);
       }
       statusMultimap.removeAll(key);
@@ -317,8 +317,8 @@ public class RedisJobRepositoryImpl implements JobRepository {
   @Override
   public void addJobScript(JobScript script) {
     RListMultimap<String, JobScript> scriptList =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
     script.setId(UUID.randomUUID().toString());
     script.setTime(Date.from(ZonedDateTime.now().toInstant()));
     scriptList.put(script.getJobId(), script);
@@ -330,8 +330,8 @@ public class RedisJobRepositoryImpl implements JobRepository {
   @Override
   public List<JobScript> queryJobScripts(String jobId) {
     RListMultimap<String, JobScript> scriptList =
-        redissonClient.getListMultimap(String.join(SystemProperties.SEPERATOR,
-            SystemProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
+        redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
+            JobProperties.EXECUTOR_PREFIX, JobScript.class.getName()));
     return scriptList.getAll(jobId);
   }
 }
