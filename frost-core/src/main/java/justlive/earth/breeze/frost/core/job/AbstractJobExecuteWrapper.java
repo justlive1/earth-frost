@@ -2,10 +2,12 @@ package justlive.earth.breeze.frost.core.job;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.UUID;
 import org.springframework.util.StringUtils;
 import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobRecordStatus;
 import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.notify.Event;
 import justlive.earth.breeze.frost.core.notify.EventPublisher;
@@ -26,48 +28,53 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
   protected JobInfo jobInfo;
 
-  protected JobExecuteRecord jobRecord;
+  protected JobRecordStatus jobRecordStatus;
 
   protected void before() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobInfo = jobRepository.findJobInfoById(jobExecuteParam.getJobId());
-    jobRecord = this.record(jobExecuteParam.getJobId(), jobExecuteParam.getLoggerId());
-    jobRecord.setExecuteTime(Date.from(ZonedDateTime.now().toInstant()));
+    jobRecordStatus = new JobRecordStatus();
+    jobRecordStatus.setId(UUID.randomUUID().toString());
+    if (jobExecuteParam.isFailRetry()) {
+      jobRecordStatus.setType(3);
+    } else {
+      jobRecordStatus.setType(1);
+    }
+    jobRecordStatus.setLoggerId(jobExecuteParam.getLoggerId());
+    jobRecordStatus.setTime(Date.from(ZonedDateTime.now().toInstant()));
   }
 
   @Override
   public void success() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.SUCCESS.name());
-    jobRecord.setExecuteMsg(String.format("执行成功 [%s]", address()));
-    jobRepository.updateJobRecord(jobRecord);
+    jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
+    jobRecordStatus.setMsg(String.format("执行成功 [%s]", address()));
+    jobRepository.addJobRecordStatus(jobRecordStatus);
   }
 
   @Override
   public void exception(Exception e) {
     super.exception(e);
-
-    jobRecord.setExecuteStatus(JobExecuteRecord.STATUS.FAIL.name());
+    jobRecordStatus.setStatus(JobExecuteRecord.STATUS.FAIL.name());
     String cause;
     if (e instanceof CodedException) {
       cause = ((CodedException) e).getErrorCode().toString();
     } else {
       cause = e.getMessage();
     }
-    jobRecord.setExecuteMsg(String.format("执行失败 [%s] [%s]", address(), cause));
-
+    jobRecordStatus.setMsg(String.format("执行失败 [%s] [%s]", address(), cause));
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    jobRepository.updateJobRecord(jobRecord);
+    jobRepository.addJobRecordStatus(jobRecordStatus);
 
     IJob job = getIJob();
     if (job.exception()) {
       EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
-      publisher.publish(new Event(jobInfo, Event.TYPE.EXECUTE_FAIL.name(),
-          jobRecord.getExecuteMsg(), jobRecord.getExecuteTime().getTime()));
+      publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_FAIL.name(),
+          jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
       if (!jobExecuteParam.isFailRetry()) {
         jobExecuteParam.setFailRetry(true);
         publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_FAIL_RETRY.name(),
-            jobRecord.getExecuteMsg(), jobRecord.getExecuteTime().getTime()));
+            jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
       }
     }
 

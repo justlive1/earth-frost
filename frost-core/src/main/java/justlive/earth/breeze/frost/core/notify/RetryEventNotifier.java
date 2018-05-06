@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import justlive.earth.breeze.frost.api.model.JobExecuteParam;
+import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
 
@@ -28,15 +29,16 @@ public class RetryEventNotifier extends AbstractEventNotifier {
 
   @Override
   protected boolean shouldNotify(Event event) {
-    return SUPPORT_EVENTS.contains(event.getType());
+    return SUPPORT_EVENTS.contains(event.getType())
+        && Objects.equals(JobInfo.STRATEGY.RETRY.name(), event.getData().getFailStrategy());
   }
 
   @Override
   protected void doNotify(Event event) {
     if (Objects.equals(Event.TYPE.EXECUTE_FAIL_RETRY.name(), event.getType())) {
-      dispatcher.dispatch((JobExecuteParam) event.getData());
+      dispatcher.dispatch(event.getData());
     } else if (Objects.equals(Event.TYPE.DISPATCH_FAIL_RETRY.name(), event.getType())) {
-      JobExecuteParam param = (JobExecuteParam) event.getData();
+      JobExecuteParam param = event.getData();
       jobSchedule.retryJob(param.getJobId(), param.getLoggerId());
     }
   }

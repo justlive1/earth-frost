@@ -3,6 +3,7 @@ package justlive.earth.breeze.frost.core.notify;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
@@ -11,6 +12,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.core.persistence.JobRepository;
 
 /**
  * 邮件事件通知器
@@ -20,8 +22,8 @@ import justlive.earth.breeze.frost.api.model.JobInfo;
  */
 public class MailEventNotifier extends AbstractEventNotifier {
 
-  private static final String DEFAULT_SUBJECT = "#{data.name} (#{data.id}) throws an exception";
-  private static final String DEFAULT_TEXT = "#{data.name} (#{data.id}) \n #{message}";
+  private static final String DEFAULT_SUBJECT = "#{job.name} (#{job.id}) throws an exception";
+  private static final String DEFAULT_TEXT = "#{job.name} (#{job.id}) \n #{event.message}";
 
   private static final List<String> SUPPORT_EVENTS =
       Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name());
@@ -54,6 +56,9 @@ public class MailEventNotifier extends AbstractEventNotifier {
    */
   private Expression subject;
 
+  @Autowired
+  private JobRepository jobRepository;
+
   public MailEventNotifier(MailSender sender) {
     this.sender = sender;
     this.subject = parser.parseExpression(DEFAULT_SUBJECT, ParserContext.TEMPLATE_EXPRESSION);
@@ -63,10 +68,18 @@ public class MailEventNotifier extends AbstractEventNotifier {
   @Override
   protected void doNotify(Event event) {
 
-    EvaluationContext context = new StandardEvaluationContext(event);
+    JobInfo jobInfo = jobRepository.findJobInfoById(event.getData().getJobId());
+    if (jobInfo == null) {
+      return;
+    }
 
+    Msg msg = new Msg();
+    msg.event = event;
+    msg.job = jobInfo;
+    EvaluationContext context = new StandardEvaluationContext(msg);
     SimpleMailMessage message = new SimpleMailMessage();
-    String[] mails = ((JobInfo) event.getData()).getNotifyMails();
+
+    String[] mails = jobInfo.getNotifyMails();
     String[] dest;
     if (mails != null) {
       dest = Arrays.copyOf(mails, mails.length + to.length);
@@ -85,9 +98,8 @@ public class MailEventNotifier extends AbstractEventNotifier {
 
   @Override
   protected boolean shouldNotify(Event event) {
-    return SUPPORT_EVENTS.contains(event.getType())
-        && (((JobInfo) event.getData()).getFailStrategy() == null || Objects
-            .equals(((JobInfo) event.getData()).getFailStrategy(), JobInfo.STRATEGY.NOTIFY.name()));
+    return SUPPORT_EVENTS.contains(event.getType()) && (event.getData()).getFailStrategy() == null
+        || Objects.equals(event.getData().getFailStrategy(), JobInfo.STRATEGY.NOTIFY.name());
   }
 
   public void setTo(String[] to) {
@@ -130,4 +142,8 @@ public class MailEventNotifier extends AbstractEventNotifier {
     return text.getExpressionString();
   }
 
+  public static class Msg {
+    public Event event;
+    public JobInfo job;
+  }
 }

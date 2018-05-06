@@ -455,7 +455,7 @@ public class DemoScriptJob implements IJob {
 }
 
 
-function logsController($rootScope, $scope, $http, $stateParams, $filter) {
+function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) {
 	
 	$rootScope.navActive = 2;
 	
@@ -481,8 +481,31 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter) {
 			if (data.success) {
 				$scope.totalCount = data.data.totalCount;
 				$scope.logs = data.data.items;
+				if($scope.logs) {
+					$scope.logs.forEach(r => {
+						$scope.popoverExecute(r);
+					});
+				}
 			}
 		});
+	};
+	
+	$scope.popoverExecute = function (log) {
+	
+		var executeDetail = '', dispatchDetial = '';
+		log.recordStatuses.forEach(r => {
+			if (r.type == 0){
+				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务调度<<<</label><div>${r.msg}</div></div>`;
+			} else if (r.type == 1) {
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务执行<<<</label><div>${r.msg}</div></div>`;
+			} else if (r.type == 2) {
+				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div>${r.msg}</div></div>`;
+			} else if (r.type == 3) {
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div>${r.msg}</div></div>`;
+			}
+		});
+		log.dispatchDetail = $sce.trustAsHtml(dispatchDetial);
+		log.executeDetail = $sce.trustAsHtml(executeDetail);
 	};
 	
 	$scope.doFilter = function (value) {

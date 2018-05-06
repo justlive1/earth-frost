@@ -863,7 +863,7 @@ footer {
 }
 
 .width100 {
-    width: 100px !important;
+	width: 100px !important;
 }
 
 .width135 {
@@ -918,6 +918,10 @@ footer {
 
 .record.container-fluid {
 	padding-bottom: 100px;
+}
+
+.pop-record-status {
+	max-width: 400px !important;
 }
 
 .inline-block {

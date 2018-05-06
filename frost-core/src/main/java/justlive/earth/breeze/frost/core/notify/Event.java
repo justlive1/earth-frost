@@ -1,5 +1,6 @@
 package justlive.earth.breeze.frost.core.notify;
 
+import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ public class Event {
   /**
    * data
    */
-  private Object data;
+  private JobExecuteParam data;
 
   /**
    * 类型

@@ -47,4 +47,9 @@ public class JobExecuteParam {
    */
   private String type;
 
+  /**
+   * 失败处理策略
+   */
+  private String failStrategy;
+
 }

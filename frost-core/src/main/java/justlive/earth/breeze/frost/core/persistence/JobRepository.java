@@ -4,6 +4,7 @@ import java.util.List;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobRecordStatus;
 import justlive.earth.breeze.frost.api.model.JobScript;
 
 /**
@@ -118,11 +119,11 @@ public interface JobRepository {
   JobExecuteRecord findJobExecuteRecordById(String id);
 
   /**
-   * 修改job执行记录
+   * 增加任务执行状态
    * 
-   * @param record
+   * @param recordStatus
    */
-  void updateJobRecord(JobExecuteRecord record);
+  void addJobRecordStatus(JobRecordStatus recordStatus);
 
   /**
    * 删除job执行记录
@@ -145,4 +146,11 @@ public interface JobRepository {
    * @return
    */
   List<JobScript> queryJobScripts(String jobId);
+
+  /**
+   * 删除任务脚本
+   * 
+   * @param jobId
+   */
+  void removeJobScripts(String jobId);
 }

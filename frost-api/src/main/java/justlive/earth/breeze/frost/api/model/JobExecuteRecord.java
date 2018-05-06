@@ -1,6 +1,7 @@
 package justlive.earth.breeze.frost.api.model;
 
 import java.util.Date;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -63,5 +64,10 @@ public class JobExecuteRecord {
    * 执行备注
    */
   private String executeMsg;
+
+  /**
+   * 执行状态列表
+   */
+  private List<JobRecordStatus> recordStatuses;
 
 }

@@ -118,6 +118,7 @@ public class RedisJobServiceImpl implements JobService {
   public void removeJob(String jobId) {
     jobSchedule.removeJob(jobId);
     jobRepository.removeJobRecords(jobId);
+    jobRepository.removeJobScripts(jobId);
     jobRepository.removeJob(jobId);
     jobLogger.removeLogger(jobId);
   }

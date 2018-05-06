@@ -7,6 +7,7 @@ import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobGroup;
 import justlive.earth.breeze.frost.api.model.JobInfo;
+import justlive.earth.breeze.frost.api.model.JobRecordStatus;
 import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
 import justlive.earth.breeze.frost.core.notify.Event;
@@ -37,9 +38,11 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
   private String loggerId;
 
-  private JobExecuteRecord record;
+  private JobRecordStatus jobRecordStatus;
 
   private boolean failRetry;
+
+  private JobExecuteParam param;
 
   public JobDispatchWrapper(String id, String loggerId) {
     this.id = id;
@@ -48,21 +51,26 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
   @Override
   public void doRun() {
-
+    Date time = Date.from(ZonedDateTime.now().toInstant());
+    param = new JobExecuteParam(id);
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     JobInfo jobInfo = jobRepository.findJobInfoById(id);
     JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
     if (loggerId == null) {
       loggerId = jobLogger.bindLog(id);
-      record = this.record(id, loggerId);
-      record.setDispachTime(Date.from(ZonedDateTime.now().toInstant()));
+      JobExecuteRecord record = this.record(id, loggerId);
       jobRepository.addJobRecord(record);
     } else {
-      record = jobRepository.findJobExecuteRecordById(loggerId);
       failRetry = true;
     }
+    jobRecordStatus = this.recordStatus(loggerId);
+    jobRecordStatus.setTime(time);
+    if (failRetry) {
+      jobRecordStatus.setType(2);
+    } else {
+      jobRecordStatus.setType(0);
+    }
 
-    JobExecuteParam param = new JobExecuteParam(id);
     String key;
     if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), jobInfo.getType())) {
       if (jobInfo.getGroup() != null && jobInfo.getGroup().getGroupKey() != null) {
@@ -81,6 +89,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     param.setLoggerId(loggerId);
     param.setFailRetry(failRetry);
     param.setType(jobInfo.getType());
+    param.setFailStrategy(jobInfo.getFailStrategy());
 
     Dispatcher dispatcher = SpringBeansHolder.getBean(Dispatcher.class);
     dispatcher.dispatch(param);
@@ -90,9 +99,9 @@ public class JobDispatchWrapper extends AbstractWrapper {
   @Override
   public void success() {
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    record.setDispachStatus(JobExecuteRecord.STATUS.SUCCESS.name());
-    record.setDispachMsg("调度成功");
-    jobRepository.updateJobRecord(record);
+    jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
+    jobRecordStatus.setMsg("调度成功");
+    jobRepository.addJobRecordStatus(jobRecordStatus);
   }
 
   @Override
@@ -100,25 +109,23 @@ public class JobDispatchWrapper extends AbstractWrapper {
     super.exception(e);
 
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    record.setDispachStatus(JobExecuteRecord.STATUS.FAIL.name());
+    jobRecordStatus.setStatus(JobExecuteRecord.STATUS.FAIL.name());
     if (e instanceof CodedException) {
-      record.setDispachMsg(((CodedException) e).getErrorCode().toString());
+      jobRecordStatus.setMsg(((CodedException) e).getErrorCode().toString());
     } else {
-      record.setDispachMsg(e.getMessage());
+      jobRecordStatus.setMsg(e.getMessage());
     }
-
-    jobRepository.updateJobRecord(record);
+    jobRepository.addJobRecordStatus(jobRecordStatus);
 
     EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
-    publisher.publish(new Event(jobRepository.findJobInfoById(id), Event.TYPE.DISPATCH_FAIL.name(),
-        record.getDispachMsg(), record.getDispachTime().getTime()));
+    publisher.publish(new Event(param, Event.TYPE.DISPATCH_FAIL.name(), jobRecordStatus.getMsg(),
+        jobRecordStatus.getTime().getTime()));
 
     if (!failRetry) {
-      JobExecuteParam param = new JobExecuteParam(id);
       param.setLoggerId(loggerId);
       param.setFailRetry(failRetry);
       publisher.publish(new Event(param, Event.TYPE.DISPATCH_FAIL_RETRY.name(),
-          record.getDispachMsg(), record.getDispachTime().getTime()));
+          jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
     }
 
   }
