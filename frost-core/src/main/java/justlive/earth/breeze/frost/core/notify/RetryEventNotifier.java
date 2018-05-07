@@ -8,6 +8,7 @@ import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
+import justlive.earth.breeze.frost.core.persistence.JobRepository;
 
 /**
  * 失败重试事件通知器
@@ -21,6 +22,9 @@ public class RetryEventNotifier extends AbstractEventNotifier {
       Arrays.asList(Event.TYPE.DISPATCH_FAIL_RETRY.name(), Event.TYPE.EXECUTE_FAIL_RETRY.name());
 
   @Autowired
+  JobRepository jobRepository;
+
+  @Autowired
   JobSchedule jobSchedule;
 
   @Autowired
@@ -29,8 +33,12 @@ public class RetryEventNotifier extends AbstractEventNotifier {
 
   @Override
   protected boolean shouldNotify(Event event) {
+    JobInfo jobInfo = jobRepository.findJobInfoById(event.getData().getJobId());
+    if (jobInfo == null) {
+      return false;
+    }
     return SUPPORT_EVENTS.contains(event.getType())
-        && Objects.equals(JobInfo.STRATEGY.RETRY.name(), event.getData().getFailStrategy());
+        && Objects.equals(JobInfo.STRATEGY.RETRY.name(), jobInfo.getFailStrategy());
   }
 
   @Override

@@ -1,8 +1,6 @@
 package justlive.earth.breeze.frost.core.notify;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -13,6 +11,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
+import lombok.Data;
 
 /**
  * 邮件事件通知器
@@ -24,9 +23,6 @@ public class MailEventNotifier extends AbstractEventNotifier {
 
   private static final String DEFAULT_SUBJECT = "#{job.name} (#{job.id}) throws an exception";
   private static final String DEFAULT_TEXT = "#{job.name} (#{job.id}) \n #{event.message}";
-
-  private static final List<String> SUPPORT_EVENTS =
-      Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name());
 
   private final SpelExpressionParser parser = new SpelExpressionParser();
   private final MailSender sender;
@@ -96,12 +92,6 @@ public class MailEventNotifier extends AbstractEventNotifier {
     sender.send(message);
   }
 
-  @Override
-  protected boolean shouldNotify(Event event) {
-    return SUPPORT_EVENTS.contains(event.getType()) && (event.getData()).getFailStrategy() == null
-        || Objects.equals(event.getData().getFailStrategy(), JobInfo.STRATEGY.NOTIFY.name());
-  }
-
   public void setTo(String[] to) {
     this.to = Arrays.copyOf(to, to.length);
   }
@@ -142,8 +132,9 @@ public class MailEventNotifier extends AbstractEventNotifier {
     return text.getExpressionString();
   }
 
+  @Data
   public static class Msg {
-    public Event event;
-    public JobInfo job;
+    private Event event;
+    private JobInfo job;
   }
 }

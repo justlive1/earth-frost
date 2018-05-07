@@ -38,6 +38,8 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
   private String loggerId;
 
+  private String parentLoggerId;
+
   private JobRecordStatus jobRecordStatus;
 
   private boolean failRetry;
@@ -47,6 +49,10 @@ public class JobDispatchWrapper extends AbstractWrapper {
   public JobDispatchWrapper(String id, String loggerId) {
     this.id = id;
     this.loggerId = loggerId;
+  }
+
+  public void setParentLoggerId(String parentLoggerId) {
+    this.parentLoggerId = parentLoggerId;
   }
 
   @Override
@@ -88,8 +94,6 @@ public class JobDispatchWrapper extends AbstractWrapper {
     param.setTopicKey(key);
     param.setLoggerId(loggerId);
     param.setFailRetry(failRetry);
-    param.setType(jobInfo.getType());
-    param.setFailStrategy(jobInfo.getFailStrategy());
 
     Dispatcher dispatcher = SpringBeansHolder.getBean(Dispatcher.class);
     dispatcher.dispatch(param);
@@ -128,5 +132,12 @@ public class JobDispatchWrapper extends AbstractWrapper {
           jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
     }
 
+  }
+
+  @Override
+  public void finshed() {
+    if (parentLoggerId != null) {
+      // TODO
+    }
   }
 }

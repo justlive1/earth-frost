@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <div class="modal-header">
-	<div class="modal-title">{{modalDatas.opt == 1 ? '新增任务' : '修改任务'}}</div>
+	<div class="modal-title">{{modalDatas.opt == 1 ? '新增任务' :
+		'修改任务'}}</div>
 </div>
 
 <div class="modal-body">
@@ -38,11 +39,11 @@
 			</div>
 		</div>
 		<div class="control-group inline-block">
-			<label class="control-label width100"> 任务描述 </label>
+			<label class="control-label width100"> 任务名称 </label>
 			<div class="controls">
 				<div class="input-prepend">
-					<input type="text" ng-model="modalDatas.name" placeholder="请输入描述"
-						class="input-large width235">
+					<input type="text" ng-model="modalDatas.name" name="jobName"
+						placeholder="请输入名称" class="input-large width235" required>
 				</div>
 			</div>
 		</div>
@@ -67,6 +68,15 @@
 			</div>
 		</div>
 		<div class="control-group inline-block">
+			<label class="control-label width100"> 子任务 </label>
+			<div class="controls">
+				<div ng-dropdown-multiselect="" options="modalDatas.jobInfos"
+					selected-model="modalDatas.childrenJobs"
+					translation-texts="modalDatas.translationTexts"
+					extra-settings="modalDatas.extraSettings"></div>
+			</div>
+		</div>
+		<div class="control-group inline-block">
 			<label class="control-label width100"> 参数 </label>
 			<div class="controls">
 				<div class="input-prepend">
@@ -87,16 +97,8 @@
 				</div>
 			</div>
 		</div>
-		<div class="control-group inline-block" ng-if="modalDatas.opt == 1">
-			<label class="control-label width100"> 自动运行 </label>
-			<div class="controls">
-				<div class="input-prepend">
-					<input type="checkbox" ng-model="modalDatas.auto">
-				</div>
-			</div>
-		</div>
-		<div class="control-group inline-block"
-			ng-if="modalDatas.failStrategy == 'NOTIFY'">
+
+		<div class="control-group inline-block">
 			<label class="control-label width100"> 通知邮件 </label>
 			<div class="controls">
 				<div class="input-prepend">
@@ -105,6 +107,16 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="control-group inline-block" ng-if="modalDatas.opt == 1">
+			<label class="control-label width100"> 自动运行 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="checkbox" ng-model="modalDatas.auto">
+				</div>
+			</div>
+		</div>
+
 		<div class="control-group error">
 			<div class="help-inline error-message margin-left180">{{modalDatas.error}}</div>
 		</div>
@@ -113,6 +125,6 @@
 
 <div class="modal-footer">
 	<button class="btn btn-info" type="button" ng-click="$ctrl.ok()"
-		ng-disabled="jobForm.cron.$invalid">确定</button>
+		ng-disabled="jobForm.cron.$invalid || jobForm.jobName.$invalid">确定</button>
 	<button class="btn" type="button" ng-click="$ctrl.cancel()">取消</button>
 </div>

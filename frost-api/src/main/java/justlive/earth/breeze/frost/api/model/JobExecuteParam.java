@@ -42,14 +42,4 @@ public class JobExecuteParam {
    */
   private boolean failRetry;
 
-  /**
-   * 任务类型
-   */
-  private String type;
-
-  /**
-   * 失败处理策略
-   */
-  private String failStrategy;
-
 }

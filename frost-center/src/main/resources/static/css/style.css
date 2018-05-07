@@ -912,6 +912,10 @@ footer {
 	margin-left: 110px;
 }
 
+.modal-multi-btn {
+	width: 250px;	
+}
+
 .modal-footer-confirm {
 	padding: 5px 15px 5px;
 }
@@ -922,6 +926,10 @@ footer {
 
 .pop-record-status {
 	max-width: 400px !important;
+}
+
+.pop-record-status .error-msg {
+	word-wrap: break-word;
 }
 
 .inline-block {

@@ -1,5 +1,6 @@
 package justlive.earth.breeze.frost.core.job;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -31,6 +32,12 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
   protected JobRecordStatus jobRecordStatus;
 
   protected void before() {
+    Instant instant = ZonedDateTime.now().toInstant();
+    // 触发开始执行任务事件
+    EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
+    publisher.publish(
+        new Event(jobExecuteParam, Event.TYPE.EXECUTE_ENTER.name(), null, instant.toEpochMilli()));
+
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobInfo = jobRepository.findJobInfoById(jobExecuteParam.getJobId());
     jobRecordStatus = new JobRecordStatus();
@@ -41,7 +48,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
       jobRecordStatus.setType(1);
     }
     jobRecordStatus.setLoggerId(jobExecuteParam.getLoggerId());
-    jobRecordStatus.setTime(Date.from(ZonedDateTime.now().toInstant()));
+    jobRecordStatus.setTime(Date.from(instant));
   }
 
   @Override
@@ -50,6 +57,10 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     jobRecordStatus.setMsg(String.format("执行成功 [%s]", address()));
     jobRepository.addJobRecordStatus(jobRecordStatus);
+    // 触发任务执行成功事件
+    EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
+    publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_SUCCESS.name(), null,
+        ZonedDateTime.now().toInstant().toEpochMilli()));
   }
 
   @Override
@@ -68,10 +79,12 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
     IJob job = getIJob();
     if (job.exception()) {
+      // 通知事件
       EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
       publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_FAIL.name(),
           jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
       if (!jobExecuteParam.isFailRetry()) {
+        // 失败重试事件
         jobExecuteParam.setFailRetry(true);
         publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_FAIL_RETRY.name(),
             jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));

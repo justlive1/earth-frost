@@ -130,6 +130,15 @@ public class RedisJobScheduleImpl implements JobSchedule {
     service.submit(new JobDispatchWrapper(jobId, loggerId));
   }
 
+  @Override
+  public void triggerChildJob(String jobId, String loggerId) {
+    RScheduledExecutorService service =
+        redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
+    JobDispatchWrapper wrapper = new JobDispatchWrapper(jobId);
+    wrapper.setParentLoggerId(loggerId);
+    service.submit(wrapper);
+  }
+
   private JobInfo getJobInfo(String jobId) {
     JobInfo jobInfo = jobRepository.findJobInfoById(jobId);
     if (jobInfo == null) {

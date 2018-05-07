@@ -1,4 +1,4 @@
-var frostApp = angular.module("frost", [ "ui.router",'ui.bootstrap' ]);
+var frostApp = angular.module("frost", [ "ui.router",'ui.bootstrap', 'angularjs-dropdown-multiselect' ]);
 
 frostApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$locationProvider.html5Mode(false); 
@@ -163,11 +163,28 @@ public class DemoScriptJob implements IJob {
 	    return $filter('filter')([projection], $scope.searchFilter).length > 0;
 	};
 	
+	$scope.extraSettings = {
+		scrollableHeight: '150px',
+		checkBoxes: true,
+		scrollable: true,
+		showCheckAll: false,
+		showUncheckAll: false,
+		smartButtonMaxItems: 3,
+		buttonClasses: 'btn btn-default modal-multi-btn'
+	};
+	
+	$scope.translationTexts = {
+		buttonDefaultText: '配置子任务'
+	};
+	
 	$scope.addJob = function() {
 		
 		$scope.modalDatas = { opt: 1};
 		$scope.modalDatas.type = 'BEAN';
 		$scope.modalDatas.failStrategy = 'NOTIFY';
+		$scope.modalDatas.childrenJobs = [];
+		$scope.modalDatas.extraSettings = $scope.extraSettings;
+		$scope.modalDatas.translationTexts = $scope.translationTexts;
 		
 		$http.get('queryExecutors').success(function(data) {
 			if (data.success) {
@@ -183,6 +200,15 @@ public class DemoScriptJob implements IJob {
 						$scope.modalDatas.jobKey = data.data[0].groups[0].jobKey;
 					}
 				}
+			}
+		});
+		
+		$http.get('queryAllJobs').success(function(data) {
+			if (data.success) {
+				$scope.modalDatas.jobInfos = [];
+				data.data.forEach(r => {
+					$scope.modalDatas.jobInfos.push({id: r.id, label: r.name});
+				});
 			}
 		});
 		
@@ -210,6 +236,10 @@ public class DemoScriptJob implements IJob {
 			if($scope.modalDatas.notifyMails) {
 				mails = $scope.modalDatas.notifyMails.split(',');
 			}
+			var childJobIds = null;
+			if ($scope.modalDatas.childrenJobs.length > 0) {
+				childJobIds = $scope.modalDatas.childrenJobs.map(r => r.id);
+			}
 			var job = {
 				 name: $scope.modalDatas.name,
 				 cron: $scope.modalDatas.cron,
@@ -217,7 +247,8 @@ public class DemoScriptJob implements IJob {
 				 param: $scope.modalDatas.param,
 				 auto: $scope.modalDatas.auto,
 				 failStrategy: $scope.modalDatas.failStrategy,
-				 notifyMails: mails
+				 notifyMails: mails,
+				 childJobIds: childJobIds
 			 };
 			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){
@@ -338,6 +369,9 @@ public class DemoScriptJob implements IJob {
 	$scope.updateJob = function(id) {
 		
 		$scope.modalDatas = {};
+		$scope.modalDatas.childrenJobs = [];
+		$scope.modalDatas.extraSettings = $scope.extraSettings;
+		$scope.modalDatas.translationTexts = $scope.translationTexts;
 		
 		postForm('queryExecutors', null, function(data) {
 			if (data.success) {
@@ -373,6 +407,7 @@ public class DemoScriptJob implements IJob {
 				$scope.modalDatas.param = data.data.param;
 				$scope.modalDatas.failStrategy = data.data.failStrategy;
 				$scope.modalDatas.notifyMails = mails;
+				$scope.modalDatas.childJobIds = data.data.childJobIds;
 				if (data.data.group) {
 					var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
 					if(executor){
@@ -384,6 +419,19 @@ public class DemoScriptJob implements IJob {
 						$scope.modalDatas.jobKey = data.data.group.jobKey;
 					}
 				}
+			}
+		});
+		
+		$http.get('queryAllJobs').success(function(data) {
+			if (data.success) {
+				$scope.modalDatas.jobInfos = [];
+				data.data.forEach(r => {
+					var obj = {id: r.id, label: r.name};
+					$scope.modalDatas.jobInfos.push(obj);
+					if($scope.modalDatas.childJobIds && $scope.modalDatas.childJobIds.indexOf(r.id) > -1) {
+						$scope.modalDatas.childrenJobs.push(obj);
+					} 
+				});
 			}
 		});
 		
@@ -411,6 +459,10 @@ public class DemoScriptJob implements IJob {
 			if($scope.modalDatas.notifyMails) {
 				mails = $scope.modalDatas.notifyMails.split(',');
 			}
+			var childJobIds = null;
+			if ($scope.modalDatas.childrenJobs.length > 0) {
+				childJobIds = $scope.modalDatas.childrenJobs.map(r => r.id);
+			}
 			var job = {
 				 id: id,
 				 name: $scope.modalDatas.name,
@@ -418,7 +470,8 @@ public class DemoScriptJob implements IJob {
 				 type: $scope.modalDatas.type,
 				 param: $scope.modalDatas.param,
 				 failStrategy: $scope.modalDatas.failStrategy,
-				 notifyMails: mails
+				 notifyMails: mails,
+				 childJobIds: childJobIds
 			 };
 			 if (job.type == 'SCRIPT') {
 				 if ($scope.modalDatas.useExecutor) {
@@ -495,13 +548,13 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 		var executeDetail = '', dispatchDetial = '';
 		log.recordStatuses.forEach(r => {
 			if (r.type == 0){
-				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务调度<<<</label><div>${r.msg}</div></div>`;
+				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务调度<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			} else if (r.type == 1) {
-				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务执行<<<</label><div>${r.msg}</div></div>`;
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务执行<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			} else if (r.type == 2) {
-				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div>${r.msg}</div></div>`;
+				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			} else if (r.type == 3) {
-				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div>${r.msg}</div></div>`;
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			}
 		});
 		log.dispatchDetail = $sce.trustAsHtml(dispatchDetial);

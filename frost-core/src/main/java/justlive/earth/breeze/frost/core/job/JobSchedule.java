@@ -62,4 +62,12 @@ public interface JobSchedule {
    * @param loggerId
    */
   void retryJob(String jobId, String loggerId);
+
+  /**
+   * 触发子job
+   * 
+   * @param jobId
+   * @param loggerId
+   */
+  void triggerChildJob(String jobId, String loggerId);
 }

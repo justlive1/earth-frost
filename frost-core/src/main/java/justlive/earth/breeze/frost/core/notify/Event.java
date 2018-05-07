@@ -26,7 +26,15 @@ public class Event {
     /**
      * 执行失败重试
      */
-    EXECUTE_FAIL_RETRY;
+    EXECUTE_FAIL_RETRY,
+    /**
+     * 开始执行
+     */
+    EXECUTE_ENTER,
+    /**
+     * 执行成功
+     */
+    EXECUTE_SUCCESS;
   }
 
   /**

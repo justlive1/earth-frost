@@ -99,4 +99,9 @@ public class JobInfo {
    */
   private String[] notifyMails;
 
+  /**
+   * 子任务id
+   */
+  private String[] childJobIds;
+
 }

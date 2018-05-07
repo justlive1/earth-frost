@@ -16,6 +16,7 @@ import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.dispacher.Dispatcher;
 import justlive.earth.breeze.frost.core.job.JobBeanExecuteWrapper;
 import justlive.earth.breeze.frost.core.job.JobScriptExecuteWrapper;
+import justlive.earth.breeze.frost.core.persistence.JobRepository;
 import justlive.earth.breeze.snow.common.base.exception.Exceptions;
 
 /**
@@ -31,11 +32,18 @@ public class RedisDispatcher implements Dispatcher {
   @Autowired
   RedissonClient redissonClient;
 
+  @Autowired
+  JobRepository jobRepository;
+
   @Override
   public void dispatch(JobExecuteParam param) {
 
+    JobInfo jobInfo = jobRepository.findJobInfoById(param.getJobId());
+    if (jobInfo == null) {
+      throw Exceptions.fail("30005", String.format("未查询到任务 %s", param));
+    }
     this.checkDispatch(param);
-    if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), param.getType())) {
+    if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), jobInfo.getType())) {
       redissonClient.getExecutorService(param.getTopicKey())
           .execute(new JobScriptExecuteWrapper(param));
     } else {
