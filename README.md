@@ -209,12 +209,10 @@ cron：触发任务的表达式
 
 列表字段说明
 
-```
-执行器分组： 通过配置文件中的frost.job.executor.key进行分组，<font color="red">注意：分组相同且@Job的value相同的IJob逻辑应该完全相同</font>
-名称：执行器应用的名称，便于区分和管理
-信息：展开分组时展示该执行器下注册的任务列表，合并分组时展示分组下在线执行器数量
+- 执行器分组： 通过配置文件中的frost.job.executor.key进行分组，<font color="red">注意：分组相同且@Job的value相同的IJob逻辑应该完全相同</font>
+- 名称：执行器应用的名称，便于区分和管理
+- 信息：展开分组时展示该执行器下注册的任务列表，合并分组时展示分组下在线执行器数量
 
-```
 
 #### 2.任务管理
 
@@ -255,6 +253,6 @@ cron：触发任务的表达式
 2.8 删除任务
 
 点击操作栏“删除”按钮删除任务
-![删除任务](https://gitee.com/justlive1/earth-frost/raw/master/images/remove.jpeg)
+![删除任务](https://gitee.com/justlive1/earth-frost/raw/master/images/removeJob.jpeg)
 
 
