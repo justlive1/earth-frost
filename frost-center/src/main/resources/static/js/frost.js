@@ -47,11 +47,10 @@ frostApp.controller('appModalInstanceCtrl', function ($scope, $uibModalInstance,
     };
     
     $ctrl.executorChange = function() {
-		if($scope.modalDatas.executorId){
-			var executor = $scope.modalDatas.executorMap.get($scope.modalDatas.executorId);
-			$scope.modalDatas.jobs = executor.groups;
-			if(executor.groups && executor.groups.length > 0){
-				$scope.modalDatas.jobKey = executor.groups[0].jobKey;
+		if($scope.modalDatas.groupKey){
+			$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
+			if($scope.modalDatas.jobs && $scope.modalDatas.jobs.length > 0){
+				$scope.modalDatas.jobKey = $scope.modalDatas.jobs[0].jobKey;
 			}
 		}
 	};
@@ -186,14 +185,12 @@ public class DemoScriptJob implements IJob {
 		
 		$http.get('queryExecutors').success(function(data) {
 			if (data.success) {
-				$scope.modalDatas.executorList = data.data;
-				var map = new Map();
-				data.data.forEach(r => map.set(r.id, r));
-				$scope.modalDatas.executorMap = map;
+				
+				transferExecutor(data.data, $scope.modalDatas);
 				
 				if(data.data.length > 0){
-					$scope.modalDatas.executorId = data.data[0].id;
-					$scope.modalDatas.jobs = data.data[0].groups;
+					$scope.modalDatas.groupKey = data.data[0].key;
+					$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
 					if (data.data[0].groups && data.data[0].groups.length >　0){
 						$scope.modalDatas.jobKey = data.data[0].groups[0].jobKey;
 					}
@@ -254,14 +251,14 @@ public class DemoScriptJob implements IJob {
 				 
 				 if ($scope.modalDatas.useExecutor) {
 					 job.group = {
-						 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+						 groupKey: $scope.modalDatas.groupKey
 					 };
 				 }
 				 
 			 } else {
 				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,
-					 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+					 groupKey: $scope.modalDatas.groupKey
 				 };
 			 }
 			 //
@@ -373,18 +370,12 @@ public class DemoScriptJob implements IJob {
 		
 		postForm('queryExecutors', null, function(data) {
 			if (data.success) {
-				$scope.modalDatas.executorList = data.data;
-				var map = new Map(), groupMap = new Map();
-				data.data.forEach(r => {
-					map.set(r.id, r);
-					groupMap.set(r.key, r);
-				});
-				$scope.modalDatas.executorMap = map;
-				$scope.modalDatas.executorGroupMap = groupMap;
+				
+				transferExecutor(data.data, $scope.modalDatas);
 				
 				if(data.data.length > 0){
-					$scope.modalDatas.executorId = data.data[0].id;
-					$scope.modalDatas.jobs = data.data[0].groups;
+					$scope.modalDatas.groupKey = data.data[0].key;
+					$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
 					if (data.data[0].groups && data.data[0].groups.length >　0){
 						$scope.modalDatas.jobKey = data.data[0].groups[0].jobKey;
 					}
@@ -407,10 +398,8 @@ public class DemoScriptJob implements IJob {
 				$scope.modalDatas.notifyMails = mails;
 				$scope.modalDatas.childJobIds = data.data.childJobIds;
 				if (data.data.group) {
-					var executor = $scope.modalDatas.executorGroupMap.get(data.data.group.groupKey);
-					if(executor){
-						$scope.modalDatas.executorId = executor.id;
-					}
+					$scope.modalDatas.groupKey = data.data.group.groupKey;
+					$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
 					if ($scope.modalDatas.type == 'SCRIPT') {
 						$scope.modalDatas.useExecutor = true;
 					} else {
@@ -474,7 +463,7 @@ public class DemoScriptJob implements IJob {
 			 if (job.type == 'SCRIPT') {
 				 if ($scope.modalDatas.useExecutor) {
 					 job.group = {
-						 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+						 groupKey: $scope.modalDatas.groupKey
 					 };
 				 } 
 				 if ($scope.modalDatas.preType != job.type) {
@@ -483,7 +472,7 @@ public class DemoScriptJob implements IJob {
 			 } else {
 				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,
-					 groupKey: $scope.modalDatas.executorMap.get($scope.modalDatas.executorId).key
+					 groupKey: $scope.modalDatas.groupKey
 				 };
 			 }
 			 var flag = true;
@@ -514,19 +503,12 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 	$scope.pageSize = 10;
 	
 	$scope.search = function() {
-		var jobKey = '', groupKey = '';
-		if ($scope.executorId){
-			groupKey = $scope.executorMap.get($scope.executorId).key;
-			if ($scope.jobKey) {
-				jobKey = $scope.jobKey;
-			}
-		}
 		var params = {
 			jobId: $scope.jobId, 
 			pageIndex: $scope.pageIndex, 
 			pageSize: $scope.pageSize,
-			groupKey: groupKey,
-			jobKey: jobKey
+			groupKey: $scope.groupKey,
+			jobKey: $scope.jobKey
 		};
 		$http.post('queryJobExecuteRecords', null, {params: params}).success(function(data) {
 			if (data.success) {
@@ -542,7 +524,9 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 	};
 	
 	$scope.popoverExecute = function (log) {
-	
+		if (!log.recordStatuses) {
+			return;
+		}
 		var executeDetail = '', dispatchDetial = '';
 		log.recordStatuses.forEach(r => {
 			if (r.type == 0){
@@ -571,7 +555,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 	};
 	
 	$scope.filterJobs = function (value) {
-		if (!value.group && $scope.jobKey) {
+		if (!value.group && ($scope.jobKey || $scope.groupKey)) {
 			return false;
 		}
 		if ($scope.groupKey && value.group.groupKey != $scope.groupKey) {
@@ -585,11 +569,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 	
 	$http.get('queryExecutors').success(function(data) {
 		if (data.success) {
-			$scope.executorList = data.data;
-			var map = new Map();
-			data.data.forEach(r => map.set(r.id, r));
-			$scope.executorMap = map;
-			$scope.executorId = $stateParams.executorId;
+			transferExecutor(data.data, $scope);
 		}
 		$http.get('queryAllJobs').success(function(data) {
 			if (data.success) {
@@ -602,9 +582,9 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 	
 	
 	$scope.executorChange = function() {
-		if($scope.executorId){
-			var executor = $scope.executorMap.get($scope.executorId);
-			$scope.jobs = executor.groups;
+		$scope.jobKey = "";
+		if($scope.groupKey){
+			$scope.jobs = $scope.executorMap[$scope.groupKey];
 		}
 	};
 	
@@ -716,5 +696,26 @@ function postForm(url, data, success, error) {
 		 success: success,
 		 error: error
 	 });
+}
+
+function transferExecutor(data, modalDatas) {
+	const map = new Map();
+	data.forEach(r => {
+		if (!map.has(r.key)) {
+			map.set(r.key, new Map());
+		}
+		if (r.groups) {
+			r.groups.forEach(g => map.get(r.key).set(g.id, g));
+		}
+	});
+	
+	modalDatas.executorMap = {};
+	for (let [key, value] of map) {  
+		modalDatas.executorMap[key] = [];
+		for (let [k, v] of value) { 
+			modalDatas.executorMap[key].push(v);
+		}
+	}
+	
 }
 

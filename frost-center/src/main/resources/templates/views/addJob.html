@@ -24,9 +24,9 @@
 					<select class="input-large width248"
 						ng-change="$ctrl.executorChange()"
 						ng-disabled="modalDatas.type == 'SCRIPT' && !modalDatas.useExecutor"
-						ng-model="modalDatas.executorId">
-						<option ng-repeat="executor in modalDatas.executorList"
-							value="{{executor.id}}">{{executor.name}}</option>
+						ng-model="modalDatas.groupKey">
+						<option ng-repeat="(k, v) in modalDatas.executorMap"
+							value="{{k}}">{{k}}</option>
 					</select>
 					<div class="checkbox"
 						style="display: inline-block; margin-left: 5px"

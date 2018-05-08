@@ -10,10 +10,10 @@
 			<div class="controls inline-block">
 				<div class="input-prepend" style="margin-bottom: 0">
 					<select class="input-large width248" ng-change="executorChange()"
-						ng-model="executorId">
+						ng-model="groupKey">
 						<option value="">全部</option>
-						<option ng-repeat="executor in executorList"
-							value="{{executor.id}}">{{executor.name}}</option>
+						<option ng-repeat="(k, v) in executorMap"
+							value="{{k}}">{{k}}</option>
 					</select>
 				</div>
 			</div>

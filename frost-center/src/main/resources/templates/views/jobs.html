@@ -15,17 +15,17 @@
 				<th class="time-column"><span>名称</span></th>
 				<th class="info-column">分组信息</th>
 				<th class="cron-column">Cron</th>
-				<th class="time-column">状态</th>
+				<th class="cron-column">状态</th>
 				<th class="operation-column">操作</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="job in jobs | filter : doFilter">
 				<td class="name-column" ng-bind="job.id"></td>
-				<td class="name-column" ng-bind="job.name"></td>
+				<td class="time-column" ng-bind="job.name"></td>
 				<td class="info-column">[{{job.group.groupKey?job.group.groupKey:'…'}}]-[{{job.group.jobKey?job.group.jobKey:'…'}}]</td>
 				<td class="cron-column" ng-bind="job.cron"></td>
-				<td class="status-column"><span class="status-{{job.status}}">{{job.status}}</span></td>
+				<td class="cron-column"><span class="status-{{job.status}}">{{job.status}}</span></td>
 				<td class="operation-column">
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="触发一次" ng-click="triggleJob(job.id)">

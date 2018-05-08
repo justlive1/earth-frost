@@ -150,3 +150,111 @@ redisson.address=redis://localhost:6379
 进入调度记录页面可查看调度和执行结果
 ![调度记录](https://gitee.com/justlive1/earth-frost/raw/master/images/record.jpeg)
 
+### 任务配置属性说明
+
+```
+任务类型：
+	脚本模式：传统的任务模式，需要在执行器开发对应的Bean，此模式的任务只能调度分配到拥有该类的执行器上
+	脚本模式：任务以Java源码的形式保存在数据库中，调度中心可将任务分配到任何开启支持脚本模式的执行器上，可使用@Resource/@Autowired注入执行器里中的其他服务
+任务名称：任务的名称，描述任务以便于管理
+执行器：指定运行在哪个执行器分组
+执行器逻辑：指定任务运行的bean
+cron：触发任务的表达式
+参数：运行任务的参数，字符串格式，执行逻辑可通过JobContext::getParam获取参数
+子任务：可在任务列表中选择已创建的任务，当本任务执行成功时，将会触发子任务的一次主动调度
+失败处理：
+	失败通知（默认）：调度或执行失败后，触发通知，默认提供了邮件，可继承AbstractEventNotifier进行扩展
+	失败重试：调度或执行失败后，会主动再次调度或执行
+通知邮件：调度中心配置了全局的默认推送邮件地址，每个任务可自定义添加通知邮件列表
+自动运行：勾选后创建任务即是运行状态
+```
+
+### 开发实例模式任务
+任务需要在frost-executor项目中编码并部署
+
+#### 1.在执行器项目中开发执行逻辑
+
+```
+- 实现IJob接口，默认实现了init、destory、exception方法
+- 实现IJob接口execute方法，任务处理的主要逻辑
+- 异常处理（可选）实现IJob接口exception方法，自定义异常处理，返回true时执行全局异常处理逻辑，返回false不执行全局异常处理逻辑
+- 注册到运行容器(Spring容器添加注解或xml配置)
+- 注册到执行器，添加注解@Job(value = "执行逻辑id", desc = "执行逻辑描述")
+
+```
+
+#### 2.在调度中心，新建任务
+参考上述任务配置属性说明，任务类型选择实例模式，执行器选择执行器配置中frost.job.executor.key的值，执行逻辑选择@Job注解定义的值
+![添加任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addJob.jpeg)
+
+### 开发脚本模式任务
+
+#### 1.在调度中心，新建脚本任务
+参考实例模式的新建任务，任务模式选择脚本模式
+
+注意：需要有执行器frost.job.executor.scriptJobEnabled=true开启支持脚本任务执行
+![添加脚本任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addScriptJob.jpeg)
+
+#### 2.在调度中心，开发任务代码
+点击指定任务的脚本按钮，前往在线编辑任务界面，支持对任务代码进行开发（可在IDE中编辑完毕，复制粘贴到编辑中），支持使用@Resource/@Autowired注入执行器中其他Bean
+
+注意：分布式执行器使用@Resource/@Autowired要确认是否所有执行器都存在注入的Bean，可配合指定执行器的分组来限定执行脚本任务的执行器
+![修改脚本](https://gitee.com/justlive1/earth-frost/raw/master/images/script.jpeg)
+
+### 任务管理
+
+#### 1.执行器列表
+点击执行器管理导航进入执行器列表，展示在线的执行器
+![执行器列表](https://gitee.com/justlive1/earth-frost/raw/master/images/executor.jpeg)
+
+列表字段说明
+
+```
+执行器分组： 通过配置文件中的frost.job.executor.key进行分组，<font color="red">注意：分组相同且@Job的value相同的IJob逻辑应该完全相同</font>
+名称：执行器应用的名称，便于区分和管理
+信息：展开分组时展示该执行器下注册的任务列表，合并分组时展示分组下在线执行器数量
+
+```
+
+#### 2.任务管理
+
+2.1 新建任务
+
+参考开发实例模式或脚本模式任务章节
+
+2.2 执行一次任务
+
+点击操作栏“执行一次”按钮可触发执行一次任务
+![执行任务](https://gitee.com/justlive1/earth-frost/raw/master/images/triggerJob.jpeg)
+
+2.3 暂停任务
+
+点击操作栏“暂停”按钮可暂停正常任务，后续调度将不再执行
+![暂停任务](https://gitee.com/justlive1/earth-frost/raw/master/images/pauseJob.jpeg)
+
+2.4 恢复任务
+
+点击操作栏“恢复”按钮可恢复暂停任务
+![恢复任务](https://gitee.com/justlive1/earth-frost/raw/master/images/resumeJob.jpeg)
+
+2.5 编辑任务
+
+点击操作栏“编辑”按钮可编辑任务属性，参照任务配置属性进行修改
+
+2.6 在线编辑脚本
+
+点击操作栏“脚本”按钮跳转到在线编辑脚本页面，可进行脚本任务源码修改
+![脚本任务](https://gitee.com/justlive1/earth-frost/raw/master/images/toScriptJob.jpeg)
+![修改脚本](https://gitee.com/justlive1/earth-frost/raw/master/images/script.jpeg)
+
+2.7 跳转任务日志
+
+点击操作栏“日志”按钮跳转到调度记录页面，只展示该任务的记录
+![跳转任务日志](https://gitee.com/justlive1/earth-frost/raw/master/images/toRecord.jpeg)
+
+2.8 删除任务
+
+点击操作栏“删除”按钮删除任务
+![删除任务](https://gitee.com/justlive1/earth-frost/raw/master/images/remove.jpeg)
+
+
