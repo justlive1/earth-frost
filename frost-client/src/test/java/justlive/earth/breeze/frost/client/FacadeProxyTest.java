@@ -6,6 +6,12 @@ import justlive.earth.breeze.frost.api.facade.JobApiFacade;
 import justlive.earth.breeze.frost.api.model.JobGroup;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 
+/**
+ * 测试
+ * 
+ * @author wubo
+ *
+ */
 public class FacadeProxyTest {
 
   JobApiFacade jobApiFacade;
@@ -21,7 +27,6 @@ public class FacadeProxyTest {
 
   }
 
-  // @org.junit.Test
   public void testJob() {
 
     JobInfo jobInfo = new JobInfo();

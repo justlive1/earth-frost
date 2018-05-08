@@ -5,6 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 事件类
+ * 
+ * @author wubo
+ *
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

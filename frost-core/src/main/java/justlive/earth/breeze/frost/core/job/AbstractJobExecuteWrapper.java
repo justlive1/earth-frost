@@ -93,6 +93,11 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
   }
 
+  /**
+   * 获取任务处理逻辑
+   * 
+   * @return
+   */
   protected abstract IJob getIJob();
 
   private String address() {

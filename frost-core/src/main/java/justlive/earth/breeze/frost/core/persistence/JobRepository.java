@@ -60,6 +60,8 @@ public interface JobRepository {
   /**
    * 获取job列表
    * 
+   * @param from
+   * @param to
    * @return
    */
   List<JobInfo> queryJobInfos(int from, int to);

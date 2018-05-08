@@ -16,19 +16,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpringBeansHolder implements ApplicationContextAware {
 
-  static final ConcurrentMap<Class<?>, BeanFactory> beanFactoryMap = new ConcurrentHashMap<>();
+  static final ConcurrentMap<Class<?>, BeanFactory> BEAN_FACTORY_MAP = new ConcurrentHashMap<>();
 
   @Override
   public void setApplicationContext(ApplicationContext applicationContext) {
-    beanFactoryMap.put(ApplicationContext.class, applicationContext);
+    BEAN_FACTORY_MAP.put(ApplicationContext.class, applicationContext);
   }
 
   public static <T> T getBean(String name, Class<T> clazz) {
-    return beanFactoryMap.get(ApplicationContext.class).getBean(name, clazz);
+    return BEAN_FACTORY_MAP.get(ApplicationContext.class).getBean(name, clazz);
   }
 
   public static <T> T getBean(Class<T> clazz) {
-    return beanFactoryMap.get(ApplicationContext.class).getBean(clazz);
+    return BEAN_FACTORY_MAP.get(ApplicationContext.class).getBean(clazz);
   }
 
 }

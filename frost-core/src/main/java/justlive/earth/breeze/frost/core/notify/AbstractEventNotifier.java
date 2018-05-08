@@ -38,6 +38,11 @@ public abstract class AbstractEventNotifier implements Notifier {
     return true;
   }
 
+  /**
+   * 处理通知逻辑
+   * 
+   * @param event
+   */
   protected abstract void doNotify(Event event);
 
   private Logger getLogger() {

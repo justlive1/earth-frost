@@ -12,6 +12,7 @@ public interface JobLogger {
    * 绑定job日志
    * 
    * @param jobId
+   * @return
    */
   String bindLog(String jobId);
 
