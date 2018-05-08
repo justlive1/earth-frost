@@ -121,11 +121,9 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import justlive.earth.breeze.frost.core.job.IJob;
-import justlive.earth.breeze.frost.core.job.Job;
 import justlive.earth.breeze.frost.core.job.JobContext;
 
  
-@Job(value = "DemoScriptJob", desc = "示例脚本job")
 public class DemoScriptJob implements IJob {
  
  @Autowired

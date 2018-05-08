@@ -16,8 +16,13 @@ public class FacadeProxyTest {
     jobApiFacade = proxy.getJobApiFacade();
   }
 
-//  @org.junit.Test
+  @org.junit.Test
   public void test() {
+
+  }
+
+  // @org.junit.Test
+  public void testJob() {
 
     JobInfo jobInfo = new JobInfo();
     jobInfo.setName("测试添加");
