@@ -3,6 +3,7 @@ package justlive.earth.breeze.frost.core.job;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Objects;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import justlive.earth.breeze.frost.api.model.JobExecuteParam;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobGroup;
@@ -46,6 +47,8 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
   private JobExecuteParam param;
 
+  private JobInfo jobInfo;
+
   public JobDispatchWrapper(String id, String loggerId) {
     this.id = id;
     this.loggerId = loggerId;
@@ -60,7 +63,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     Date time = Date.from(ZonedDateTime.now().toInstant());
     param = new JobExecuteParam(id);
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
-    JobInfo jobInfo = jobRepository.findJobInfoById(id);
+    jobInfo = jobRepository.findJobInfoById(id);
     JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
     if (loggerId == null) {
       loggerId = jobLogger.bindLog(id);
@@ -128,6 +131,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     if (!failRetry) {
       param.setLoggerId(loggerId);
       param.setFailRetry(failRetry);
+      param.setParentLoggerId(parentLoggerId);
       publisher.publish(new Event(param, Event.TYPE.DISPATCH_FAIL_RETRY.name(),
           jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
     }
@@ -137,7 +141,15 @@ public class JobDispatchWrapper extends AbstractWrapper {
   @Override
   public void finshed() {
     if (parentLoggerId != null) {
-      // TODO
+      JobRecordStatus status = recordStatus(parentLoggerId);
+      status.setType(5);
+      status.setTime(jobRecordStatus.getTime());
+      status.setMsg(String.format("[%s]触发调度[%s]-[%s]",
+          DateFormatUtils.ISO_8601_EXTENDED_DATETIME_FORMAT.format(jobRecordStatus.getTime()),
+          jobInfo.getName(), jobInfo.getId()));
+      status.setStatus(jobRecordStatus.getStatus());
+      JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
+      jobRepository.addJobRecordStatus(status);
     }
   }
 }

@@ -555,6 +555,8 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			} else if (r.type == 3) {
 				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg}</div></div>`;
+			} else if (r.type == 5) {
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>子任务<<<</label><div class="error-msg">${r.msg}[<span class="status-${r.status}">${r.status}</span>]</div></div>`;
 			}
 		});
 		log.dispatchDetail = $sce.trustAsHtml(dispatchDetial);

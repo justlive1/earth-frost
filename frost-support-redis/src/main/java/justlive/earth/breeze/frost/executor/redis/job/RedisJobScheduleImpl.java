@@ -123,11 +123,13 @@ public class RedisJobScheduleImpl implements JobSchedule {
   }
 
   @Override
-  public void retryJob(String jobId, String loggerId) {
+  public void retryJob(String jobId, String loggerId, String parentLoggerId) {
 
     RScheduledExecutorService service =
         redissonClient.getExecutorService(JobProperties.CENTER_PREFIX);
-    service.submit(new JobDispatchWrapper(jobId, loggerId));
+    JobDispatchWrapper wrapper = new JobDispatchWrapper(jobId, loggerId);
+    wrapper.setParentLoggerId(parentLoggerId);
+    service.submit(wrapper);
   }
 
   @Override

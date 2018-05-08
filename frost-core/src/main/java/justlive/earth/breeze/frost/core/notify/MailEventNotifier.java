@@ -1,6 +1,7 @@
 package justlive.earth.breeze.frost.core.notify;
 
 import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -23,6 +24,10 @@ public class MailEventNotifier extends AbstractEventNotifier {
 
   private static final String DEFAULT_SUBJECT = "#{job.name} (#{job.id}) throws an exception";
   private static final String DEFAULT_TEXT = "#{job.name} (#{job.id}) \n #{event.message}";
+
+  private static final List<String> SUPPORT_EVENTS =
+      Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name());
+
 
   private final SpelExpressionParser parser = new SpelExpressionParser();
   private final MailSender sender;
@@ -59,6 +64,11 @@ public class MailEventNotifier extends AbstractEventNotifier {
     this.sender = sender;
     this.subject = parser.parseExpression(DEFAULT_SUBJECT, ParserContext.TEMPLATE_EXPRESSION);
     this.text = parser.parseExpression(DEFAULT_TEXT, ParserContext.TEMPLATE_EXPRESSION);
+  }
+
+  @Override
+  protected boolean shouldNotify(Event event) {
+    return SUPPORT_EVENTS.contains(event.getType());
   }
 
   @Override

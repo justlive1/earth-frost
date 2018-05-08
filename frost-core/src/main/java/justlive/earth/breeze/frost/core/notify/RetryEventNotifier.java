@@ -47,7 +47,7 @@ public class RetryEventNotifier extends AbstractEventNotifier {
       dispatcher.dispatch(event.getData());
     } else if (Objects.equals(Event.TYPE.DISPATCH_FAIL_RETRY.name(), event.getType())) {
       JobExecuteParam param = event.getData();
-      jobSchedule.retryJob(param.getJobId(), param.getLoggerId());
+      jobSchedule.retryJob(param.getJobId(), param.getLoggerId(), param.getParentLoggerId());
     }
   }
 

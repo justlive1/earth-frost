@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.mail.MailSender;
 import justlive.earth.breeze.frost.core.config.JobProperties;
+import justlive.earth.breeze.frost.core.notify.ChildrenJobEventNotifier;
 import justlive.earth.breeze.frost.core.notify.CompositeNotifier;
 import justlive.earth.breeze.frost.core.notify.EventListener;
 import justlive.earth.breeze.frost.core.notify.EventPublisher;
@@ -48,6 +49,12 @@ public class NotifierConfig {
   @Profile(JobProperties.PROFILE_CENTER)
   RetryEventNotifier retryEventNotifier() {
     return new RetryEventNotifier();
+  }
+
+  @Bean
+  @Profile(JobProperties.PROFILE_CENTER)
+  ChildrenJobEventNotifier childrenJobEventNotifier() {
+    return new ChildrenJobEventNotifier();
   }
 
   @Bean

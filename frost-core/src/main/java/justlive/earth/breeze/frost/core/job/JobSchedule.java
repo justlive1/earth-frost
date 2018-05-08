@@ -60,8 +60,9 @@ public interface JobSchedule {
    * 
    * @param jobId
    * @param loggerId
+   * @param parentLoggerId
    */
-  void retryJob(String jobId, String loggerId);
+  void retryJob(String jobId, String loggerId, String parentLoggerId);
 
   /**
    * 触发子job

@@ -42,4 +42,9 @@ public class JobExecuteParam {
    */
   private boolean failRetry;
 
+  /**
+   * 父任务日志id
+   */
+  private String parentLoggerId;
+
 }

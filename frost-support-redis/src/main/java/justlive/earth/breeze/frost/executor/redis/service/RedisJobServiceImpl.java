@@ -83,6 +83,7 @@ public class RedisJobServiceImpl implements JobService {
     localJobInfo.setScript(jobInfo.getScript());
     localJobInfo.setFailStrategy(jobInfo.getFailStrategy());
     localJobInfo.setNotifyMails(jobInfo.getNotifyMails());
+    localJobInfo.setChildJobIds(jobInfo.getChildJobIds());
 
     jobRepository.updateJob(localJobInfo);
 
