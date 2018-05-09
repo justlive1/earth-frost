@@ -28,6 +28,18 @@ public class JobProperties {
 
   public static final String JOB_SCRIPT_PREFIX = "frost-job-script";
 
+  public static final String CENTER_STATISTICS = "center_statistics";
+
+  public static final String CENTER_STATISTICS_DISPATCH = "dispatch";
+
+  public static final String CENTER_STATISTICS_EXECUTE = "execute";
+
+  public static final String CENTER_STATISTICS_RUNNING = "running";
+
+  public static final String CENTER_STATISTICS_SUCCESS = "success";
+
+  public static final String CENTER_STATISTICS_FAIL = "fail";
+
   public static final Integer HEARTBEAT = 5;
 
   /**

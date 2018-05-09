@@ -1,7 +1,9 @@
 package justlive.earth.breeze.frost.executor.redis.service;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import org.redisson.api.RedissonClient;
 import org.redisson.executor.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,9 @@ import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.api.model.JobScript;
+import justlive.earth.breeze.frost.api.model.JobStatictis;
 import justlive.earth.breeze.frost.api.model.Page;
+import justlive.earth.breeze.frost.core.config.JobProperties;
 import justlive.earth.breeze.frost.core.job.JobLogger;
 import justlive.earth.breeze.frost.core.job.JobSchedule;
 import justlive.earth.breeze.frost.core.persistence.JobRepository;
@@ -33,6 +37,9 @@ public class RedisJobServiceImpl implements JobService {
 
   @Autowired
   JobLogger jobLogger;
+
+  @Autowired
+  RedissonClient redissonClient;
 
   @Override
   public int countExecutors() {
@@ -204,4 +211,17 @@ public class RedisJobServiceImpl implements JobService {
     return jobRepository.queryJobScripts(jobId);
   }
 
+  @Override
+  public JobStatictis queryJobStatictis(Date begin, Date end) {
+    JobStatictis statictis = new JobStatictis();
+    statictis.setTotalJobs((long) this.countJobInfos());
+    statictis.setTotalExecutors((long) this.countExecutors());
+    statictis.setTotalDispatches(redissonClient.getAtomicLong(String.join(JobProperties.SEPERATOR,
+        JobProperties.CENTER_PREFIX, JobProperties.CENTER_STATISTICS,
+        JobProperties.CENTER_STATISTICS_DISPATCH, JobProperties.CENTER_STATISTICS_RUNNING)).get());
+
+    // TODO
+
+    return statictis;
+  }
 }

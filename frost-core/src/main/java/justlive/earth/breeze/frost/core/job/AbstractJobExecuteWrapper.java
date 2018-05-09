@@ -37,7 +37,8 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
     publisher.publish(
         new Event(jobExecuteParam, Event.TYPE.EXECUTE_ENTER.name(), null, instant.toEpochMilli()));
-
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobLogger.enter(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE);
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobInfo = jobRepository.findJobInfoById(jobExecuteParam.getJobId());
     jobRecordStatus = new JobRecordStatus();
@@ -61,6 +62,8 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
     publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_SUCCESS.name(), null,
         ZonedDateTime.now().toInstant().toEpochMilli()));
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobLogger.leave(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE, true);
   }
 
   @Override
@@ -90,7 +93,8 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
             jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
       }
     }
-
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobLogger.leave(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE, false);
   }
 
   /**

@@ -1,10 +1,12 @@
 package justlive.earth.breeze.frost.core.service;
 
+import java.util.Date;
 import java.util.List;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.api.model.JobScript;
+import justlive.earth.breeze.frost.api.model.JobStatictis;
 import justlive.earth.breeze.frost.api.model.Page;
 
 /**
@@ -139,4 +141,12 @@ public interface JobService {
    */
   List<JobScript> queryJobScripts(String jobId);
 
+  /**
+   * 获取统计
+   * 
+   * @param begin
+   * @param end
+   * @return
+   */
+  JobStatictis queryJobStatictis(Date begin, Date end);
 }

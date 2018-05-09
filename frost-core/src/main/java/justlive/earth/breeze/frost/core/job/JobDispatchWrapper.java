@@ -72,6 +72,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     } else {
       failRetry = true;
     }
+    jobLogger.enter(loggerId, JobProperties.CENTER_STATISTICS_DISPATCH);
     jobRecordStatus = this.recordStatus(loggerId);
     jobRecordStatus.setTime(time);
     if (failRetry) {
@@ -109,6 +110,8 @@ public class JobDispatchWrapper extends AbstractWrapper {
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     jobRecordStatus.setMsg("调度成功");
     jobRepository.addJobRecordStatus(jobRecordStatus);
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobLogger.leave(loggerId, JobProperties.CENTER_STATISTICS_DISPATCH, true);
   }
 
   @Override
@@ -136,6 +139,8 @@ public class JobDispatchWrapper extends AbstractWrapper {
           jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
     }
 
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobLogger.leave(loggerId, JobProperties.CENTER_STATISTICS_DISPATCH, false);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package justlive.earth.breeze.frost.center.controller;
 
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,7 @@ import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
 import justlive.earth.breeze.frost.api.model.JobScript;
+import justlive.earth.breeze.frost.api.model.JobStatictis;
 import justlive.earth.breeze.frost.api.model.Page;
 import justlive.earth.breeze.frost.core.service.JobService;
 import justlive.earth.breeze.snow.common.base.domain.Response;
@@ -210,5 +212,17 @@ public class CenterController {
   @RequestMapping("/queryJobScripts")
   public Response<List<JobScript>> queryJobScripts(String jobId) {
     return Response.success(jobService.queryJobScripts(jobId));
+  }
+
+  /**
+   * 任务统计
+   * 
+   * @param begin
+   * @param end
+   * @return
+   */
+  @RequestMapping("/queryJobStatictis")
+  public Response<JobStatictis> queryJobStatictis(Date begin, Date end) {
+    return Response.success(jobService.queryJobStatictis(begin, end));
   }
 }

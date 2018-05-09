@@ -2,7 +2,7 @@ var frostApp = angular.module("frost", [ "ui.router",'ui.bootstrap', 'angularjs-
 
 frostApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 	$locationProvider.html5Mode(false); 
-	$urlRouterProvider.otherwise("/executors");
+	$urlRouterProvider.otherwise("/");
 	$stateProvider.state("executors", {
 		url : "/executors",
 		templateUrl : "executors.html",
@@ -26,6 +26,10 @@ frostApp.config(function($stateProvider, $urlRouterProvider, $locationProvider) 
 		},
 		templateUrl : "script.html",
 		controller : scriptController
+	}).state("statistics", {
+		url : "/",
+		templateUrl : "statistics.html",
+		controller : statisticsController
 	});
 });
 
@@ -565,7 +569,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 			return false;
 		}
 		return true;
-	}
+	};
 	
 	$http.get('queryExecutors').success(function(data) {
 		if (data.success) {
@@ -646,6 +650,91 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 			$scope.modalDatas.error = errorThrown;
 		});
 	};
+}
+
+function statisticsController($scope, $http) {
+	$scope.option = {
+			tooltip : {
+				trigger : 'axis',
+				axisPointer : {
+					type : 'cross',
+					label : {
+						backgroundColor : '#6a7985'
+					}
+				}
+			},
+			legend : {
+				data : [ '调度成功', '调度失败', '执行中', '执行成功', '执行失败' ]
+			},
+			grid : {
+				left : '3%',
+				right : '4%',
+				bottom : '3%',
+				containLabel : true
+			},
+			xAxis : [ {
+				type : 'category',
+				boundaryGap : false,
+				data : []
+			} ],
+			yAxis : [ {
+				type : 'value'
+			} ],
+			series : [ {
+				name : '调度成功',
+				type : 'line',
+				areaStyle : {
+					normal : {}
+				},
+				data : [ ]
+			},
+			{
+				name : '调度失败',
+				type : 'line',
+				areaStyle : {
+					normal : {}
+				},
+				data : [ ]
+			},
+			{
+				name : '执行中',
+				type : 'line',
+				areaStyle : {
+					normal : {}
+				},
+				data : [ ]
+			},
+			{
+				name : '执行成功',
+				type : 'line',
+				areaStyle : {
+					normal : {}
+				},
+				data : [ ]
+			},
+			{
+				name : '执行失败',
+				type : 'line',
+				areaStyle : {
+					normal : {}
+				},
+				data : [ ]
+			}]
+		};
+
+	$scope.dailyReport = echarts.init(document.getElementById('dailyReport'));
+	$scope.dailyReport.setOption($scope.option);
+	
+	$scope.search = function() {
+		var params = {};
+		$http.post('queryJobStatictis', null, {params: params}).success(function(data) {
+			if (data.success) {
+				console.log(data);
+			}
+		});
+	};
+	
+	$scope.search();
 }
 
 function openConfirm($scope, $uibModal, msg, ok) {

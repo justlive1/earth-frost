@@ -22,4 +22,21 @@ public interface JobLogger {
    * @param jobId
    */
   void removeLogger(String jobId);
+
+  /**
+   * 开始调度或执行任务
+   * 
+   * @param loggerId
+   * @param type
+   */
+  void enter(String loggerId, String type);
+
+  /**
+   * 调度或执行任务结束
+   * 
+   * @param loggerId
+   * @param type
+   * @param success
+   */
+  void leave(String loggerId, String type, boolean success);
 }
