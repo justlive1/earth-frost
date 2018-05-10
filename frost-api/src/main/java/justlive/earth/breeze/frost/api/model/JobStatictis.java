@@ -28,14 +28,25 @@ public class JobStatictis {
   private Long totalDispatches;
 
   /**
+   * 运行中的执行
+   */
+  private Long totalRunningExecutions;
+
+  /**
    * 统计日期
    */
   private List<String> statictisDays;
 
+
   /**
-   * 运行中的执行
+   * 成功的调度
    */
-  private List<Long> runningExecutions;
+  private List<Long> successDispatches;
+
+  /**
+   * 失败的调度
+   */
+  private List<Long> failDispatches;
 
   /**
    * 成功的执行

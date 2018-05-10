@@ -1,6 +1,5 @@
 package justlive.earth.breeze.frost.center.controller;
 
-import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -222,7 +221,7 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobStatictis")
-  public Response<JobStatictis> queryJobStatictis(Date begin, Date end) {
+  public Response<JobStatictis> queryJobStatictis(String begin, String end) {
     return Response.success(jobService.queryJobStatictis(begin, end));
   }
 }

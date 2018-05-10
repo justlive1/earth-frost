@@ -78,7 +78,7 @@ public class RedisJobLoggerImpl implements JobLogger {
       key = JobProperties.CENTER_STATISTICS_FAIL;
     }
     redissonClient.getAtomicLong(String.join(JobProperties.SEPERATOR, JobProperties.CENTER_PREFIX,
-        JobProperties.CENTER_STATISTICS, key,
-        DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now()))).decrementAndGet();
+        JobProperties.CENTER_STATISTICS, type, key,
+        DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now()))).incrementAndGet();
   }
 }

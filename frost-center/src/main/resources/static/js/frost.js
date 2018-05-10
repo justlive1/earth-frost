@@ -652,7 +652,7 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 	};
 }
 
-function statisticsController($scope, $http) {
+function statisticsController($scope, $http, $filter) {
 	$scope.option = {
 			tooltip : {
 				trigger : 'axis',
@@ -664,7 +664,7 @@ function statisticsController($scope, $http) {
 				}
 			},
 			legend : {
-				data : [ '调度成功', '调度失败', '执行中', '执行成功', '执行失败' ]
+				data : [ '调度成功', '调度失败', '执行成功', '执行失败' ]
 			},
 			grid : {
 				left : '3%',
@@ -697,14 +697,6 @@ function statisticsController($scope, $http) {
 				data : [ ]
 			},
 			{
-				name : '执行中',
-				type : 'line',
-				areaStyle : {
-					normal : {}
-				},
-				data : [ ]
-			},
-			{
 				name : '执行成功',
 				type : 'line',
 				areaStyle : {
@@ -722,14 +714,25 @@ function statisticsController($scope, $http) {
 			}]
 		};
 
+	const today = new Date();
+	$scope.begin = {opened: false, value: today};
+	$scope.end = {opened: false, value: today};
+	
 	$scope.dailyReport = echarts.init(document.getElementById('dailyReport'));
-	$scope.dailyReport.setOption($scope.option);
 	
 	$scope.search = function() {
-		var params = {};
+		var params = {
+			begin: $scope.begin.value,
+			end: $scope.end.value
+		};
 		$http.post('queryJobStatictis', null, {params: params}).success(function(data) {
 			if (data.success) {
-				console.log(data);
+				$scope.option.xAxis[0].data = data.data.statictisDays;
+				$scope.option.series[0].data = data.data.successDispatches;
+				$scope.option.series[1].data = data.data.failDispatches;
+				$scope.option.series[2].data = data.data.successExecutions;
+				$scope.option.series[3].data = data.data.failExecutions;
+				$scope.dailyReport.setOption($scope.option);
 			}
 		});
 	};

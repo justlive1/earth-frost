@@ -1,6 +1,5 @@
 package justlive.earth.breeze.frost.core.service;
 
-import java.util.Date;
 import java.util.List;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
@@ -148,5 +147,5 @@ public interface JobService {
    * @param end
    * @return
    */
-  JobStatictis queryJobStatictis(Date begin, Date end);
+  JobStatictis queryJobStatictis(String begin, String end);
 }
