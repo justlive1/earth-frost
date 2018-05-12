@@ -19,7 +19,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<snow.version>0.0.1-SNAPSHOT</snow.version>
+		<snow.version>0.0.1</snow.version>
 		<redisson.version>3.6.4</redisson.version>
 		<spring-boot-admin.version>1.5.7</spring-boot-admin.version>
 		<okhttp.version>3.10.0</okhttp.version>
