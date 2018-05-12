@@ -7,38 +7,31 @@
 
 		<div class="control-group inline-block">
 			<label class="control-label inline-block"> 执行器 </label>
-			<div class="controls inline-block">
-				<div class="input-prepend" style="margin-bottom: 0">
-					<select class="input-large width248" ng-change="executorChange()"
-						ng-model="groupKey">
-						<option value="">全部</option>
-						<option ng-repeat="(k, v) in executorMap"
-							value="{{k}}">{{k}}</option>
-					</select>
-				</div>
+			<div class="input-prepend" style="margin-bottom: 0">
+				<select class="input-large width248" ng-change="executorChange()"
+					ng-model="groupKey">
+					<option value="">全部</option>
+					<option ng-repeat="(k, v) in executorMap" value="{{k}}">{{k}}</option>
+				</select>
 			</div>
 		</div>
 		<div class="control-group inline-block">
 			<label class="control-label inline-block"> 执行逻辑 </label>
-			<div class="controls inline-block">
-				<div class="input-prepend" style="margin-bottom: 0">
-					<select class="input-large width248" ng-model="jobKey">
-						<option value="">全部</option>
-						<option ng-repeat="job in jobs" value="{{job.jobKey}}">{{job.jobDesc}}({{job.jobKey}})</option>
-					</select>
-				</div>
+			<div class="input-prepend" style="margin-bottom: 0">
+				<select class="input-large width248" ng-model="jobKey">
+					<option value="">全部</option>
+					<option ng-repeat="job in jobs" value="{{job.jobKey}}">{{job.jobDesc}}({{job.jobKey}})</option>
+				</select>
 			</div>
 		</div>
 		<div class="control-group inline-block">
 			<label class="control-label inline-block"> 选择任务 </label>
-			<div class="controls inline-block">
-				<div class="input-prepend" style="margin-bottom: 0">
-					<select class="input-large width248" ng-model="jobId">
-						<option value="">全部</option>
-						<option ng-repeat="info in jobInfos | filter : filterJobs"
-							value="{{info.id}}">{{info.name}}</option>
-					</select>
-				</div>
+			<div class="input-prepend" style="margin-bottom: 0">
+				<select class="input-large width248" ng-model="jobId">
+					<option value="">全部</option>
+					<option ng-repeat="info in jobInfos | filter : filterJobs"
+						value="{{info.id}}">{{info.name}}</option>
+				</select>
 			</div>
 		</div>
 		<div class="control-group inline-block">

@@ -84,6 +84,8 @@ redisson.address=redis://localhost:6379
 #### 2.部署项目
 正确进行上述配置，可将项目编译打包 mvn package(jar或war，相关打包操作参照Spring boot)，调度中心访问地址：http://localhost:20000/center，访问可进入登录界面
 ![登录页面](https://gitee.com/justlive1/earth-frost/raw/master/images/login.jpeg)
+登录成功后进入报表页面
+![报表页面](https://gitee.com/justlive1/earth-frost/raw/master/images/statictis.jpeg)
 
 #### 3.集群模式
 支持集群模式部署，提供调度系统可用性。

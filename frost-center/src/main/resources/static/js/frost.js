@@ -652,29 +652,33 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 	};
 }
 
-function statisticsController($scope, $http) {
+function statisticsController($scope, $http, $filter) {
 	$scope.option = {
 			tooltip : {
 				trigger : 'axis',
 				axisPointer : {
 					type : 'cross',
 					label : {
-						backgroundColor : '#6a7985'
+						backgroundColor : '#999'
 					}
 				}
 			},
+			toolbox: {
+		        feature: {
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        },
+		        right: '10%'
+		    },
 			legend : {
-				data : [ '调度成功', '调度失败', '执行中', '执行成功', '执行失败' ]
-			},
-			grid : {
-				left : '3%',
-				right : '4%',
-				bottom : '3%',
-				containLabel : true
+				data : [ '调度成功', '调度失败', '执行成功', '执行失败' ]
 			},
 			xAxis : [ {
 				type : 'category',
-				boundaryGap : false,
+				axisPointer: {
+	                type: 'shadow'
+	            },
 				data : []
 			} ],
 			yAxis : [ {
@@ -682,54 +686,52 @@ function statisticsController($scope, $http) {
 			} ],
 			series : [ {
 				name : '调度成功',
-				type : 'line',
-				areaStyle : {
-					normal : {}
-				},
+				type : 'bar',
 				data : [ ]
 			},
 			{
 				name : '调度失败',
-				type : 'line',
-				areaStyle : {
-					normal : {}
-				},
-				data : [ ]
-			},
-			{
-				name : '执行中',
-				type : 'line',
-				areaStyle : {
-					normal : {}
-				},
+				type : 'bar',
 				data : [ ]
 			},
 			{
 				name : '执行成功',
 				type : 'line',
-				areaStyle : {
-					normal : {}
-				},
+				showAllSymbol: true,
 				data : [ ]
 			},
 			{
 				name : '执行失败',
 				type : 'line',
-				areaStyle : {
-					normal : {}
-				},
+				showAllSymbol: true,
 				data : [ ]
 			}]
 		};
 
+	const today = new Date(), sevenDaysAgo = new Date();
+	sevenDaysAgo.setDate(today.getDate() - 7);
+	$scope.begin = {opened: false, value: sevenDaysAgo};
+	$scope.end = {opened: false, value: today};
+	
 	$scope.dailyReport = echarts.init(document.getElementById('dailyReport'));
-	$scope.dailyReport.setOption($scope.option);
 	
 	$scope.search = function() {
-		var params = {};
+		var params = {
+			begin: $filter('date')($scope.begin.value, 'yyyy-MM-dd'),
+			end: $filter('date')($scope.end.value, 'yyyy-MM-dd')
+		};
 		$http.post('queryJobStatictis', null, {params: params}).success(function(data) {
 			if (data.success) {
-				console.log(data);
+				$scope.option.xAxis[0].data = data.data.statictisDays;
+				$scope.option.series[0].data = data.data.successDispatches;
+				$scope.option.series[1].data = data.data.failDispatches;
+				$scope.option.series[2].data = data.data.successExecutions;
+				$scope.option.series[3].data = data.data.failExecutions;
+				$scope.dailyReport.setOption($scope.option);
+				$scope.totalJobs = data.data.totalJobs;
+				$scope.totalExecutors = data.data.totalExecutors;
+				$scope.totalDispatches = data.data.totalDispatches;
+				$scope.totalRunningExecutions = data.data.totalRunningExecutions;
 			}
 		});
 	};

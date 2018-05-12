@@ -1,12 +1,14 @@
 package justlive.earth.breeze.frost.executor.redis.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import org.redisson.api.RedissonClient;
 import org.redisson.executor.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.google.common.collect.Lists;
 import justlive.earth.breeze.frost.api.model.JobExecuteRecord;
 import justlive.earth.breeze.frost.api.model.JobExecutor;
 import justlive.earth.breeze.frost.api.model.JobInfo;
@@ -212,16 +214,66 @@ public class RedisJobServiceImpl implements JobService {
   }
 
   @Override
-  public JobStatictis queryJobStatictis(Date begin, Date end) {
+  public JobStatictis queryJobStatictis(String begin, String end) {
     JobStatictis statictis = new JobStatictis();
     statictis.setTotalJobs((long) this.countJobInfos());
     statictis.setTotalExecutors((long) this.countExecutors());
     statictis.setTotalDispatches(redissonClient.getAtomicLong(String.join(JobProperties.SEPERATOR,
         JobProperties.CENTER_PREFIX, JobProperties.CENTER_STATISTICS,
         JobProperties.CENTER_STATISTICS_DISPATCH, JobProperties.CENTER_STATISTICS_RUNNING)).get());
+    statictis.setTotalRunningExecutions(redissonClient
+        .getAtomicLong(String.join(JobProperties.SEPERATOR, JobProperties.CENTER_PREFIX,
+            JobProperties.CENTER_STATISTICS, JobProperties.CENTER_STATISTICS_EXECUTE,
+            JobProperties.CENTER_STATISTICS_RUNNING))
+        .get());
 
-    // TODO
+    List<String> statictisDays = queryStatictisDays(begin, end);
+    statictis.setStatictisDays(statictisDays);
+
+    statictis.setFailDispatches(Lists.newArrayList());
+    statictis.setSuccessDispatches(Lists.newArrayList());
+    statictis.setFailExecutions(Lists.newArrayList());
+    statictis.setSuccessExecutions(Lists.newArrayList());
+    for (String day : statictisDays) {
+      statictis.getSuccessDispatches()
+          .add(redissonClient
+              .getAtomicLong(String.join(JobProperties.SEPERATOR, JobProperties.CENTER_PREFIX,
+                  JobProperties.CENTER_STATISTICS, JobProperties.CENTER_STATISTICS_DISPATCH,
+                  JobProperties.CENTER_STATISTICS_SUCCESS, day))
+              .get());
+      statictis.getFailDispatches()
+          .add(redissonClient.getAtomicLong(String.join(JobProperties.SEPERATOR,
+              JobProperties.CENTER_PREFIX, JobProperties.CENTER_STATISTICS,
+              JobProperties.CENTER_STATISTICS_DISPATCH, JobProperties.CENTER_STATISTICS_FAIL, day))
+              .get());
+      statictis.getSuccessExecutions()
+          .add(redissonClient
+              .getAtomicLong(String.join(JobProperties.SEPERATOR, JobProperties.CENTER_PREFIX,
+                  JobProperties.CENTER_STATISTICS, JobProperties.CENTER_STATISTICS_EXECUTE,
+                  JobProperties.CENTER_STATISTICS_SUCCESS, day))
+              .get());
+      statictis.getFailExecutions()
+          .add(redissonClient.getAtomicLong(String.join(JobProperties.SEPERATOR,
+              JobProperties.CENTER_PREFIX, JobProperties.CENTER_STATISTICS,
+              JobProperties.CENTER_STATISTICS_EXECUTE, JobProperties.CENTER_STATISTICS_FAIL, day))
+              .get());
+    }
 
     return statictis;
   }
+
+  private List<String> queryStatictisDays(String begin, String end) {
+    List<String> statictisDays = Lists.newArrayList();
+
+    LocalDate from = LocalDate.parse(begin);
+    LocalDate to = LocalDate.parse(end);
+
+    while (from.isBefore(to) || from.equals(to)) {
+      statictisDays.add(DateTimeFormatter.ISO_LOCAL_DATE.format(from));
+      from = from.plusDays(1);
+    }
+
+    return statictisDays;
+  }
+
 }
