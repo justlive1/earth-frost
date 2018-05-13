@@ -39,15 +39,21 @@ frostApp.controller('appModalInstanceCtrl', function ($scope, $uibModalInstance,
     $scope.modalDatas = modalDatas; 
 
     $ctrl.ok = function (val) {
-    	if ($scope.modalDatas.ok && !$scope.modalDatas.ok()) {
-    		return;
-    	}
-    	// 在模态框View中修改的值传递回去，view中可以直接添加属性
-    	$uibModalInstance.close($scope.modalDatas);
+	    	if ($scope.modalDatas.ok) {
+	    		var rsp = $scope.modalDatas.ok();
+	    		rsp.then(function(resp) {
+	    			if(resp.data.success){
+	    				$uibModalInstance.close($scope.modalDatas);
+	    			}
+	    		});
+	    		return;
+	    	}
+	    	// 在模态框View中修改的值传递回去，view中可以直接添加属性
+	    	$uibModalInstance.close($scope.modalDatas);
     };
     
     $ctrl.cancel = function () {
-    	$uibModalInstance.dismiss('cancel');
+    		$uibModalInstance.dismiss('cancel');
     };
     
     $ctrl.executorChange = function() {
@@ -144,7 +150,8 @@ public class DemoScriptJob implements IJob {
 	$scope.pageSize = 10;
 	
 	$scope.queryJobs = function() {
-		postForm('queryJobInfos', {pageIndex: $scope.pageIndex, pageSize: $scope.pageSize}, function(data) {
+		$http.post('queryJobInfos', {}, {params: {pageIndex: $scope.pageIndex, pageSize: $scope.pageSize}}).then(function(resp) {
+			var data = resp.data;
 			if (data.success) {
 				$scope.totalCount = data.data.totalCount;
 				$scope.jobs = data.data.items;
@@ -166,7 +173,6 @@ public class DemoScriptJob implements IJob {
 	
 	$scope.extraSettings = {
 		scrollableHeight: '150px',
-		checkBoxes: true,
 		scrollable: true,
 		showCheckAll: false,
 		showUncheckAll: false,
@@ -249,7 +255,6 @@ public class DemoScriptJob implements IJob {
 				 notifyMails: mails,
 				 childJobIds: childJobIds
 			 };
-			 var flag = true;
 			 if($scope.modalDatas.type == 'SCRIPT'){
 				 job.script = $scope.defaultScript;
 				 
@@ -265,95 +270,89 @@ public class DemoScriptJob implements IJob {
 					 groupKey: $scope.modalDatas.groupKey
 				 };
 			 }
-			 //
-			 postJson('addJob', job, function(data){
-					 if (data.success) {
+			 
+			 return $http.post('addJob', job).then(function(data){
+					 if (data.data.success) {
 						 $scope.queryJobs();
 					 } else {
-						 $scope.modalDatas.error = data.message;
-						 flag = false;
+						 $scope.modalDatas.error = data.data.message;
 					 }
+					 return data;
 				 },
-				 function(req, textStatus, errorThrown){
-					 $scope.modalDatas.error = req.responseJSON.message;
-					 flag = false;
+				 function(req){
+					 $scope.modalDatas.error = req.data.message;
+					 return req;
 				 });
-			 
-			 return flag;
 		};
 	};
 	
 	$scope.triggleJob = function (id) {
 		openConfirm($scope, $uibModal, "确定执行?", function(data) {
-			var flag = true;
 			
-			postForm('triggerJob', {id: id}, function(resp){
-				 if (resp.success) {
+			return $http.post('triggerJob', {}, {params: {id: id}}).then(function(resp){
+				 if (resp.data.success) {
 					$scope.queryJobs();
 				 } else {
-					$scope.modalDatas.error = resp.message;
-					flag = false;
+					$scope.modalDatas.error = resp.data.message;
 				 }
+				 return resp;
 			 },
-			 function(XMLHttpRequest, textStatus, errorThrown){
-				 $scope.modalDatas.error = errorThrown;
+			 function(req){
+				 $scope.modalDatas.error = req.data.message;
+				 return req;
 			 });
 			
-			return flag;
 		});
 	};
 	
 	$scope.pauseJob = function (id) {
 		openConfirm($scope, $uibModal, "确定暂停?", function(data) {
-			var flag = true;
-			postForm('pauseJob', {id: id}, function(resp){
-				 if (resp.success) {
+			return $http.post('pauseJob', {id: id}, {params: {id: id}}).then(function(resp){
+				 if (resp.data.success) {
 					$scope.queryJobs();
 				 } else {
-					$scope.modalDatas.error = resp.message;
-					flag = false;
+					$scope.modalDatas.error = resp.data.message;
 				 }
+				 return resp;
 			 },
-			 function(XMLHttpRequest, textStatus, errorThrown){
-				 $scope.modalDatas.error = errorThrown;
+			 function(req){
+				 $scope.modalDatas.error = req.data.message;
+				 return req;
 			 });
-			return flag;
 		});
 	};
 	
 	$scope.resumeJob = function (id) {
 		openConfirm($scope, $uibModal, "确定恢复?", function(data) {
-			var flag = true;
-			postForm('resumeJob', {id: id}, function(resp){
-				 if (resp.success) {
+			return $http.post('resumeJob', {id: id}, {params: {id: id}}).then(function(resp){
+				 if (resp.data.success) {
 					$scope.queryJobs();
 				 } else {
-					$scope.modalDatas.error = resp.message;
-					flag = false;
+					$scope.modalDatas.error = resp.data.message;
 				 }
+				 return resp;
 			 },
-			 function(XMLHttpRequest, textStatus, errorThrown){
-				 $scope.modalDatas.error = errorThrown;
+			 function(req){
+				 $scope.modalDatas.error = req.data.message;
+				 return req;
 			 });
-			return flag;
 		});
 	};
 	
 	$scope.removeJob = function (id) {
 		openConfirm($scope, $uibModal, "确定删除?", function(data) {
-			var flag = true;
-			postForm('removeJob', {id: id}, function(resp){
-				 if (resp.success) {
+			return $http.post('removeJob', {id: id}, {params: {id: id}}).then(function(resp){
+				 if (resp.data.success) {
 					$scope.queryJobs();
 				 } else {
-					$scope.modalDatas.error = resp.message;
-					flag = false;
+					$scope.modalDatas.error = resp.data.message;
 				 }
+				 return resp;
 			 },
-			 function(XMLHttpRequest, textStatus, errorThrown){
-				 $scope.modalDatas.error = errorThrown;
+			 function(req){
+				 $scope.modalDatas.error = req.data.message;
+				 return req;
 			 });
-			return flag;
 		});
 	};
 	
@@ -372,7 +371,8 @@ public class DemoScriptJob implements IJob {
 		$scope.modalDatas.extraSettings = $scope.extraSettings;
 		$scope.modalDatas.translationTexts = $scope.translationTexts;
 		
-		postForm('queryExecutors', null, function(data) {
+		$http.post('queryExecutors').then(function(resp) {
+			var data = resp.data;
 			if (data.success) {
 				
 				transferExecutor(data.data, $scope.modalDatas);
@@ -385,45 +385,49 @@ public class DemoScriptJob implements IJob {
 					}
 				}
 			}
-		});
-		
-		postForm('findJobInfoById', {id: id}, function(data) {
-			if (data.success && data.data) {
-				var mails = null;
-				if (data.data.notifyMails) {
-					mails = data.data.notifyMails.join();
-				}
-				$scope.modalDatas.type = data.data.type;
-				$scope.modalDatas.preType = data.data.type;
-				$scope.modalDatas.cron = data.data.cron;
-				$scope.modalDatas.name = data.data.name;
-				$scope.modalDatas.param = data.data.param;
-				$scope.modalDatas.failStrategy = data.data.failStrategy;
-				$scope.modalDatas.notifyMails = mails;
-				$scope.modalDatas.childJobIds = data.data.childJobIds;
-				if (data.data.group) {
-					$scope.modalDatas.groupKey = data.data.group.groupKey;
-					$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
-					if ($scope.modalDatas.type == 'SCRIPT') {
-						$scope.modalDatas.useExecutor = true;
-					} else {
-						$scope.modalDatas.jobKey = data.data.group.jobKey;
+		}).then(function(){
+			$http.post('findJobInfoById', {id: id}, {params: {id: id}}).then(function(resp) {
+				var data = resp.data;
+				if (data.success && data.data) {
+					var mails = null;
+					if (data.data.notifyMails) {
+						mails = data.data.notifyMails.join();
+					}
+					$scope.modalDatas.type = data.data.type;
+					$scope.modalDatas.preType = data.data.type;
+					$scope.modalDatas.cron = data.data.cron;
+					$scope.modalDatas.name = data.data.name;
+					$scope.modalDatas.param = data.data.param;
+					$scope.modalDatas.failStrategy = data.data.failStrategy;
+					$scope.modalDatas.notifyMails = mails;
+					$scope.modalDatas.childJobIds = data.data.childJobIds;
+					if (data.data.group) {
+						$scope.modalDatas.groupKey = data.data.group.groupKey;
+						$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
+						if ($scope.modalDatas.type == 'SCRIPT') {
+							$scope.modalDatas.useExecutor = true;
+						} else {
+							$scope.modalDatas.jobKey = data.data.group.jobKey;
+						}
 					}
 				}
-			}
-		});
-		
-		$http.get('queryAllJobs').success(function(data) {
-			if (data.success) {
-				$scope.modalDatas.jobInfos = [];
-				data.data.forEach(r => {
-					var obj = {id: r.id, label: r.name};
-					$scope.modalDatas.jobInfos.push(obj);
-					if($scope.modalDatas.childJobIds && $scope.modalDatas.childJobIds.indexOf(r.id) > -1) {
-						$scope.modalDatas.childrenJobs.push(obj);
-					} 
+			}).then(function(){
+				$http.get('queryAllJobs').success(function(data) {
+					if (data.success) {
+						$scope.modalDatas.jobInfos = [];
+						data.data.forEach(r => {
+							var obj = {id: r.id, label: r.name};
+							if(r.id == id) {
+								obj.disabled = true;
+							}
+							$scope.modalDatas.jobInfos.push(obj);
+							if($scope.modalDatas.childJobIds && $scope.modalDatas.childJobIds.indexOf(r.id) > -1) {
+								$scope.modalDatas.childrenJobs.push(obj);
+							} 
+						});
+					}
 				});
-			}
+			});
 		});
 		
 		var modal = $uibModal.open({
@@ -479,20 +483,18 @@ public class DemoScriptJob implements IJob {
 					 groupKey: $scope.modalDatas.groupKey
 				 };
 			 }
-			 var flag = true;
-			 postJson('updateJob', job, function(data){
-					 if (data.success) {
+			 return $http.post('updateJob', job).then(function(data){
+					 if (data.data.success) {
 						 $scope.queryJobs();
 					 } else {
-						 $scope.modalDatas.error = data.message;
-						 flag = false;
+						 $scope.modalDatas.error = data.data.message;
 					 }
+					 return data;
 				 },
-				 function(XMLHttpRequest, textStatus, errorThrown){
-					 $scope.modalDatas.error = errorThrown;
+				 function(req){
+					 $scope.modalDatas.error = req.data.message;
+					 return req;
 				 });
-			 
-			 return flag;
 		};
 	};
 	
@@ -601,7 +603,8 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 	$scope.jobId = $stateParams.jobId;
 	
 	$scope.queryVersions = function () {
-		postForm('queryJobScripts', {jobId: $stateParams.jobId}, function(data) {
+		$http.post('queryJobScripts', {}, {params: {jobId: $stateParams.jobId}}).then(function(resp) {
+			var data = resp.data;
 			if (data.success && data.data) {
 				$scope.scriptList = data.data;
 				$scope.scriptMap = new Map();
@@ -610,7 +613,8 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 		});
 	};
 	
-	postForm('findJobInfoById', {id: $stateParams.jobId}, function(data) {
+	$http.post('findJobInfoById', {}, {params: {id: $stateParams.jobId}}).then(function(resp) {
+		var data = resp.data;
 		if (data.success && data.data) {
 			myTextarea.value = data.data.script;
 			$scope.queryVersions();
@@ -638,7 +642,8 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 		
 		var script = $scope.codeMirrorEditor.doc.getValue();
 		
-		postJson("addJobScript", {jobId: $scope.jobId, script: script, version: $scope.version}, function(data){
+		$http.post("addJobScript", {jobId: $scope.jobId, script: script, version: $scope.version}).then(function(resp){
+			var data = resp.data;
 			if(data.success){
 				openConfirm($scope, $uibModal, data.data);
 			} else {
@@ -764,29 +769,6 @@ function openConfirm($scope, $uibModal, msg, ok) {
 		 delete $scope.modalDatas.error;
 	});
 	
-}
-
-function postJson(url, data, success, error) {
-	 $.ajax({
-		 url: url, 
-		 data: JSON.stringify(data), 
-		 async: false,
-		 type: 'post',
-		 contentType: 'application/json',
-		 success: success,
-		 error: error
-	 });
-}
-
-function postForm(url, data, success, error) {
-	$.ajax({
-		 url: url, 
-		 data: data, 
-		 async: false,
-		 type: 'post',
-		 success: success,
-		 error: error
-	 });
 }
 
 function transferExecutor(data, modalDatas) {

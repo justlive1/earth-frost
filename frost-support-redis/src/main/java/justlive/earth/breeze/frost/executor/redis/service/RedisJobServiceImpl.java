@@ -2,6 +2,7 @@ package justlive.earth.breeze.frost.executor.redis.service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.redisson.api.RedissonClient;
@@ -82,6 +83,11 @@ public class RedisJobServiceImpl implements JobService {
     JobInfo localJobInfo = jobRepository.findJobInfoById(jobInfo.getId());
     if (localJobInfo == null) {
       throw Exceptions.fail("300002", "未查询到Job记录");
+    }
+
+    if (jobInfo.getChildJobIds() != null
+        && Arrays.asList(jobInfo.getChildJobIds()).contains(jobInfo.getId())) {
+      throw Exceptions.fail("300003", "子任务不能包含本任务");
     }
 
     localJobInfo.setCron(jobInfo.getCron());
