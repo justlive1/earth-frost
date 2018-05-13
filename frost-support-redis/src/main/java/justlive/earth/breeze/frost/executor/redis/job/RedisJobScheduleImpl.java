@@ -105,6 +105,7 @@ public class RedisJobScheduleImpl implements JobSchedule {
   public String resumeJob(String jobId) {
 
     JobInfo jobInfo = this.getJobInfo(jobId);
+    pauseJob(jobId);
     return this.addJob(jobId, jobInfo.getCron());
   }
 
