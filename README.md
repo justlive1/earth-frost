@@ -75,10 +75,36 @@ frost.notifier.mail.subject=#{job.name} (#{job.id}) throws an exception
 frost.notifier.mail.text=#{job.name} (#{job.id}) \n #{event.message}
 
 # redis配置
-# 0:单机模式， 1：集群模式
+# 0:单机模式， 1：集群模式，2：云托管模式，3：哨兵模式，4：主从模式
 redisson.mode=0
+
+# 公共配置
+redisson.password=
+redisson.slaveConnectionPoolSize=50
+redisson.masterConnectionPoolSize=50
+redisson.timeout=3000
+
+# 单机模式
 redisson.address=redis://localhost:6379
 
+# 集群模式
+redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+redisson.scanInterval=2000
+
+# 云托管模式
+redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+redisson.scanInterval=2000
+redisson.dnsMonitoringInterval=5000
+
+# 哨兵模式
+redisson.sentinelAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+redisson.scanInterval=2000
+redisson.masterName=mymaster
+
+# 主从模式
+redisson.masterAddress=redis://127.0.0.1:6379
+redisson.slaveAddresses=redis://localhost:6380,redis://localhost:6381
+redisson.dnsMonitoringInterval=5000
 ```
 
 #### 2.部署项目
@@ -122,10 +148,36 @@ frost.job.executor.port=${server.port}
 frost.job.executor.scriptJobEnabled=true
 
 # redis配置
-# 0:单机模式， 1：集群模式
+# 0:单机模式， 1：集群模式，2：云托管模式，3：哨兵模式，4：主从模式
 redisson.mode=0
+
+# 公共配置
+redisson.password=
+redisson.slaveConnectionPoolSize=50
+redisson.masterConnectionPoolSize=50
+redisson.timeout=3000
+
+# 单机模式
 redisson.address=redis://localhost:6379
 
+# 集群模式
+redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+redisson.scanInterval=2000
+
+# 云托管模式
+redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+redisson.scanInterval=2000
+redisson.dnsMonitoringInterval=5000
+
+# 哨兵模式
+redisson.sentinelAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+redisson.scanInterval=2000
+redisson.masterName=mymaster
+
+# 主从模式
+redisson.masterAddress=redis://127.0.0.1:6379
+redisson.slaveAddresses=redis://localhost:6380,redis://localhost:6381
+redisson.dnsMonitoringInterval=5000
 ```
 
 #### 3.部署执行器

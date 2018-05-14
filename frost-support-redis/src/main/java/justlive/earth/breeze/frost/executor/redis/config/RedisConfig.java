@@ -9,6 +9,9 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
+import org.redisson.config.MasterSlaveServersConfig;
+import org.redisson.config.ReplicatedServersConfig;
+import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -60,8 +63,84 @@ public class RedisConfig {
   RedissonClient redissonCluster(RedissonProperties redssionProperties) {
     Config config = new Config();
     ClusterServersConfig serverConfig =
-        config.useClusterServers().addNodeAddress(redssionProperties.getSentinelAddresses())
+        config.useClusterServers().addNodeAddress(redssionProperties.getNodeAddresses())
             .setTimeout(redssionProperties.getTimeout())
+            .setScanInterval(redssionProperties.getScanInterval())
+            .setSlaveConnectionPoolSize(redssionProperties.getSlaveConnectionPoolSize())
+            .setMasterConnectionPoolSize(redssionProperties.getMasterConnectionPoolSize());
+
+    if (StringUtils.hasText(redssionProperties.getPassword())) {
+      serverConfig.setPassword(redssionProperties.getPassword());
+    }
+
+    return Redisson.create(config);
+  }
+
+  /**
+   * 云托管模式
+   * 
+   * @param redssionProperties
+   * @return
+   */
+  @Bean
+  @ConditionalOnProperty(name = "redisson.mode", havingValue = "2")
+  RedissonClient redissonReplicatedServers(RedissonProperties redssionProperties) {
+    Config config = new Config();
+    ReplicatedServersConfig serverConfig =
+        config.useReplicatedServers().addNodeAddress(redssionProperties.getNodeAddresses())
+            .setTimeout(redssionProperties.getTimeout())
+            .setScanInterval(redssionProperties.getScanInterval())
+            .setDnsMonitoringInterval(redssionProperties.getDnsMonitoringInterval())
+            .setSlaveConnectionPoolSize(redssionProperties.getSlaveConnectionPoolSize())
+            .setMasterConnectionPoolSize(redssionProperties.getMasterConnectionPoolSize());
+
+    if (StringUtils.hasText(redssionProperties.getPassword())) {
+      serverConfig.setPassword(redssionProperties.getPassword());
+    }
+
+    return Redisson.create(config);
+  }
+
+  /**
+   * 哨兵模式
+   * 
+   * @param redssionProperties
+   * @return
+   */
+  @Bean
+  @ConditionalOnProperty(name = "redisson.mode", havingValue = "3")
+  RedissonClient redissonuseSentinelServers(RedissonProperties redssionProperties) {
+    Config config = new Config();
+    SentinelServersConfig serverConfig =
+        config.useSentinelServers().addSentinelAddress(redssionProperties.getSentinelAddresses())
+            .setTimeout(redssionProperties.getTimeout())
+            .setScanInterval(redssionProperties.getScanInterval())
+            .setMasterName(redssionProperties.getMasterName())
+            .setSlaveConnectionPoolSize(redssionProperties.getSlaveConnectionPoolSize())
+            .setMasterConnectionPoolSize(redssionProperties.getMasterConnectionPoolSize());
+
+    if (StringUtils.hasText(redssionProperties.getPassword())) {
+      serverConfig.setPassword(redssionProperties.getPassword());
+    }
+
+    return Redisson.create(config);
+  }
+
+  /**
+   * 主从模式
+   * 
+   * @param redssionProperties
+   * @return
+   */
+  @Bean
+  @ConditionalOnProperty(name = "redisson.mode", havingValue = "4")
+  RedissonClient redissonuseMasterSlaveServers(RedissonProperties redssionProperties) {
+    Config config = new Config();
+    MasterSlaveServersConfig serverConfig =
+        config.useMasterSlaveServers().setMasterAddress(redssionProperties.getMasterAddress())
+            .addSlaveAddress(redssionProperties.getSlaveAddresses())
+            .setTimeout(redssionProperties.getTimeout())
+            .setDnsMonitoringInterval(redssionProperties.getDnsMonitoringInterval())
             .setSlaveConnectionPoolSize(redssionProperties.getSlaveConnectionPoolSize())
             .setMasterConnectionPoolSize(redssionProperties.getMasterConnectionPoolSize());
 
