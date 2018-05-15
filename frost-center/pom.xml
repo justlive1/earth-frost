@@ -4,9 +4,9 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>justlive.earth.breeze.frost</groupId>
+		<groupId>vip.justlive</groupId>
 		<artifactId>frost</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
 
 	<artifactId>frost-center</artifactId>
@@ -21,12 +21,12 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>justlive.earth.breeze.frost</groupId>
+			<groupId>vip.justlive</groupId>
 			<artifactId>frost-support${frost.support}</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>justlive.earth.breeze.snow</groupId>
+			<groupId>vip.justlive</groupId>
 			<artifactId>snow-common-web</artifactId>
 		</dependency>
 

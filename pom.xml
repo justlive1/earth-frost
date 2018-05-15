@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>justlive.earth.breeze.frost</groupId>
+	<groupId>vip.justlive</groupId>
 	<artifactId>frost</artifactId>
 	<packaging>pom</packaging>
 	<name>frost</name>
 	<url>https://gitee.com/justlive1/earth-frost</url>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -19,7 +19,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<snow.version>0.0.1</snow.version>
+		<snow.version>1.0.0</snow.version>
 		<redisson.version>3.6.4</redisson.version>
 		<spring-boot-admin.version>1.5.7</spring-boot-admin.version>
 		<okhttp.version>3.10.0</okhttp.version>
@@ -29,37 +29,37 @@
 		<dependencies>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.frost</groupId>
+				<groupId>vip.justlive</groupId>
 				<artifactId>frost-api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.frost</groupId>
+				<groupId>vip.justlive</groupId>
 				<artifactId>frost-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.frost</groupId>
+				<groupId>vip.justlive</groupId>
 				<artifactId>frost-executor</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.frost</groupId>
+				<groupId>vip.justlive</groupId>
 				<artifactId>frost-support-redis</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.snow</groupId>
+				<groupId>vip.justlive</groupId>
 				<artifactId>snow-common-base</artifactId>
 				<version>${snow.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>justlive.earth.breeze.snow</groupId>
+				<groupId>vip.justlive</groupId>
 				<artifactId>snow-common-web</artifactId>
 				<version>${snow.version}</version>
 			</dependency>
