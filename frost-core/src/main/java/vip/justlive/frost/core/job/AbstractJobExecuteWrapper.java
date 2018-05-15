@@ -31,6 +31,8 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
   protected JobRecordStatus jobRecordStatus;
 
+  protected boolean success;
+
   protected void before() {
     Instant instant = ZonedDateTime.now().toInstant();
     // 触发开始执行任务事件
@@ -54,6 +56,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
   @Override
   public void success() {
+    success = true;
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     jobRecordStatus.setMsg(String.format("执行成功 [%s]", address()));
@@ -62,12 +65,11 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
     publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_SUCCESS.name(), null,
         ZonedDateTime.now().toInstant().toEpochMilli()));
-    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
-    jobLogger.leave(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE, true);
   }
 
   @Override
   public void exception(Exception e) {
+    success = false;
     super.exception(e);
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.FAIL.name());
     String cause;
@@ -93,8 +95,13 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
             jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
       }
     }
+  }
+
+  @Override
+  public void finshed() {
     JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
-    jobLogger.leave(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE, false);
+    jobLogger.leave(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE,
+        success);
   }
 
   /**

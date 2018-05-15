@@ -124,13 +124,13 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$rootScope.navActive = 1;
 	
 	$scope.defaultScript = 
-`package justlive.earth.breeze.frost.executor.example;
+`package vip.justlive.frost.executor.example;
  
 import java.util.Random;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
-import justlive.earth.breeze.frost.core.job.IJob;
-import justlive.earth.breeze.frost.core.job.JobContext;
+import vip.justlive.frost.core.job.IJob;
+import vip.justlive.frost.core.job.JobContext;
 
  
 public class DemoScriptJob implements IJob {

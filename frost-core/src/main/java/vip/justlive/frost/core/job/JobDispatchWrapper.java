@@ -49,6 +49,8 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
   private JobInfo jobInfo;
 
+  private boolean success;
+
   public JobDispatchWrapper(String id, String loggerId) {
     this.id = id;
     this.loggerId = loggerId;
@@ -106,16 +108,16 @@ public class JobDispatchWrapper extends AbstractWrapper {
 
   @Override
   public void success() {
+    success = true;
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     jobRecordStatus.setMsg("调度成功");
     jobRepository.addJobRecordStatus(jobRecordStatus);
-    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
-    jobLogger.leave(loggerId, JobProperties.CENTER_STATISTICS_DISPATCH, true);
   }
 
   @Override
   public void exception(Exception e) {
+    success = false;
     super.exception(e);
 
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
@@ -138,9 +140,6 @@ public class JobDispatchWrapper extends AbstractWrapper {
       publisher.publish(new Event(param, Event.TYPE.DISPATCH_FAIL_RETRY.name(),
           jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
     }
-
-    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
-    jobLogger.leave(loggerId, JobProperties.CENTER_STATISTICS_DISPATCH, false);
   }
 
   @Override
@@ -156,5 +155,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
       JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
       jobRepository.addJobRecordStatus(status);
     }
+    JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
+    jobLogger.leave(loggerId, JobProperties.CENTER_STATISTICS_DISPATCH, success);
   }
 }
