@@ -596,7 +596,7 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 	
 }
 
-function scriptController($scope, $stateParams, $state, $uibModal) {
+function scriptController($scope, $stateParams, $state, $uibModal, $http) {
 	
 	var myTextarea = document.getElementById('editor');
 	
@@ -619,11 +619,11 @@ function scriptController($scope, $stateParams, $state, $uibModal) {
 			myTextarea.value = data.data.script;
 			$scope.queryVersions();
 		}
-	});
-	
-	$scope.codeMirrorEditor = CodeMirror.fromTextArea(myTextarea, {
-	    mode: "text/x-java",
-	    lineNumbers: true
+	}).then(function(resp) {
+		$scope.codeMirrorEditor = CodeMirror.fromTextArea(myTextarea, {
+			mode: "text/x-java",
+			lineNumbers: true
+		});
 	});
 	
 	$scope.switchScript = function (id) {
