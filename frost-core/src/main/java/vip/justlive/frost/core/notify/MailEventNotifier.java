@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -22,14 +21,9 @@ import vip.justlive.frost.core.persistence.JobRepository;
  */
 public class MailEventNotifier extends AbstractEventNotifier {
 
-  private static final String DEFAULT_SUBJECT = "#{job.name} (#{job.id}) throws an exception";
-  private static final String DEFAULT_TEXT = "#{job.name} (#{job.id}) \n #{event.message}";
-
   private static final List<String> SUPPORT_EVENTS =
       Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name());
 
-
-  private final SpelExpressionParser parser = new SpelExpressionParser();
   private final MailSender sender;
 
   /**
@@ -62,8 +56,8 @@ public class MailEventNotifier extends AbstractEventNotifier {
 
   public MailEventNotifier(MailSender sender) {
     this.sender = sender;
-    this.subject = parser.parseExpression(DEFAULT_SUBJECT, ParserContext.TEMPLATE_EXPRESSION);
-    this.text = parser.parseExpression(DEFAULT_TEXT, ParserContext.TEMPLATE_EXPRESSION);
+    this.subject = PARSER.parseExpression(DEFAULT_SUBJECT, ParserContext.TEMPLATE_EXPRESSION);
+    this.text = PARSER.parseExpression(DEFAULT_TEXT, ParserContext.TEMPLATE_EXPRESSION);
   }
 
   @Override
@@ -127,7 +121,7 @@ public class MailEventNotifier extends AbstractEventNotifier {
   }
 
   public void setSubject(String subject) {
-    this.subject = parser.parseExpression(subject, ParserContext.TEMPLATE_EXPRESSION);
+    this.subject = PARSER.parseExpression(subject, ParserContext.TEMPLATE_EXPRESSION);
   }
 
   public String getSubject() {
@@ -135,7 +129,7 @@ public class MailEventNotifier extends AbstractEventNotifier {
   }
 
   public void setText(String text) {
-    this.text = parser.parseExpression(text, ParserContext.TEMPLATE_EXPRESSION);
+    this.text = PARSER.parseExpression(text, ParserContext.TEMPLATE_EXPRESSION);
   }
 
   public String getText() {

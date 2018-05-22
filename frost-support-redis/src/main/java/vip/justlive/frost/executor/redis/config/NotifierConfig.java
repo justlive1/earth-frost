@@ -13,6 +13,7 @@ import org.springframework.mail.MailSender;
 import vip.justlive.frost.core.config.JobProperties;
 import vip.justlive.frost.core.notify.ChildrenJobEventNotifier;
 import vip.justlive.frost.core.notify.CompositeNotifier;
+import vip.justlive.frost.core.notify.DingtalkEventNotifier;
 import vip.justlive.frost.core.notify.EventListener;
 import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.notify.MailEventNotifier;
@@ -43,6 +44,15 @@ public class NotifierConfig {
   @ConfigurationProperties("frost.notifier.mail")
   MailEventNotifier mailEventNotifier(MailSender sender) {
     return new MailEventNotifier(sender);
+  }
+
+  @Bean
+  @Profile(JobProperties.PROFILE_CENTER)
+  @ConditionalOnProperty(value = "frost.notifier.dingtalk.enabled", havingValue = "true",
+      matchIfMissing = true)
+  @ConfigurationProperties("frost.notifier.dingtalk")
+  DingtalkEventNotifier dingtalkEventNotifier() {
+    return new DingtalkEventNotifier();
   }
 
   @Bean
