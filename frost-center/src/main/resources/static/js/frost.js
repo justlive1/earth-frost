@@ -538,11 +538,11 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 			if (r.type == 0){
 				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务调度<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			} else if (r.type == 1) {
-				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务执行<<<</label><div class="error-msg">${r.msg}</div></div>`;
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>任务执行<<<</label><div class="error-msg">${r.msg} [耗时${r.duration}ms]</div></div>`;
 			} else if (r.type == 2) {
 				dispatchDetial += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg}</div></div>`;
 			} else if (r.type == 3) {
-				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg}</div></div>`;
+				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-FAIL">>>>失败重试<<<</label><div class="error-msg">${r.msg} [耗时${r.duration}ms]</div></div>`;
 			} else if (r.type == 5) {
 				executeDetail += `<div class="form-group" style="text-align: center;"><label class="status-UNKNOWN">>>>子任务<<<</label><div class="error-msg">${r.msg}[<span class="status-${r.status}">${r.status}</span>]</div></div>`;
 			}

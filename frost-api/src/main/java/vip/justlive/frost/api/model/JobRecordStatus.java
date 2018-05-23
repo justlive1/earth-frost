@@ -26,6 +26,8 @@ public class JobRecordStatus {
   private String msg;
 
   private Date time;
+  
+  private long duration;
 
   public void fill(JobExecuteRecord record) {
     if (Objects.equals(loggerId, record.getId())) {

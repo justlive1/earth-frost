@@ -57,14 +57,15 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
   @Override
   public void success() {
     success = true;
+    long end = ZonedDateTime.now().toInstant().toEpochMilli();
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     jobRecordStatus.setMsg(String.format("执行成功 [%s]", address()));
+    jobRecordStatus.setDuration(end - jobRecordStatus.getTime().getTime());
     jobRepository.addJobRecordStatus(jobRecordStatus);
     // 触发任务执行成功事件
     EventPublisher publisher = SpringBeansHolder.getBean(EventPublisher.class);
-    publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_SUCCESS.name(), null,
-        ZonedDateTime.now().toInstant().toEpochMilli()));
+    publisher.publish(new Event(jobExecuteParam, Event.TYPE.EXECUTE_SUCCESS.name(), null, end));
   }
 
   @Override
@@ -79,6 +80,8 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
       cause = e.getMessage();
     }
     jobRecordStatus.setMsg(String.format("执行失败 [%s] [%s]", address(), cause));
+    jobRecordStatus.setDuration(
+        ZonedDateTime.now().toInstant().toEpochMilli() - jobRecordStatus.getTime().getTime());
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRepository.addJobRecordStatus(jobRecordStatus);
 
