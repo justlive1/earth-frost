@@ -12,7 +12,8 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  */
 public abstract class AbstractEventNotifier implements Notifier {
 
-  protected static final String DEFAULT_SUBJECT = "#{job.name} (#{job.id}) throws an exception";
+  protected static final String DEFAULT_SUBJECT =
+      "There is something wrong with #{job.name} (#{job.id})";
   protected static final String DEFAULT_TEXT = "#{job.name} (#{job.id}) \n #{event.message}";
   protected static final SpelExpressionParser PARSER = new SpelExpressionParser();
 

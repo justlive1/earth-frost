@@ -253,6 +253,7 @@ public class DemoScriptJob implements IJob {
 				 auto: $scope.modalDatas.auto,
 				 failStrategy: $scope.modalDatas.failStrategy,
 				 notifyMails: mails,
+				 timeout : $scope.modalDatas.timeout,
 				 childJobIds: childJobIds
 			 };
 			 if($scope.modalDatas.type == 'SCRIPT'){
@@ -401,6 +402,7 @@ public class DemoScriptJob implements IJob {
 					$scope.modalDatas.failStrategy = data.data.failStrategy;
 					$scope.modalDatas.notifyMails = mails;
 					$scope.modalDatas.childJobIds = data.data.childJobIds;
+					$scope.modalDatas.timeout = data.data.timeout;
 					if (data.data.group) {
 						$scope.modalDatas.groupKey = data.data.group.groupKey;
 						$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
@@ -466,6 +468,7 @@ public class DemoScriptJob implements IJob {
 				 param: $scope.modalDatas.param,
 				 failStrategy: $scope.modalDatas.failStrategy,
 				 notifyMails: mails,
+				 timeout: $scope.modalDatas.timeout,
 				 childJobIds: childJobIds
 			 };
 			 if (job.type == 'SCRIPT') {

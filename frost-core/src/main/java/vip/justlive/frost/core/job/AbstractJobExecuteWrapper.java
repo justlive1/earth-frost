@@ -11,6 +11,7 @@ import vip.justlive.frost.api.model.JobExecuteRecord;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.api.model.JobRecordStatus;
 import vip.justlive.frost.core.config.JobProperties;
+import vip.justlive.frost.core.monitor.Monitor;
 import vip.justlive.frost.core.notify.Event;
 import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.persistence.JobRepository;
@@ -52,6 +53,9 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     }
     jobRecordStatus.setLoggerId(jobExecuteParam.getLoggerId());
     jobRecordStatus.setTime(Date.from(instant));
+
+    Monitor monitor = SpringBeansHolder.getBean("timeoutMonitorImpl", Monitor.class);
+    monitor.watch(jobExecuteParam);
   }
 
   @Override
@@ -102,6 +106,8 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
   @Override
   public void finshed() {
+    Monitor monitor = SpringBeansHolder.getBean("timeoutMonitorImpl", Monitor.class);
+    monitor.unWatch(jobExecuteParam);
     JobLogger jobLogger = SpringBeansHolder.getBean(JobLogger.class);
     jobLogger.leave(jobExecuteParam.getLoggerId(), JobProperties.CENTER_STATISTICS_EXECUTE,
         success);

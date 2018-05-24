@@ -40,7 +40,11 @@ public class Event {
     /**
      * 执行成功
      */
-    EXECUTE_SUCCESS;
+    EXECUTE_SUCCESS,
+    /**
+     * 超时监控
+     */
+    TIMEOUT_MONITOR;
   }
 
   /**

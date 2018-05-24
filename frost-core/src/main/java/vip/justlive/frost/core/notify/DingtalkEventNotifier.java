@@ -29,8 +29,8 @@ public class DingtalkEventNotifier extends AbstractEventNotifier {
 
   private static final MediaType MEDIA_JSON = MediaType.parse("application/json; charset=utf-8");
   private static final String DINGTALK_URL = "https://oapi.dingtalk.com/robot/send?access_token=%s";
-  private static final List<String> SUPPORT_EVENTS =
-      Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name());
+  private static final List<String> SUPPORT_EVENTS = Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(),
+      Event.TYPE.EXECUTE_FAIL.name(), Event.TYPE.TIMEOUT_MONITOR.name());
 
   /**
    * 发送文本

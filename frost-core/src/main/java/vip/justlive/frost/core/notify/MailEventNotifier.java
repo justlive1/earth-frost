@@ -21,8 +21,8 @@ import vip.justlive.frost.core.persistence.JobRepository;
  */
 public class MailEventNotifier extends AbstractEventNotifier {
 
-  private static final List<String> SUPPORT_EVENTS =
-      Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name());
+  private static final List<String> SUPPORT_EVENTS = Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(),
+      Event.TYPE.EXECUTE_FAIL.name(), Event.TYPE.TIMEOUT_MONITOR.name());
 
   private final MailSender sender;
 

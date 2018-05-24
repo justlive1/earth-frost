@@ -104,4 +104,9 @@ public class JobInfo {
    */
   private String[] childJobIds;
 
+  /**
+   * 超时预警时间，单位秒
+   */
+  private Long timeout;
+
 }
