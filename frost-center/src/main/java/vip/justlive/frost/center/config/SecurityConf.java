@@ -29,7 +29,8 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
     http.logout().logoutUrl("/logout");
     // The ui currently doesn't support csrf
     http.csrf().disable();
-
+    
+    http.headers().frameOptions().disable();
     // Requests for the login page and the static assets are allowed
     http.authorizeRequests().antMatchers("/**/ui/**", "/**/*.css").permitAll();
     // ... and any other request needs to be authorized
