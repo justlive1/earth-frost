@@ -18,7 +18,7 @@ public class JobProperties {
 
   public static final String PROFILE_EXECUTOR = "executor";
 
-  public static final String SEPERATOR = "|";
+  public static final String SEPERATOR = ":";
 
   public static final String CENTER_PREFIX = "frost-center";
 
