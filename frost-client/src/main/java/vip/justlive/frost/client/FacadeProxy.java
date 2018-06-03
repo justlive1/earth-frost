@@ -15,7 +15,7 @@ public class FacadeProxy {
 
   private JobApiFacade jobApiFacade;
 
-  FacadeProxy(String location) {
+  FacadeProxy(String... location) {
     ConfigFactory.loadProperties(location);
     ClientProperties clientProps = ConfigFactory.load(ClientProperties.class);
     this.jobApiFacade = new JobApiFacadeImpl(clientProps);
@@ -27,7 +27,7 @@ public class FacadeProxy {
    * @param location 配置文件路径
    * @return
    */
-  public static FacadeProxy newProxy(String location) {
+  public static FacadeProxy newProxy(String... location) {
     return new FacadeProxy(location);
   }
 

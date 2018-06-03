@@ -311,3 +311,35 @@ cron：触发任务的表达式
 ![删除任务](https://gitee.com/justlive1/earth-frost/raw/master/images/removeJob.jpeg)
 
 
+#### 3.使用client
+
+3.1 依赖frost-client
+
+```
+<dependency>
+    <groupId>justlive.earth.breeze.frost</groupId>
+    <artifactId>frost-client</artifactId>
+</dependency>
+```
+
+3.2 配置frost连接地址
+
+```
+# 调度中心地址
+frost.client.baseUrl=http://localhost:20000/center
+# 用户名
+frost.client.username=frost
+# 密码
+frost.client.password=frost
+```
+
+3.3 实例化client
+
+```
+FacadeProxy proxy = FacadeProxy.newProxy("classpath:frost.properties", "classpath:frost-override.properties");
+JobApiFacade jobApiFacade = proxy.getJobApiFacade();
+```
+
+3.4 调用JobApiFacade进行操作
+
+…
