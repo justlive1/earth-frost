@@ -128,7 +128,7 @@ redisson.dnsMonitoringInterval=5000
 
 ```
 <dependency>
-	<groupId>justlive.earth.breeze.frost</groupId>
+	<groupId>vip.justlive</groupId>
 	<artifactId>frost-support-redis</artifactId>
 </dependency>
 ```
@@ -317,7 +317,7 @@ cron：触发任务的表达式
 
 ```
 <dependency>
-    <groupId>justlive.earth.breeze.frost</groupId>
+    <groupId>vip.justlive</groupId>
     <artifactId>frost-client</artifactId>
 </dependency>
 ```
