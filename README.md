@@ -7,7 +7,7 @@ earth-frost是一个轻量级分布式任务调度框架。
 - 调度模块和执行模块分离
 - 使用redis作为数据库
 - 基于订阅模式实现服务注册和发现
-- 演示地址： http://www.justlive.vip
+- 演示地址： http://www.justlive.vip (请勿恶意攻击)
 
 ## 环境
 - Angular: v1.x
