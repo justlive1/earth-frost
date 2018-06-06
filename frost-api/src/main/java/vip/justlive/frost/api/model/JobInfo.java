@@ -109,4 +109,14 @@ public class JobInfo {
    */
   private Long timeout;
 
+  /**
+   * 是否使用分片
+   */
+  private boolean useSharding;
+
+  /**
+   * 分片
+   */
+  private JobSharding sharding;
+
 }

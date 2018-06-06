@@ -100,6 +100,8 @@ public class RedisJobServiceImpl implements JobService {
     localJobInfo.setNotifyMails(jobInfo.getNotifyMails());
     localJobInfo.setChildJobIds(jobInfo.getChildJobIds());
     localJobInfo.setTimeout(jobInfo.getTimeout());
+    localJobInfo.setUseSharding(jobInfo.isUseSharding());
+    localJobInfo.setSharding(jobInfo.getSharding());
 
     jobRepository.updateJob(localJobInfo);
 
