@@ -54,7 +54,11 @@ public class RedisDispatcher implements Dispatcher {
 
   @Override
   public void checkDispatch(JobExecuteParam param) {
+    count(param);
+  }
 
+  @Override
+  public int count(JobExecuteParam param) {
     // redisson 当没有worker时候，调用countActiveWorkers会阻塞
     // 由于计算count是基于订阅模式下的publish触发增加各自worker到workersCounterAtomicLong事件
     // 再去获取semaphore，最后返回workersCounterAtomicLong的数值
@@ -68,6 +72,7 @@ public class RedisDispatcher implements Dispatcher {
     if (workers == 0) {
       throw Exceptions.fail("30000", "没有可调度的执行器");
     }
+    return workers;
   }
 
   /**

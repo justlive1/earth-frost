@@ -21,7 +21,7 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
   public void doRun() {
     this.before();
     IJob job = getIJob();
-    job.execute(new DefaultJobContext(jobInfo));
+    job.execute(new DefaultJobContext(jobInfo, jobExecuteParam));
   }
 
   @Override

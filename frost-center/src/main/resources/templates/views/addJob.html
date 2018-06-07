@@ -117,6 +117,18 @@
 			</div>
 		</div>
 
+		<div class="control-group inline-block">
+			<label class="control-label width100"> 分片运行 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="checkbox" ng-model="modalDatas.useSharding" ng-click="modalDatas.sharding = '';"> <input
+						type="text" ng-model="modalDatas.sharding"
+						placeholder="默认分片为执行器个数" class="input-large"
+						ng-disabled="!modalDatas.useSharding" style="width: 222px;">
+				</div>
+			</div>
+		</div>
+
 		<div class="control-group inline-block" ng-if="modalDatas.opt == 1">
 			<label class="control-label width100"> 自动运行 </label>
 			<div class="controls">

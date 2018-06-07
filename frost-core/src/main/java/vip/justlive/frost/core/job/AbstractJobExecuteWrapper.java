@@ -64,7 +64,12 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     long end = ZonedDateTime.now().toInstant().toEpochMilli();
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
-    jobRecordStatus.setMsg(String.format("执行成功 [%s]", address()));
+    String msg = String.format("执行成功 [%s]", address());
+    if (jobExecuteParam.getSharding() != null) {
+      msg += String.format("[%s of %s]", jobExecuteParam.getSharding().getIndex(),
+          jobExecuteParam.getSharding().getTotal());
+    }
+    jobRecordStatus.setMsg(msg);
     jobRecordStatus.setDuration(end - jobRecordStatus.getTime().getTime());
     jobRepository.addJobRecordStatus(jobRecordStatus);
     // 触发任务执行成功事件
@@ -83,7 +88,14 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     } else {
       cause = e.getMessage();
     }
-    jobRecordStatus.setMsg(String.format("执行失败 [%s] [%s]", address(), cause));
+
+    if (jobExecuteParam.getSharding() != null) {
+      jobRecordStatus.setMsg(String.format("执行失败 [%s] [%s of %s] [%s]", address(),
+          jobExecuteParam.getSharding().getIndex(), jobExecuteParam.getSharding().getTotal(),
+          cause));
+    } else {
+      jobRecordStatus.setMsg(String.format("执行失败 [%s] [%s]", address(), cause));
+    }
     jobRecordStatus.setDuration(
         ZonedDateTime.now().toInstant().toEpochMilli() - jobRecordStatus.getTime().getTime());
     JobRepository jobRepository = SpringBeansHolder.getBean(JobRepository.class);

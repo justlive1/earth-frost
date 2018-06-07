@@ -254,6 +254,8 @@ public class DemoScriptJob implements IJob {
 				 failStrategy: $scope.modalDatas.failStrategy,
 				 notifyMails: mails,
 				 timeout : $scope.modalDatas.timeout,
+				 useSharding : $scope.modalDatas.useSharding,
+				 sharding : $scope.modalDatas.sharding,
 				 childJobIds: childJobIds
 			 };
 			 if($scope.modalDatas.type == 'SCRIPT'){
@@ -403,6 +405,8 @@ public class DemoScriptJob implements IJob {
 					$scope.modalDatas.notifyMails = mails;
 					$scope.modalDatas.childJobIds = data.data.childJobIds;
 					$scope.modalDatas.timeout = data.data.timeout;
+					$scope.modalDatas.useSharding = data.data.useSharding;
+					$scope.modalDatas.sharding = data.data.sharding;
 					if (data.data.group) {
 						$scope.modalDatas.groupKey = data.data.group.groupKey;
 						$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
@@ -469,6 +473,8 @@ public class DemoScriptJob implements IJob {
 				 failStrategy: $scope.modalDatas.failStrategy,
 				 notifyMails: mails,
 				 timeout: $scope.modalDatas.timeout,
+				 useSharding : $scope.modalDatas.useSharding,
+				 sharding : $scope.modalDatas.sharding,
 				 childJobIds: childJobIds
 			 };
 			 if (job.type == 'SCRIPT') {

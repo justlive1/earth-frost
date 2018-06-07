@@ -47,4 +47,9 @@ public class JobExecuteParam {
    */
   private String parentLoggerId;
 
+  /**
+   * 分片参数
+   */
+  private JobSharding sharding;
+
 }

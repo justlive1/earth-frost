@@ -117,6 +117,6 @@ public class JobInfo {
   /**
    * 分片
    */
-  private JobSharding sharding;
+  private Integer sharding;
 
 }

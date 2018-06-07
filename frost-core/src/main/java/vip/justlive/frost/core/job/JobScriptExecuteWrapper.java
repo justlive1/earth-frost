@@ -27,7 +27,7 @@ public class JobScriptExecuteWrapper extends AbstractJobExecuteWrapper {
       throw Exceptions.fail("30002", "执行job类型不匹配");
     }
     IJob job = getIJob();
-    job.execute(new DefaultJobContext(jobInfo));
+    job.execute(new DefaultJobContext(jobInfo, jobExecuteParam));
   }
 
   @Override

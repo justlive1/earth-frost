@@ -1,6 +1,8 @@
 package vip.justlive.frost.api.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 分片
@@ -9,6 +11,8 @@ import lombok.Data;
  *
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class JobSharding {
 
   /**

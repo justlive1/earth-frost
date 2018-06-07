@@ -14,6 +14,7 @@ import vip.justlive.frost.api.model.JobExecuteRecord;
 import vip.justlive.frost.api.model.JobGroup;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.api.model.JobRecordStatus;
+import vip.justlive.frost.api.model.JobSharding;
 import vip.justlive.frost.core.config.JobProperties;
 import vip.justlive.frost.core.dispacher.Dispatcher;
 import vip.justlive.frost.core.notify.Event;
@@ -102,8 +103,24 @@ public class JobDispatchWrapper extends AbstractWrapper {
     param.setFailRetry(failRetry);
 
     Dispatcher dispatcher = SpringBeansHolder.getBean(Dispatcher.class);
-    dispatcher.dispatch(param);
 
+    if (jobInfo.isUseSharding()) {
+      handleSharding(dispatcher);
+    } else {
+      dispatcher.dispatch(param);
+    }
+  }
+
+  void handleSharding(Dispatcher dispatcher) {
+    Integer total = jobInfo.getSharding();
+    if (total == null) {
+      total = dispatcher.count(param);
+    }
+    for (int i = 0; i < total; i++) {
+      JobSharding sharding = new JobSharding(i, total);
+      param.setSharding(sharding);
+      dispatcher.dispatch(param);
+    }
   }
 
   @Override
