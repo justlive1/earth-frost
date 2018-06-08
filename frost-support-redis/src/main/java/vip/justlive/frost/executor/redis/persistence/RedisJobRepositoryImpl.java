@@ -227,7 +227,9 @@ public class RedisJobRepositoryImpl implements JobRepository {
           redissonClient.getListMultimap(String.join(JobProperties.SEPERATOR,
               JobProperties.EXECUTOR_PREFIX, JobRecordStatus.class.getName()));
       for (JobExecuteRecord record : list.subList(from, Math.min(to, list.size()))) {
-        recordStatus.get(record.getId()).forEach(r -> r.fill(record));
+        List<JobRecordStatus> statuses = recordStatus.getAll(record.getId());
+        statuses.forEach(r -> r.fill(record));
+        record.setRecordStatuses(statuses);
         records.add(record);
       }
       return records;
