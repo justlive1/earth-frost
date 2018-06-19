@@ -18,16 +18,23 @@ earth-frost是一个轻量级分布式任务调度框架。
 - Thymeleaf: 3
 
 ## 功能
-- 简单易上手，支持web界面进行任务的CRUD … ok
-- 支持动态修改任务的开始，停止  … ok
-- 调度中心支持集群部署，将任务的调度进行封装，支持分配各种不同的任务 … ok
-- 执行器支持分布式，支持集群部署，可进行相应分组，在调度中心界面查看 … ok
-- 支持伸缩扩展，调度中心和执行器都是基于redis订阅模式进行服务注册发现和任务调度，服务上下线发现及时 … ok
-- 支持失败重试 … ok
-- 任务监控和报警  … ok
-- 动态编译任务，支持web界面编辑任务源码，创建任务  … ok
-- 支持父子任务  … ok
-- 运行报表  … ok
+1.0.0
+- 简单易上手，支持web界面进行任务的CRUD
+- 支持动态修改任务的开始，停止
+- 调度中心支持集群部署，将任务的调度进行封装，支持分配各种不同的任务
+- 执行器支持分布式，支持集群部署，可进行相应分组，在调度中心界面查看
+- 支持伸缩扩展，调度中心和执行器都是基于redis订阅模式进行服务注册发现和任务调度，服务上下线发现及时
+- 支持失败重试
+- 任务监控和报警
+- 动态编译任务，支持web界面编辑任务源码，创建任务
+- 支持父子任务
+- 运行报表 
+
+1.1.0
+- 支持钉钉预警通知
+- 调度记录增加执行时间
+- 任务超时报警机制
+- 支持分片任务
 
 ## 开发
 	
@@ -74,6 +81,13 @@ frost.notifier.mail.from=${spring.mail.username}
 frost.notifier.mail.to=
 frost.notifier.mail.subject=#{job.name} (#{job.id}) throws an exception
 frost.notifier.mail.text=#{job.name} (#{job.id}) \n #{event.message}
+
+# 钉钉通知
+frost.notifier.dingtalk.enabled=false
+frost.notifier.dingtalk.subject=There is something wrong with #{job.name} (#{job.id})
+frost.notifier.dingtalk.text=#{job.name} (#{job.id}) \n #{event.message}
+frost.notifier.dingtalk.accessToken=
+frost.notifier.dingtalk.linkUrl=localhost:20000/center
 
 # redis配置
 # 0:单机模式， 1：集群模式，2：云托管模式，3：哨兵模式，4：主从模式
@@ -221,6 +235,8 @@ cron：触发任务的表达式
 	失败通知（默认）：调度或执行失败后，触发通知，默认提供了邮件，可继承AbstractEventNotifier进行扩展
 	失败重试：调度或执行失败后，会主动再次调度或执行
 通知邮件：调度中心配置了全局的默认推送邮件地址，每个任务可自定义添加通知邮件列表
+超时预警：可填写任务的预期处理时间，超过时间还未执行完任务则进行预警
+分片运行：勾选后任务分片运行，可填写分片总数，注意：分片任务需要任务逻辑支持分片方式，否则会重复执行
 自动运行：勾选后创建任务即是运行状态
 ```
 
@@ -255,6 +271,34 @@ cron：触发任务的表达式
 
 注意：分布式执行器使用@Resource/@Autowired要确认是否所有执行器都存在注入的Bean，可配合指定执行器的分组来限定执行脚本任务的执行器
 ![修改脚本](https://gitee.com/justlive1/earth-frost/raw/master/images/script.jpeg)
+
+### 开发分片任务
+
+#### 1.在执行器项目中开发执行逻辑
+
+分片任务通过将一个任务同时分发给所有执行器(或指定分片数量)，协同进行任务处理，当进行大数据量操作时可显著提高处理速度。
+
+```
+public class ShardingJob implements IJob {
+
+  @Override
+  public void execute(JobContext ctx) {
+	// 获取分片信息
+    JobSharding sharding = ctx.getSharding();
+	// 分片序号
+    int index = sharding.getIndex();
+    // 分片总数
+    int total = sharding.getTotal();
+    
+    ... 业务逻辑
+  }
+}
+```
+
+#### 2.在调度中心，新建任务
+
+参考上述实例任务配置任务，勾选分片运行，可使用默认执行器个数用于支持动态扩容或指定分片总数
+![添加任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addShardingJob.jpeg)
 
 ### 任务管理
 
