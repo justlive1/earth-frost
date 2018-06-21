@@ -58,11 +58,45 @@
 			</div>
 		</div>
 		<div class="control-group inline-block">
+			<label class="control-label width100"> 任务模式 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<select class="input-large width248" ng-model="modalDatas.mode">
+						<option value="CRON">cron任务</option>
+						<option value="SIMPLE">简单任务</option>
+						<option value="DELAY">延时任务</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="control-group inline-block"
+			ng-if="modalDatas.mode == 'CRON'">
 			<label class="control-label width100"> Cron </label>
 			<div class="controls">
 				<div class="input-prepend">
 					<input type="text" ng-model="modalDatas.cron" name="cron"
 						placeholder="请输入cron" class="input-large width235" required>
+				</div>
+			</div>
+		</div>
+		<div class="control-group inline-block"
+			ng-if="modalDatas.mode == 'SIMPLE'">
+			<label class="control-label width100"> 执行时间 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input placeholder="请选择执行时间" class="input-large width235"
+						name="execDate" type="datetime-local"
+						ng-model="modalDatas.execDate" required>
+				</div>
+			</div>
+		</div>
+		<div class="control-group inline-block"
+			ng-if="modalDatas.mode == 'DELAY'">
+			<label class="control-label width100"> 延时 </label>
+			<div class="controls">
+				<div class="input-prepend">
+					<input type="text" ng-model="modalDatas.delayStr" name="delay"
+						placeholder="格式：初始延时,延时间隔 单位：秒" class="input-large width235" required>
 				</div>
 			</div>
 		</div>
@@ -121,10 +155,11 @@
 			<label class="control-label width100"> 分片运行 </label>
 			<div class="controls">
 				<div class="input-prepend">
-					<input type="checkbox" ng-model="modalDatas.useSharding" ng-click="modalDatas.sharding = '';"> <input
-						type="text" ng-model="modalDatas.sharding"
-						placeholder="默认分片为执行器个数" class="input-large"
-						ng-disabled="!modalDatas.useSharding" style="width: 222px;">
+					<input type="checkbox" ng-model="modalDatas.useSharding"
+						ng-click="modalDatas.sharding = '';"> <input type="text"
+						ng-model="modalDatas.sharding" placeholder="默认分片为执行器个数"
+						class="input-large" ng-disabled="!modalDatas.useSharding"
+						style="width: 222px;">
 				</div>
 			</div>
 		</div>

@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.redisson.api.RedissonClient;
 import org.redisson.executor.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,8 @@ public class RedisJobServiceImpl implements JobService {
   @Override
   public String addJob(JobInfo jobInfo) {
 
-    if (!CronExpression.isValidExpression(jobInfo.getCron())) {
+    if (Objects.equals(jobInfo.getMode(), JobInfo.MODE.CRON.name())
+        && !CronExpression.isValidExpression(jobInfo.getCron())) {
       throw Exceptions.fail("300001", "定时表达式格式有误");
     }
     if (jobInfo.isAuto()) {
@@ -67,7 +69,7 @@ public class RedisJobServiceImpl implements JobService {
     }
     jobRepository.addJob(jobInfo);
     if (jobInfo.isAuto()) {
-      jobSchedule.addJob(jobInfo.getId(), jobInfo.getCron());
+      jobSchedule.addJob(jobInfo.getId());
     }
 
     return jobInfo.getId();
@@ -76,7 +78,8 @@ public class RedisJobServiceImpl implements JobService {
   @Override
   public void updateJob(JobInfo jobInfo) {
 
-    if (!CronExpression.isValidExpression(jobInfo.getCron())) {
+    if (Objects.equals(jobInfo.getMode(), JobInfo.MODE.CRON.name())
+        && !CronExpression.isValidExpression(jobInfo.getCron())) {
       throw Exceptions.fail("300001", "定时表达式格式有误");
     }
 
@@ -90,23 +93,22 @@ public class RedisJobServiceImpl implements JobService {
       throw Exceptions.fail("300003", "子任务不能包含本任务");
     }
 
-    localJobInfo.setCron(jobInfo.getCron());
-    localJobInfo.setName(jobInfo.getName());
-    localJobInfo.setGroup(jobInfo.getGroup());
-    localJobInfo.setParam(jobInfo.getParam());
-    localJobInfo.setType(jobInfo.getType());
-    localJobInfo.setScript(jobInfo.getScript());
-    localJobInfo.setFailStrategy(jobInfo.getFailStrategy());
-    localJobInfo.setNotifyMails(jobInfo.getNotifyMails());
-    localJobInfo.setChildJobIds(jobInfo.getChildJobIds());
-    localJobInfo.setTimeout(jobInfo.getTimeout());
-    localJobInfo.setUseSharding(jobInfo.isUseSharding());
-    localJobInfo.setSharding(jobInfo.getSharding());
+    this.mergeData(localJobInfo, jobInfo);
 
     jobRepository.updateJob(localJobInfo);
 
     if (JobInfo.STATUS.NORMAL.name().equals(localJobInfo.getStatus())) {
-      jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
+      switch (JobInfo.MODE.valueOf(localJobInfo.getMode())) {
+        case SIMPLE:
+          jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getTimestamp());
+          break;
+        case DELAY:
+          jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getInitDelay(), jobInfo.getDelay());
+          break;
+        case CRON:
+          jobSchedule.refreshJob(jobInfo.getId(), jobInfo.getCron());
+          break;
+      }
     }
   }
 
@@ -285,4 +287,22 @@ public class RedisJobServiceImpl implements JobService {
     return statictisDays;
   }
 
+  private void mergeData(JobInfo localJobInfo, JobInfo jobInfo) {
+    localJobInfo.setMode(jobInfo.getMode());
+    localJobInfo.setTimestamp(jobInfo.getTimestamp());
+    localJobInfo.setInitDelay(jobInfo.getInitDelay());
+    localJobInfo.setDelay(jobInfo.getDelay());
+    localJobInfo.setCron(jobInfo.getCron());
+    localJobInfo.setName(jobInfo.getName());
+    localJobInfo.setGroup(jobInfo.getGroup());
+    localJobInfo.setParam(jobInfo.getParam());
+    localJobInfo.setType(jobInfo.getType());
+    localJobInfo.setScript(jobInfo.getScript());
+    localJobInfo.setFailStrategy(jobInfo.getFailStrategy());
+    localJobInfo.setNotifyMails(jobInfo.getNotifyMails());
+    localJobInfo.setChildJobIds(jobInfo.getChildJobIds());
+    localJobInfo.setTimeout(jobInfo.getTimeout());
+    localJobInfo.setUseSharding(jobInfo.isUseSharding());
+    localJobInfo.setSharding(jobInfo.getSharding());
+  }
 }

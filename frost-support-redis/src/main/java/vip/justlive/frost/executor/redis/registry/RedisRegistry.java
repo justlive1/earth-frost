@@ -9,6 +9,7 @@ import org.redisson.api.RMapCache;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.context.ShutdownEndpoint;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,9 @@ public class RedisRegistry extends AbstractRegistry {
       new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder()
           .namingPattern("heartbeat-schedule-pool-%d").daemon(true).build());
 
+  @Autowired
+  ShutdownEndpoint shutdown;
+
   @Override
   public void register() {
 
@@ -62,9 +66,8 @@ public class RedisRegistry extends AbstractRegistry {
     if (jobProps.getExecutor().getScriptJobEnabled()) {
       redissonClient.getExecutorService(JobProperties.JOB_SCRIPT_PREFIX)
           .registerWorkers(executorProperties.getParallel());
-      redissonClient
-          .getExecutorService(String.join(JobProperties.SEPERATOR,
-              JobProperties.JOB_SCRIPT_PREFIX, jobExecutorBean.getKey()))
+      redissonClient.getExecutorService(String.join(JobProperties.SEPERATOR,
+          JobProperties.JOB_SCRIPT_PREFIX, jobExecutorBean.getKey()))
           .registerWorkers(executorProperties.getParallel());
     }
 
@@ -89,6 +92,7 @@ public class RedisRegistry extends AbstractRegistry {
     // 注册事件
     topic.publish(new HeartBeat(jobExecutorBean.getAddress(), HeartBeat.TYPE.REGISTER.name(),
         jobExecutorBean.getName()));
+
   }
 
   @Override
@@ -96,6 +100,7 @@ public class RedisRegistry extends AbstractRegistry {
     beatFuture.cancel(true);
     topic.publish(new HeartBeat(jobExecutorBean.getAddress(), HeartBeat.TYPE.UNREGISTER.name(),
         jobExecutorBean.getName()));
+    shutdown.shutdown();
   }
 
 }

@@ -9,13 +9,40 @@ package vip.justlive.frost.core.job;
 public interface JobSchedule {
 
   /**
-   * 增加job
+   * 新增任务
+   * 
+   * @param jobId
+   * @return
+   */
+  String addJob(String jobId);
+
+  /**
+   * 增加简单任务
+   * 
+   * @param jobId
+   * @param timestamp 执行时间点的时间戳
+   * @return
+   */
+  String addSimpleJob(String jobId, long timestamp);
+
+  /**
+   * 增加延迟任务
+   * 
+   * @param jobId
+   * @param initDelay
+   * @param delay
+   * @return
+   */
+  String addDelayJob(String jobId, long initDelay, long delay);
+
+  /**
+   * 增加表达式job
    * 
    * @param jobId
    * @param cron
    * @return
    */
-  String addJob(String jobId, String cron);
+  String addCronJob(String jobId, String cron);
 
   /**
    * 刷新job
@@ -25,6 +52,25 @@ public interface JobSchedule {
    * @return
    */
   String refreshJob(String jobId, String cron);
+
+  /**
+   * 刷新job
+   * 
+   * @param jobId
+   * @param timestamp
+   * @return
+   */
+  String refreshJob(String jobId, Long timestamp);
+
+  /**
+   * 刷新job
+   * 
+   * @param jobId
+   * @param initDelay
+   * @param delay
+   * @return
+   */
+  String refreshJob(String jobId, Long initDelay, Long delay);
 
   /**
    * 暂停job

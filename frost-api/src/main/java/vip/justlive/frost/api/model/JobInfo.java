@@ -44,6 +44,21 @@ public class JobInfo {
     RETRY;
   }
 
+  public enum MODE {
+    /**
+     * 简单任务
+     */
+    SIMPLE,
+    /**
+     * 延时任务
+     */
+    DELAY,
+    /**
+     * cron表达式任务
+     */
+    CRON;
+  }
+
   /**
    * 编号
    */
@@ -58,11 +73,6 @@ public class JobInfo {
    * 分组
    */
   private JobGroup group;
-
-  /**
-   * 定时表达式
-   */
-  private String cron;
 
   /**
    * 任务状态
@@ -118,5 +128,27 @@ public class JobInfo {
    * 分片
    */
   private Integer sharding;
+
+  /**
+   * 任务模式
+   */
+  private String mode;
+
+  /**
+   * 简单任务的时间戳
+   */
+  private Long timestamp;
+
+  /**
+   * 延时任务延时
+   */
+  private Long initDelay;
+  private Long delay;
+
+  /**
+   * 定时表达式
+   */
+  private String cron;
+
 
 }

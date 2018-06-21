@@ -189,6 +189,7 @@ public class DemoScriptJob implements IJob {
 		$scope.modalDatas = { opt: 1};
 		$scope.modalDatas.type = 'BEAN';
 		$scope.modalDatas.failStrategy = 'NOTIFY';
+		$scope.modalDatas.mode = 'CRON';
 		$scope.modalDatas.childrenJobs = [];
 		$scope.modalDatas.extraSettings = $scope.extraSettings;
 		$scope.modalDatas.translationTexts = $scope.translationTexts;
@@ -245,28 +246,34 @@ public class DemoScriptJob implements IJob {
 			if ($scope.modalDatas.childrenJobs.length > 0) {
 				childJobIds = $scope.modalDatas.childrenJobs.map(r => r.id);
 			}
-			var job = {
-				 name: $scope.modalDatas.name,
-				 cron: $scope.modalDatas.cron,
-				 type: $scope.modalDatas.type,
-				 param: $scope.modalDatas.param,
-				 auto: $scope.modalDatas.auto,
-				 failStrategy: $scope.modalDatas.failStrategy,
-				 notifyMails: mails,
-				 timeout : $scope.modalDatas.timeout,
-				 useSharding : $scope.modalDatas.useSharding,
-				 sharding : $scope.modalDatas.sharding,
-				 childJobIds: childJobIds
-			 };
-			 if($scope.modalDatas.type == 'SCRIPT'){
+			
+			var job = {};
+			angular.copy($scope.modalDatas, job);
+			job.notifyMails = mails;
+			job.childJobIds = childJobIds;
+			
+			if ($scope.modalDatas.mode == 'SIMPLE') {
+				job.timestamp = new Date($scope.modalDatas.execDate).getTime();
+				delete job.cron;
+				delete job.initDelay;
+				delete job.delay;
+			} else if ($scope.modalDatas.mode == 'CRON') {
+				delete job.initDelay;
+				delete job.delay;
+			} else if ($scope.modalDatas.mode == 'DELAY') {
+				var delayArr = $scope.modalDatas.delayStr.split(',');
+				job.initDelay = delayArr[0];
+				job.delay = delayArr[1];
+				delete job.cron;
+			}
+			
+			if ($scope.modalDatas.type == 'SCRIPT'){
 				 job.script = $scope.defaultScript;
-				 
 				 if ($scope.modalDatas.useExecutor) {
 					 job.group = {
 						 groupKey: $scope.modalDatas.groupKey
 					 };
 				 }
-				 
 			 } else {
 				 job.group = {
 					 jobKey: $scope.modalDatas.jobKey,
@@ -396,17 +403,17 @@ public class DemoScriptJob implements IJob {
 					if (data.data.notifyMails) {
 						mails = data.data.notifyMails.join();
 					}
-					$scope.modalDatas.type = data.data.type;
+					
+					angular.extend($scope.modalDatas, data.data);
 					$scope.modalDatas.preType = data.data.type;
-					$scope.modalDatas.cron = data.data.cron;
-					$scope.modalDatas.name = data.data.name;
-					$scope.modalDatas.param = data.data.param;
-					$scope.modalDatas.failStrategy = data.data.failStrategy;
 					$scope.modalDatas.notifyMails = mails;
-					$scope.modalDatas.childJobIds = data.data.childJobIds;
-					$scope.modalDatas.timeout = data.data.timeout;
-					$scope.modalDatas.useSharding = data.data.useSharding;
-					$scope.modalDatas.sharding = data.data.sharding;
+					
+					if (data.data.mode == 'SIMPLE') {
+						$scope.modalDatas.execDate = new Date(data.data.timestamp);
+					} else if (data.data.mode == 'DELAY') {
+						$scope.modalDatas.delayStr = data.data.initDelay + "," + data.data.delay;
+					}
+					
 					if (data.data.group) {
 						$scope.modalDatas.groupKey = data.data.group.groupKey;
 						$scope.modalDatas.jobs = $scope.modalDatas.executorMap[$scope.modalDatas.groupKey];
@@ -464,19 +471,27 @@ public class DemoScriptJob implements IJob {
 			if ($scope.modalDatas.childrenJobs.length > 0) {
 				childJobIds = $scope.modalDatas.childrenJobs.map(r => r.id);
 			}
-			var job = {
-				 id: id,
-				 name: $scope.modalDatas.name,
-				 cron: $scope.modalDatas.cron,
-				 type: $scope.modalDatas.type,
-				 param: $scope.modalDatas.param,
-				 failStrategy: $scope.modalDatas.failStrategy,
-				 notifyMails: mails,
-				 timeout: $scope.modalDatas.timeout,
-				 useSharding : $scope.modalDatas.useSharding,
-				 sharding : $scope.modalDatas.sharding,
-				 childJobIds: childJobIds
-			 };
+			var job = {};
+			angular.copy($scope.modalDatas, job);
+			job.id = id;
+			job.notifyMails = mails;
+			job.childJobIds = childJobIds;
+			
+			if ($scope.modalDatas.mode == 'SIMPLE') {
+				job.timestamp = new Date($scope.modalDatas.execDate).getTime();
+				delete job.cron;
+				delete job.initDelay;
+				delete job.delay;
+			} else if ($scope.modalDatas.mode == 'CRON') {
+				delete job.initDelay;
+				delete job.delay;
+			} else if ($scope.modalDatas.mode == 'DELAY') {
+				var delayArr = $scope.modalDatas.delayStr.split(',');
+				job.initDelay = delayArr[0];
+				job.delay = delayArr[1];
+				delete job.cron;
+			}
+			
 			 if (job.type == 'SCRIPT') {
 				 if ($scope.modalDatas.useExecutor) {
 					 job.group = {
