@@ -228,9 +228,15 @@ redisson.dnsMonitoringInterval=5000
 任务名称：任务的名称，描述任务以便于管理
 执行器：指定运行在哪个执行器分组
 执行器逻辑：指定任务运行的bean
-cron：触发任务的表达式
-参数：运行任务的参数，字符串格式，执行逻辑可通过JobContext::getParam获取参数
+任务模式：
+	cron任务：支持cron表达式的定时任务
+	简单任务：选择日期时间定时执行（当时间早于当前时间则立即执行）
+	延时任务：启动任务后，固定延时执行任务
+cron：触发任务的表达式（cron任务模式）
+执行时间：选择执行的时间，精确到分（为什么不支持到秒？1.没有必要，2.h5的datetime-local仅支持到分，懒得用日期插件了）（简单任务模式）
+延时：启动后延时时间，执行间隔时间，单位秒（延时任务模式）
 子任务：可在任务列表中选择已创建的任务，当本任务执行成功时，将会触发子任务的一次主动调度
+参数：运行任务的参数，字符串格式，执行逻辑可通过JobContext::getParam获取参数
 失败处理：
 	失败通知（默认）：调度或执行失败后，触发通知，默认提供了邮件，可继承AbstractEventNotifier进行扩展
 	失败重试：调度或执行失败后，会主动再次调度或执行
@@ -257,6 +263,8 @@ cron：触发任务的表达式
 #### 2.在调度中心，新建任务
 参考上述任务配置属性说明，任务类型选择实例模式，执行器选择执行器配置中frost.job.executor.key的值，执行逻辑选择@Job注解定义的值
 ![添加任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addJob.jpeg)
+![添加cron任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addCronJob.jpeg)
+![添加延时任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addDelayJob.jpeg)
 
 ### 开发脚本模式任务
 
