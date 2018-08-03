@@ -41,6 +41,9 @@ frostApp.controller('appModalInstanceCtrl', function ($scope, $uibModalInstance,
     $ctrl.ok = function (val) {
 	    	if ($scope.modalDatas.ok) {
 	    		var rsp = $scope.modalDatas.ok();
+	    		if(rsp === false){
+	    			return;
+	    		}
 	    		rsp.then(function(resp) {
 	    			if(resp.data.success){
 	    				$uibModalInstance.close($scope.modalDatas);
@@ -261,7 +264,14 @@ public class DemoScriptJob implements IJob {
 				delete job.initDelay;
 				delete job.delay;
 			} else if ($scope.modalDatas.mode == 'DELAY') {
+				if ($scope.modalDatas.delayStr == null){
+					return false;
+				}
 				var delayArr = $scope.modalDatas.delayStr.split(',');
+				if (delayArr.length != 2 || delayArr[0] == '' || delayArr[1] == '') {
+					$scope.modalDatas.error = '延时填写有误';
+					return false;
+				}
 				job.initDelay = delayArr[0];
 				job.delay = delayArr[1];
 				delete job.cron;
@@ -273,6 +283,8 @@ public class DemoScriptJob implements IJob {
 					 job.group = {
 						 groupKey: $scope.modalDatas.groupKey
 					 };
+				 } else {
+					 delete job.group
 				 }
 			 } else {
 				 job.group = {
@@ -486,7 +498,14 @@ public class DemoScriptJob implements IJob {
 				delete job.initDelay;
 				delete job.delay;
 			} else if ($scope.modalDatas.mode == 'DELAY') {
+				if ($scope.modalDatas.delayStr == null){
+					return false;
+				}
 				var delayArr = $scope.modalDatas.delayStr.split(',');
+				if (delayArr.length != 2 || delayArr[0] == '' || delayArr[1] == '') {
+					$scope.modalDatas.error = '延时填写有误';
+					return false;
+				}
 				job.initDelay = delayArr[0];
 				job.delay = delayArr[1];
 				delete job.cron;
@@ -497,6 +516,8 @@ public class DemoScriptJob implements IJob {
 					 job.group = {
 						 groupKey: $scope.modalDatas.groupKey
 					 };
+				 } else {
+					 delete job.group
 				 } 
 				 if ($scope.modalDatas.preType != job.type) {
 					 job.script = $scope.defaultScript;
