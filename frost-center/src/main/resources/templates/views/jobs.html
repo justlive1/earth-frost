@@ -29,32 +29,32 @@
 				<td class="operation-column">
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="触发一次" ng-click="triggleJob(job.id)">
-						<i class="fa fa-play"></i>
+						<em class="fa fa-play"></em>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="暂停" ng-click="pauseJob(job.id)">
-						<i class="fa fa-pause"></i>
+						<em class="fa fa-pause"></em>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="恢复" ng-click="resumeJob(job.id)">
-						<i class="fa fa-history"></i>
+						<em class="fa fa-history"></em>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="编辑" ng-click="updateJob(job.id)">
-						<i class="fa fa-file-text-o"></i>
+						<em class="fa fa-file-text-o"></em>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="脚本" ng-click="jumpToScript(job.id)"
 						ng-if="job.type == 'SCRIPT'">
-						<i class="fa fa-code"></i>
+						<em class="fa fa-code"></em>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="日志" ng-click="jumpToLogs(job.id)">
-						<i class="fa fa-files-o"></i>
+						<em class="fa fa-files-o"></em>
 					</button>
 					<button type="button" class="btn" tooltip-placement="bottom"
 						uib-tooltip="删除" ng-click="removeJob(job.id)">
-						<i class="fa fa-trash"></i>
+						<em class="fa fa-trash"></em>
 					</button>
 				</td>
 			</tr>
