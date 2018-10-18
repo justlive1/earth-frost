@@ -1,11 +1,9 @@
 package vip.justlive.frost.client;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import com.google.common.reflect.TypeParameter;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
@@ -15,10 +13,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Route;
-import vip.justlive.common.base.domain.Response;
-import vip.justlive.common.base.exception.Exceptions;
 import vip.justlive.frost.api.facade.JobApiFacade;
 import vip.justlive.frost.api.model.JobInfo;
+import vip.justlive.oxygen.core.constant.Constants;
+import vip.justlive.oxygen.core.exception.Exceptions;
 
 /**
  * job api facade 实现类
@@ -60,18 +58,13 @@ public class JobApiFacadeImpl implements JobApiFacade {
     try {
       okhttp3.Response resp = client.newCall(request).execute();
       String respBody = resp.body().string();
-      if (resp.isSuccessful()) {
-        Type type = new TypeToken<Response<T>>() {
-          private static final long serialVersionUID = 1L;
-        }.where(new TypeParameter<T>() {}, clazz).getType();
-        Response<String> res = gson.fromJson(respBody, type);
-        if (res.isSuccess()) {
-          return clazz.cast(res.getData());
-        }
-        throw Exceptions.fail(res.getCode(), res.getMessage());
+      JsonElement element = new JsonParser().parse(respBody);
+      JsonObject data = element.getAsJsonObject();
+      if (data.get(Constants.RESP_IS_SUCCESS).getAsBoolean()) {
+        return gson.fromJson(data.get("data"), clazz);
       } else {
-        JsonElement element = new JsonParser().parse(respBody);
-        throw Exceptions.fail("40000", element.getAsJsonObject().get("message").getAsString());
+        throw Exceptions.fail(data.get(Constants.RESP_CODE_FIELD).getAsString(),
+            data.get(Constants.RESP_MESSAGE_FIELD).getAsString());
       }
     } catch (IOException e) {
       throw Exceptions.wrap(e);

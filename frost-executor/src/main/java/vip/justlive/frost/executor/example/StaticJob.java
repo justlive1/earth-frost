@@ -1,11 +1,11 @@
 package vip.justlive.frost.executor.example;
 
 import java.util.Random;
-import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import vip.justlive.frost.core.job.IJob;
+import vip.justlive.frost.core.job.BaseJob;
 import vip.justlive.frost.core.job.Job;
 import vip.justlive.frost.core.job.JobContext;
+import vip.justlive.oxygen.core.ioc.Bean;
 
 /**
  * 统计job
@@ -15,8 +15,8 @@ import vip.justlive.frost.core.job.JobContext;
  */
 @Slf4j
 @Job(value = "staticJob", desc = "统计job")
-@Component
-public class StaticJob implements IJob {
+@Bean
+public class StaticJob extends BaseJob {
 
   Random random = new Random();
 

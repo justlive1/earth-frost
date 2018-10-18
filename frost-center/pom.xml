@@ -15,19 +15,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<frost.support>-redis</frost.support>
 	</properties>
 	<dependencies>
 
 		<dependency>
 			<groupId>vip.justlive</groupId>
-			<artifactId>frost-support${frost.support}</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>vip.justlive</groupId>
-			<artifactId>snow-common-web</artifactId>
+			<artifactId>frost-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -38,6 +31,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
 		<dependency>

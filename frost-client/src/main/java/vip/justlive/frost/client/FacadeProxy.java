@@ -1,8 +1,8 @@
 package vip.justlive.frost.client;
 
 import lombok.Getter;
-import vip.justlive.common.base.support.ConfigFactory;
 import vip.justlive.frost.api.facade.JobApiFacade;
+import vip.justlive.oxygen.core.config.ConfigFactory;
 
 /**
  * 代理类

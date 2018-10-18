@@ -3,17 +3,15 @@ package vip.justlive.frost.core.monitor;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 import vip.justlive.frost.api.model.JobExecuteParam;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.core.notify.Event;
 import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.persistence.JobRepository;
+import vip.justlive.oxygen.core.ioc.BeanStore;
+import vip.justlive.oxygen.core.util.ThreadUtils;
 
 /**
  * 超时监听
@@ -21,22 +19,21 @@ import vip.justlive.frost.core.persistence.JobRepository;
  * @author wubo
  *
  */
-@Component("timeoutMonitorImpl")
 public class TimeoutMonitorImpl implements Monitor {
 
   private static final String MESSAGE_TEMPLATE = "The job [%s(%s)] execution exceeds %s seconds";
 
-  @Autowired
-  JobRepository jobRepository;
+  private final JobRepository jobRepository;
+  private final EventPublisher publisher;
+  private final ScheduledExecutorService executorService;
+  private final Map<String, ScheduledFuture<?>> futureMap;
 
-  @Autowired
-  EventPublisher publisher;
-
-  ScheduledExecutorService executorService =
-      new ScheduledThreadPoolExecutor(10, new BasicThreadFactory.Builder()
-          .namingPattern("timeout-monitor-pool-%d").daemon(true).build());
-
-  Map<String, ScheduledFuture<?>> futureMap = Maps.newConcurrentMap();
+  public TimeoutMonitorImpl() {
+    this.jobRepository = BeanStore.getBean(JobRepository.class);
+    this.publisher = BeanStore.getBean(EventPublisher.class);
+    this.executorService = ThreadUtils.newScheduledExecutor(10, "timeout-monitor");
+    this.futureMap = Maps.newConcurrentMap();
+  }
 
   @Override
   public void watch(JobExecuteParam target) {

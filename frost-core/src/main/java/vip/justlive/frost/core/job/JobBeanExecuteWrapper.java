@@ -1,7 +1,7 @@
 package vip.justlive.frost.core.job;
 
 import vip.justlive.frost.api.model.JobExecuteParam;
-import vip.justlive.frost.core.util.SpringBeansHolder;
+import vip.justlive.frost.core.config.JobConfig;
 
 /**
  * bean模式job包装
@@ -20,13 +20,13 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
   @Override
   public void doRun() {
     this.before();
-    IJob job = getIJob();
+    BaseJob job = getIJob();
     job.execute(new DefaultJobContext(jobInfo, jobExecuteParam));
   }
 
   @Override
-  protected IJob getIJob() {
-    return SpringBeansHolder.getBean(jobExecuteParam.getHandlerId(), IJob.class);
+  protected BaseJob getIJob() {
+    return JobConfig.findJob(jobExecuteParam.getHandlerId());
   }
 
 }

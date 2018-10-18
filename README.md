@@ -35,15 +35,15 @@ earth-frost是一个轻量级分布式任务调度框架。
 - 调度记录增加执行时间
 - 任务超时报警机制
 - 支持分片任务
+- 支持SimpleTrigger任务
+- 支持非spring项目开发执行器
 
 ## 开发
 	
 	frost-api
 		对外实体和接口
 	frost-core
-		定义调度、执行、注册发现、通知等核心功能的接口和抽象
-	frost-support-redis
-		以redis实现调度、执行、注册发现等接口的支持包
+		定义调度、执行、注册发现等核心功能的接口和实现
 	frost-center
 		调度中心服务，包含安全认证和UI展示，依赖core实现调度逻辑
 	frost-executor
@@ -143,7 +143,7 @@ redisson.dnsMonitoringInterval=5000
 ```
 <dependency>
 	<groupId>vip.justlive</groupId>
-	<artifactId>frost-support-redis</artifactId>
+	<artifactId>frost-core</artifactId>
 </dependency>
 ```
 
@@ -252,11 +252,11 @@ cron：触发任务的表达式（cron任务模式）
 #### 1.在执行器项目中开发执行逻辑
 
 ```
-- 实现IJob接口，默认实现了init、destory、exception方法
-- 实现IJob接口execute方法，任务处理的主要逻辑
-- 异常处理（可选）实现IJob接口exception方法，自定义异常处理，返回true时执行全局异常处理逻辑，返回false不执行全局异常处理逻辑
-- 注册到运行容器(Spring容器添加注解或xml配置)
-- 注册到执行器，添加注解@Job(value = "执行逻辑id", desc = "执行逻辑描述")
+- 继承 BaseJob 抽象类，默认实现了init、destory、exception方法
+- 实现 BaseJob 的 execute 方法，任务处理的主要逻辑
+- 异常处理（可选）重写 BaseJob 接口 exception 方法，自定义异常处理，返回true时执行全局异常处理逻辑，返回false不执行全局异常处理逻辑
+- 实例化job（使用new或者ioc容器，推荐使用@vip.justlive.oxygen.core.ioc.Bean实例化）
+- 注册到执行器，添加注解 @Job(value = "执行逻辑id", desc = "执行逻辑描述")
 
 ```
 
@@ -275,9 +275,9 @@ cron：触发任务的表达式（cron任务模式）
 ![添加脚本任务](https://gitee.com/justlive1/earth-frost/raw/master/images/addScriptJob.jpeg)
 
 #### 2.在调度中心，开发任务代码
-点击指定任务的脚本按钮，前往在线编辑任务界面，支持对任务代码进行开发（可在IDE中编辑完毕，复制粘贴到编辑中），支持使用@Resource/@Autowired注入执行器中其他Bean
+点击指定任务的脚本按钮，前往在线编辑任务界面，支持对任务代码进行开发（可在IDE中编辑完毕，复制粘贴到编辑中），支持使用静态工具类获取执行器中其他Bean
 
-注意：分布式执行器使用@Resource/@Autowired要确认是否所有执行器都存在注入的Bean，可配合指定执行器的分组来限定执行脚本任务的执行器
+注意：分布式执行器要获取执行器中的Bean要确认是否所有执行器都存在该Bean，可配合指定执行器的分组来限定执行脚本任务的执行器
 ![修改脚本](https://gitee.com/justlive1/earth-frost/raw/master/images/script.jpeg)
 
 ### 开发分片任务
@@ -287,7 +287,9 @@ cron：触发任务的表达式（cron任务模式）
 分片任务通过将一个任务同时分发给所有执行器(或指定分片数量)，协同进行任务处理，当进行大数据量操作时可显著提高处理速度。
 
 ```
-public class ShardingJob implements IJob {
+@Bean
+@Job(value = "shardingJob", desc = "分片job例子")
+public class ShardingJob extends BaseJob {
 
   @Override
   public void execute(JobContext ctx) {

@@ -25,7 +25,7 @@
 
 		<dependency>
 			<groupId>vip.justlive</groupId>
-			<artifactId>snow-common-base</artifactId>
+			<artifactId>oxygen-core</artifactId>
 		</dependency>
 
 		<dependency>

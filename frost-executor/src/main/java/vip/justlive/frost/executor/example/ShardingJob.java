@@ -1,18 +1,24 @@
 package vip.justlive.frost.executor.example;
 
 import java.util.List;
-import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import vip.justlive.frost.api.model.JobSharding;
-import vip.justlive.frost.core.job.IJob;
+import vip.justlive.frost.core.job.BaseJob;
 import vip.justlive.frost.core.job.Job;
 import vip.justlive.frost.core.job.JobContext;
+import vip.justlive.oxygen.core.ioc.Bean;
 
+/**
+ * 分片job
+ * 
+ * @author wubo
+ *
+ */
 @Slf4j
+@Bean
 @Job(value = "shardingJob", desc = "分片job例子")
-@Component
-public class ShardingJob implements IJob {
+public class ShardingJob extends BaseJob {
 
   @Override
   public void execute(JobContext ctx) {

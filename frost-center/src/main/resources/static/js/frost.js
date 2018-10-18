@@ -129,22 +129,14 @@ function jobsController($rootScope, $scope, $http, $filter, $uibModal, $state) {
 	$scope.defaultScript = 
 `package vip.justlive.frost.executor.example;
  
-import java.util.Random;
-import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
-import vip.justlive.frost.core.job.IJob;
+import vip.justlive.frost.core.job.BaseJob;
 import vip.justlive.frost.core.job.JobContext;
 
- 
-public class DemoScriptJob implements IJob {
- 
- @Autowired
- InjectExampleBean bean;
+public class DemoScriptJob extends BaseJob {
  
  @Override
  public void execute(JobContext ctx) {
    System.out.println(String.format("参数：%s", ctx.getParam()));
-   bean.say();
  }
  
 }`;

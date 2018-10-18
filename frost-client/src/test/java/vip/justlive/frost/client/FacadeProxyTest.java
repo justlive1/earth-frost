@@ -25,7 +25,6 @@ public class FacadeProxyTest {
 
   @org.junit.Test
   public void test() {
-
   }
 
   public void testJob() {
@@ -39,6 +38,7 @@ public class FacadeProxyTest {
     jobInfo.setGroup(group);
     jobInfo.setCron("0 * * * * ?");
     jobInfo.setFailStrategy(JobInfo.STRATEGY.NOTIFY.name());
+    jobInfo.setMode(JobInfo.MODE.CRON.name());
     String id = jobApiFacade.addJob(jobInfo);
 
     Assert.assertNotNull(id);

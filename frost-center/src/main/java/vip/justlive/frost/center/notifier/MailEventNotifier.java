@@ -1,0 +1,150 @@
+package vip.justlive.frost.center.notifier;
+
+import java.util.Arrays;
+import java.util.List;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ParserContext;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import lombok.Data;
+import vip.justlive.frost.api.model.JobInfo;
+import vip.justlive.frost.core.notify.Event;
+import vip.justlive.frost.core.persistence.JobRepository;
+import vip.justlive.oxygen.core.ioc.BeanStore;
+
+/**
+ * 邮件事件通知器
+ * 
+ * @author wubo
+ *
+ */
+/**
+ * 邮件事件通知器
+ * 
+ * @author wubo
+ *
+ */
+public class MailEventNotifier extends AbstractEventNotifier {
+
+  private static final List<String> SUPPORT_EVENTS = Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(),
+      Event.TYPE.EXECUTE_FAIL.name(), Event.TYPE.TIMEOUT_MONITOR.name());
+
+  private final MailSender sender;
+
+  /**
+   * 邮件接收者
+   */
+  private String[] to = {"root@localhost"};
+
+  /**
+   * 邮件抄送
+   */
+  private String[] cc;
+
+  /**
+   * 邮件发送者
+   */
+  private String from = null;
+
+  /**
+   * 邮件文本
+   */
+  private Expression text;
+
+  /**
+   * 邮件主题
+   */
+  private Expression subject;
+
+  public MailEventNotifier(MailSender sender) {
+    this.sender = sender;
+    this.subject = PARSER.parseExpression(DEFAULT_SUBJECT, ParserContext.TEMPLATE_EXPRESSION);
+    this.text = PARSER.parseExpression(DEFAULT_TEXT, ParserContext.TEMPLATE_EXPRESSION);
+  }
+
+  @Override
+  protected boolean shouldNotify(Event event) {
+    return SUPPORT_EVENTS.contains(event.getType());
+  }
+
+  @Override
+  protected void doNotify(Event event) {
+
+    JobInfo jobInfo =
+        BeanStore.getBean(JobRepository.class).findJobInfoById(event.getData().getJobId());
+    if (jobInfo == null) {
+      return;
+    }
+
+    Msg msg = new Msg();
+    msg.event = event;
+    msg.job = jobInfo;
+    EvaluationContext context = new StandardEvaluationContext(msg);
+    SimpleMailMessage message = new SimpleMailMessage();
+
+    String[] mails = jobInfo.getNotifyMails();
+    String[] dest;
+    if (mails != null) {
+      dest = Arrays.copyOf(mails, mails.length + to.length);
+      System.arraycopy(to, 0, dest, mails.length, to.length);
+    } else {
+      dest = to;
+    }
+    message.setTo(dest);
+    message.setFrom(from);
+    message.setSubject(subject.getValue(context, String.class));
+    message.setText(text.getValue(context, String.class));
+    message.setCc(cc);
+
+    sender.send(message);
+  }
+
+  public void setTo(String[] to) {
+    this.to = Arrays.copyOf(to, to.length);
+  }
+
+  public String[] getTo() {
+    return Arrays.copyOf(to, to.length);
+  }
+
+  public void setCc(String[] cc) {
+    this.cc = Arrays.copyOf(cc, cc.length);
+  }
+
+  public String[] getCc() {
+    return Arrays.copyOf(cc, cc.length);
+  }
+
+  public void setFrom(String from) {
+    this.from = from;
+  }
+
+  public String getFrom() {
+    return from;
+  }
+
+  public void setSubject(String subject) {
+    this.subject = PARSER.parseExpression(subject, ParserContext.TEMPLATE_EXPRESSION);
+  }
+
+  public String getSubject() {
+    return subject.getExpressionString();
+  }
+
+  public void setText(String text) {
+    this.text = PARSER.parseExpression(text, ParserContext.TEMPLATE_EXPRESSION);
+  }
+
+  public String getText() {
+    return text.getExpressionString();
+  }
+
+  @Data
+  public static class Msg {
+    private Event event;
+    private JobInfo job;
+  }
+}
+

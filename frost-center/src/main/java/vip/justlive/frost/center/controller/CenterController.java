@@ -1,20 +1,22 @@
 package vip.justlive.frost.center.controller;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import vip.justlive.common.base.domain.Response;
 import vip.justlive.frost.api.model.JobExecuteRecord;
 import vip.justlive.frost.api.model.JobExecutor;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.api.model.JobScript;
-import vip.justlive.frost.api.model.JobStatictis;
 import vip.justlive.frost.api.model.Page;
 import vip.justlive.frost.core.service.JobService;
+import vip.justlive.oxygen.core.domain.Resp;
+import vip.justlive.oxygen.core.exception.CodedException;
+import vip.justlive.oxygen.core.exception.ErrorCode;
+import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 调度中心Controller
@@ -25,8 +27,11 @@ import vip.justlive.frost.core.service.JobService;
 @RestController
 public class CenterController {
 
-  @Autowired
-  JobService jobService;
+  private JobService jobService;
+
+  public CenterController() {
+    jobService = BeanStore.getBean(JobService.class);
+  }
 
   /**
    * 登录页面
@@ -57,9 +62,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryExecutors")
-  public Response<List<JobExecutor>> queryExecutors() {
+  public Resp queryExecutors() {
     List<JobExecutor> list = jobService.queryExecutors();
-    return Response.success(list);
+    return Resp.success(list);
   }
 
   /**
@@ -69,9 +74,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/addJob")
-  public Response<String> addJob(@RequestBody JobInfo jobInfo) {
+  public Resp addJob(@RequestBody JobInfo jobInfo) {
     String jobId = jobService.addJob(jobInfo);
-    return Response.success(jobId);
+    return Resp.success(jobId);
   }
 
   /**
@@ -81,9 +86,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/updateJob")
-  public Response<String> updateJob(@RequestBody JobInfo jobInfo) {
+  public Resp updateJob(@RequestBody JobInfo jobInfo) {
     jobService.updateJob(jobInfo);
-    return Response.success("修改成功");
+    return Resp.success("修改成功");
   }
 
   /**
@@ -93,9 +98,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/pauseJob")
-  public Response<String> pauseJob(String id) {
+  public Resp pauseJob(String id) {
     jobService.pauseJob(id);
-    return Response.success("暂停成功");
+    return Resp.success("暂停成功");
   }
 
   /**
@@ -105,9 +110,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/resumeJob")
-  public Response<String> resumeJob(String id) {
+  public Resp resumeJob(String id) {
     jobService.resumeJob(id);
-    return Response.success("恢复成功");
+    return Resp.success("恢复成功");
   }
 
   /**
@@ -117,9 +122,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/removeJob")
-  public Response<String> removeJob(String id) {
+  public Resp removeJob(String id) {
     jobService.removeJob(id);
-    return Response.success("删除成功");
+    return Resp.success("删除成功");
   }
 
   /**
@@ -129,9 +134,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/triggerJob")
-  public Response<String> triggerJob(String id) {
+  public Resp triggerJob(String id) {
     jobService.triggerJob(id);
-    return Response.success("触发成功");
+    return Resp.success("触发成功");
   }
 
 
@@ -141,10 +146,10 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobInfos")
-  public Response<Page<JobInfo>> queryJobInfos(@RequestParam(defaultValue = "1") int pageIndex,
+  public Resp queryJobInfos(@RequestParam(defaultValue = "1") int pageIndex,
       @RequestParam(defaultValue = "10") int pageSize) {
     Page<JobInfo> jobInfos = jobService.queryJobInfos(pageIndex, pageSize);
-    return Response.success(jobInfos);
+    return Resp.success(jobInfos);
   }
 
   /**
@@ -155,9 +160,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryAllJobs")
-  public Response<List<JobInfo>> queryAllJobs() {
+  public Resp queryAllJobs() {
     List<JobInfo> jobInfos = jobService.queryAllJobs();
-    return Response.success(jobInfos);
+    return Resp.success(jobInfos);
   }
 
   /**
@@ -167,8 +172,8 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/findJobInfoById")
-  public Response<JobInfo> findJobInfoById(String id) {
-    return Response.success(jobService.findJobInfoById(id));
+  public Resp findJobInfoById(String id) {
+    return Resp.success(jobService.findJobInfoById(id));
   }
 
   /**
@@ -182,12 +187,12 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobExecuteRecords")
-  public Response<Page<JobExecuteRecord>> queryJobExecuteRecords(String groupKey, String jobKey,
-      String jobId, @RequestParam(defaultValue = "1") int pageIndex,
+  public Resp queryJobExecuteRecords(String groupKey, String jobKey, String jobId,
+      @RequestParam(defaultValue = "1") int pageIndex,
       @RequestParam(defaultValue = "10") int pageSize) {
     Page<JobExecuteRecord> records =
         jobService.queryJobRecords(groupKey, jobKey, jobId, pageIndex, pageSize);
-    return Response.success(records);
+    return Resp.success(records);
   }
 
   /**
@@ -197,9 +202,9 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/addJobScript")
-  public Response<String> addJobScript(@RequestBody JobScript script) {
+  public Resp addJobScript(@RequestBody JobScript script) {
     jobService.addJobScript(script);
-    return Response.success("操作成功");
+    return Resp.success("操作成功");
   }
 
   /**
@@ -209,8 +214,8 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobScripts")
-  public Response<List<JobScript>> queryJobScripts(String jobId) {
-    return Response.success(jobService.queryJobScripts(jobId));
+  public Resp queryJobScripts(String jobId) {
+    return Resp.success(jobService.queryJobScripts(jobId));
   }
 
   /**
@@ -221,7 +226,16 @@ public class CenterController {
    * @return
    */
   @RequestMapping("/queryJobStatictis")
-  public Response<JobStatictis> queryJobStatictis(String begin, String end) {
-    return Response.success(jobService.queryJobStatictis(begin, end));
+  public Resp queryJobStatictis(String begin, String end) {
+    return Resp.success(jobService.queryJobStatictis(begin, end));
+  }
+
+  @ExceptionHandler({Exception.class})
+  public Resp exception(Exception ex) {
+    if (CodedException.class.isInstance(ex)) {
+      ErrorCode errorCode = ((CodedException) ex).getErrorCode();
+      return Resp.error(errorCode.getCode(), errorCode.getMessage());
+    }
+    return Resp.error(ex.getMessage());
   }
 }

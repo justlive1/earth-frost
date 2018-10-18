@@ -1,10 +1,10 @@
 package vip.justlive.frost.executor.example;
 
-import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import vip.justlive.frost.core.job.IJob;
+import vip.justlive.frost.core.job.BaseJob;
 import vip.justlive.frost.core.job.Job;
 import vip.justlive.frost.core.job.JobContext;
+import vip.justlive.oxygen.core.ioc.Bean;
 
 /**
  * 打印执行参数job例子
@@ -14,8 +14,8 @@ import vip.justlive.frost.core.job.JobContext;
  */
 @Slf4j
 @Job(value = "printParamJob", desc = "打印执行参数job例子")
-@Component
-public class PrintParamJob implements IJob {
+@Bean
+public class PrintParamJob extends BaseJob {
 
   @Override
   public void execute(JobContext ctx) {

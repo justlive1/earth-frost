@@ -1,7 +1,7 @@
 package vip.justlive.frost.client;
 
 import lombok.Data;
-import vip.justlive.common.base.annotation.Value;
+import vip.justlive.oxygen.core.config.Value;
 
 /**
  * client配置
