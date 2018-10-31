@@ -196,7 +196,7 @@ redisson.dnsMonitoringInterval=5000
 ```
 
 #### 3.部署执行器
-使用frost-executor项目开发的执行器直接mvn package即可，集成到现有项目按原有项目打包部署，部署后打开调度中心页面查看执行器页面
+执行 `JobConfig.initExecutor()` 进行初始化执行器，项目打包按照集成项目打包方式即可，部署后打开调度中心页面查看执行器页面
 ![执行器列表](https://gitee.com/justlive1/earth-frost/raw/master/images/executor.jpeg)
 列表中出现部署的执行器则说明部署成功
 
