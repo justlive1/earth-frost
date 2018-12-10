@@ -538,7 +538,7 @@ public class DemoScriptJob extends BaseJob {
 }
 
 
-function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) {
+function logsController($rootScope, $scope, $http, $uibModal, $stateParams, $filter, $sce) {
 	
 	$rootScope.navActive = 2;
 	
@@ -617,6 +617,10 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 		$http.get('queryAllJobs').success(function(data) {
 			if (data.success) {
 				$scope.jobInfos = data.data;
+				$scope.jobMap = {};
+				for(var i in $scope.jobInfos) {
+					$scope.jobMap[$scope.jobInfos[i].id] = $scope.jobInfos[i];
+				}
 			}
 			$scope.jobId = $stateParams.jobId;
 			$scope.search();
@@ -631,6 +635,26 @@ function logsController($rootScope, $scope, $http, $stateParams, $filter, $sce) 
 		}
 	};
 	
+	$scope.removeJobLog = function() {
+		if (!$scope.jobId) {
+			openConfirm($scope, $uibModal, '请选择要删除日志的任务');
+			return;
+		}
+		openConfirm($scope, $uibModal, '确定要删除[' + $scope.jobMap[$scope.jobId].name + ']的日志？', function(){
+			return $http.post('removeJobRecords', {}, {params:{jobId: $scope.jobId}}).then(function(resp){
+				 if (resp.data.success) {
+					 $scope.search();
+				 } else {
+					$scope.modalDatas.error = resp.data.message;
+				 }
+				 return resp;
+			 },
+			 function(req){
+				 $scope.modalDatas.error = req.data.message;
+				 return req;
+			 });
+		});
+	};
 }
 
 function scriptController($scope, $stateParams, $state, $uibModal, $http) {

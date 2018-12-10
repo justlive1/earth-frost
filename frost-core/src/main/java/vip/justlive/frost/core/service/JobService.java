@@ -148,4 +148,11 @@ public interface JobService {
    * @return
    */
   JobStatictis queryJobStatictis(String begin, String end);
+
+  /**
+   * 删除job日志
+   * 
+   * @param jobId
+   */
+  void removeJobRecords(String jobId);
 }

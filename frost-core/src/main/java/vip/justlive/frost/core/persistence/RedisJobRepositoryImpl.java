@@ -2,15 +2,19 @@ package vip.justlive.frost.core.persistence;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.redisson.Redisson;
 import org.redisson.api.RList;
 import org.redisson.api.RListMultimap;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
+import org.redisson.api.RSemaphore;
+import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import com.google.common.collect.Lists;
 import vip.justlive.frost.api.model.JobExecuteRecord;
@@ -35,24 +39,52 @@ import vip.justlive.oxygen.core.util.Checks;
 public class RedisJobRepositoryImpl implements JobRepository {
 
   private final RedissonClient redissonClient;
+  private final RTopic<String> workerTopic;
 
   @Inject
   public RedisJobRepositoryImpl(Redisson redissonClient) {
     this.redissonClient = redissonClient;
+    this.workerTopic = redissonClient.getTopic(
+        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobConfig.JOB_REGIST_PREFIX));
+  }
+
+
+  private void waitFor(String uuid, int subscribers) {
+    RSemaphore semaphore =
+        redissonClient.getSemaphore(String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX,
+            JobExecutor.class.getName(), RSemaphore.class.getSimpleName(), uuid));
+    try {
+      semaphore.tryAcquire(subscribers, 10L, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+    redissonClient.getKeys().delete(semaphore);
   }
 
   @Override
   public int countExecutors() {
-    RMapCache<String, JobExecutor> cache = redissonClient.getMapCache(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobExecutor.class.getName()));
+    String uuid = UUID.randomUUID().toString();
+    int subscribers = (int) workerTopic.publish(uuid);
+    if (subscribers == 0) {
+      return 0;
+    }
+    RMapCache<String, JobExecutor> cache = redissonClient.getMapCache(String
+        .join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobExecutor.class.getName(), uuid));
+    waitFor(uuid, subscribers);
     return cache.size();
   }
 
   @Override
   public List<JobExecutor> queryJobExecutors() {
-    RMapCache<String, JobExecutor> cache = redissonClient.getMapCache(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobExecutor.class.getName()));
-    return new ArrayList<>(cache.values());
+    String uuid = UUID.randomUUID().toString();
+    int subscribers = (int) workerTopic.publish(uuid);
+    if (subscribers == 0) {
+      return Collections.emptyList();
+    }
+    RMapCache<String, JobExecutor> cache = redissonClient.getMapCache(String
+        .join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobExecutor.class.getName(), uuid));
+    waitFor(uuid, subscribers);
+    return new ArrayList<>(cache.readAllValues());
   }
 
   @Override

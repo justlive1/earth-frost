@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import com.google.common.collect.Maps;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import vip.justlive.frost.api.model.JobExecutor;
 import vip.justlive.frost.api.model.JobGroup;
 import vip.justlive.frost.core.job.BaseJob;
@@ -19,12 +20,14 @@ import vip.justlive.oxygen.core.config.ConfigFactory;
 import vip.justlive.oxygen.core.config.ValueConfig;
 import vip.justlive.oxygen.core.exception.Exceptions;
 import vip.justlive.oxygen.core.ioc.BeanStore;
+import vip.justlive.oxygen.core.util.ClassUtils;
 
 /**
  * 执行器配置属性
  * 
  * @author wubo
  */
+@Slf4j
 public class JobConfig {
 
   public static final String SEPERATOR = ":";
@@ -32,13 +35,13 @@ public class JobConfig {
   public static final String EXECUTOR_PREFIX = "frost-executor";
   public static final String JOB_GROUP_PREFIX = "frost-job-group";
   public static final String JOB_SCRIPT_PREFIX = "frost-job-script";
+  public static final String JOB_REGIST_PREFIX = "frost-regist";
   public static final String CENTER_STATISTICS = "center_statistics";
   public static final String CENTER_STATISTICS_DISPATCH = "dispatch";
   public static final String CENTER_STATISTICS_EXECUTE = "execute";
   public static final String CENTER_STATISTICS_RUNNING = "running";
   public static final String CENTER_STATISTICS_SUCCESS = "success";
   public static final String CENTER_STATISTICS_FAIL = "fail";
-  public static final Integer HEARTBEAT = 5;
 
   private static final Map<String, BaseJob> JOBS = Maps.newConcurrentMap();
   private static final List<JobGroup> JOB_GROUPS = new LinkedList<>();
@@ -74,6 +77,15 @@ public class JobConfig {
         jobGroup.setGroupKey(getExecutor().key);
         JOB_GROUPS.add(jobGroup);
       } else {
+        BaseJob exist = JOBS.get(jobAnnotation.value());
+        if (exist == job) {
+          return;
+        }
+        if (ClassUtils.getCglibActualClass(job.getClass()) == ClassUtils
+            .getCglibActualClass(exist.getClass())) {
+          log.warn("There is already a job [{}] and the job [{}] will be ignored.", exist, job);
+          return;
+        }
         throw Exceptions.fail("30000", String.format("job [%s] 已存在", jobAnnotation.value()));
       }
     }

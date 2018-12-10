@@ -271,6 +271,11 @@ public class RedisJobServiceImpl implements JobService {
     return statictis;
   }
 
+  @Override
+  public void removeJobRecords(String jobId) {
+    BeanStore.getBean(JobRepository.class).removeJobRecords(jobId);
+  }
+
   private List<String> queryStatictisDays(String begin, String end) {
     List<String> statictisDays = Lists.newArrayList();
 

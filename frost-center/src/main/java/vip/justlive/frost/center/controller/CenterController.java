@@ -230,6 +230,18 @@ public class CenterController {
     return Resp.success(jobService.queryJobStatictis(begin, end));
   }
 
+  /**
+   * 删除日志
+   * 
+   * @param jobId
+   * @return
+   */
+  @RequestMapping("/removeJobRecords")
+  public Resp removeJobRecords(@RequestParam String jobId) {
+    jobService.removeJobRecords(jobId);
+    return Resp.success("删除成功");
+  }
+
   @ExceptionHandler({Exception.class})
   public Resp exception(Exception ex) {
     if (CodedException.class.isInstance(ex)) {

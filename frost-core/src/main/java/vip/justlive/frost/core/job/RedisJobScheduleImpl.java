@@ -1,21 +1,17 @@
 package vip.justlive.frost.core.job;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.CronSchedule;
 import org.redisson.api.RList;
 import org.redisson.api.RListMultimap;
 import org.redisson.api.RScheduledExecutorService;
 import org.redisson.api.RScheduledFuture;
-import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
-import lombok.extern.slf4j.Slf4j;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.core.config.JobConfig;
 import vip.justlive.frost.core.config.SystemProperties;
 import vip.justlive.frost.core.persistence.JobRepository;
-import vip.justlive.frost.core.registry.HeartBeat;
 import vip.justlive.oxygen.core.config.ConfigFactory;
 import vip.justlive.oxygen.core.exception.Exceptions;
 import vip.justlive.oxygen.core.ioc.BeanStore;
@@ -27,10 +23,7 @@ import vip.justlive.oxygen.core.util.ThreadUtils;
  * @author wubo
  *
  */
-@Slf4j
 public class RedisJobScheduleImpl implements JobSchedule {
-
-  private final ExecutorService executorService;
 
   private RedissonClient getRedissonClient() {
     return BeanStore.getBean(RedissonClient.class);
@@ -38,24 +31,10 @@ public class RedisJobScheduleImpl implements JobSchedule {
 
   public RedisJobScheduleImpl() {
     SystemProperties props = ConfigFactory.load(SystemProperties.class);
-    executorService = ThreadUtils.newThreadPool(props.getCorePoolSize(), props.getMaximumPoolSize(),
-        props.getKeepAliveTime(), props.getQueueCapacity(), "redisson-executor-pool-%d");
-    init();
-  }
-
-  private void init() {
-    // 心跳
-    RTopic<HeartBeat> topic = getRedissonClient().getTopic(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, HeartBeat.class.getName()));
-    topic.addListener((channel, msg) -> {
-      if (log.isDebugEnabled()) {
-        log.debug("heartBeat: {}", msg);
-      }
-    });
-
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
-    service.registerWorkers(JobConfig.getParallel(), executorService);
+    getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX).registerWorkers(
+        JobConfig.getParallel(),
+        ThreadUtils.newThreadPool(props.getCorePoolSize(), props.getMaximumPoolSize(),
+            props.getKeepAliveTime(), props.getQueueCapacity(), "redisson-executor-pool-%d"));
   }
 
   @Override
