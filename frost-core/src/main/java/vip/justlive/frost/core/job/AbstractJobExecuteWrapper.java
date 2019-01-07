@@ -4,6 +4,9 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
+import org.redisson.api.RScript.Mode;
+import org.redisson.api.RScript.ReturnType;
+import org.redisson.api.RedissonClient;
 import vip.justlive.frost.api.model.JobExecuteParam;
 import vip.justlive.frost.api.model.JobExecuteRecord;
 import vip.justlive.frost.api.model.JobInfo;
@@ -15,6 +18,7 @@ import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.persistence.JobRepository;
 import vip.justlive.frost.core.util.IpUtils;
 import vip.justlive.oxygen.core.exception.CodedException;
+import vip.justlive.oxygen.core.exception.Exceptions;
 import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
@@ -55,6 +59,12 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
     Monitor monitor = BeanStore.getBean(Monitor.class);
     monitor.watch(jobExecuteParam);
+
+    long time = time();
+    long misfireThreshold = JobConfig.getExecutor().getMisfireThreshold();
+    if (time - jobExecuteParam.getExecuteAt() > misfireThreshold) {
+      throw Exceptions.fail("40000", String.format("任务错过执行，且超过阈值[%s]", misfireThreshold));
+    }
   }
 
   @Override
@@ -129,6 +139,16 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
    * @return
    */
   protected abstract BaseJob getIJob();
+
+  /**
+   * 获取当前时间
+   * 
+   * @return time
+   */
+  protected long time() {
+    return BeanStore.getBean(RedissonClient.class).getScript().eval(Mode.READ_ONLY,
+        "return redis.call('TIME')[1]*1000", ReturnType.INTEGER);
+  }
 
   private String address() {
     String address = JobConfig.getExecutor().getIp();

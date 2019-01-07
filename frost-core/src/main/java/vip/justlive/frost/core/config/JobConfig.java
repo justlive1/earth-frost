@@ -164,6 +164,11 @@ public class JobConfig {
      * 是否开启脚本任务执行
      */
     private Boolean scriptJobEnabled = true;
+
+    /**
+     * 错过执行的阈值(毫秒)
+     */
+    private Long misfireThreshold = 5000L;
   }
 
 }

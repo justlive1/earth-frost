@@ -52,4 +52,8 @@ public class JobExecuteParam {
    */
   private JobSharding sharding;
 
+  /**
+   * 执行时间点
+   */
+  private long executeAt;
 }

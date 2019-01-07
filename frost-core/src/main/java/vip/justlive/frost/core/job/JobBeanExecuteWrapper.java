@@ -15,6 +15,7 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
 
   public JobBeanExecuteWrapper(JobExecuteParam jobExecuteParam) {
     this.jobExecuteParam = jobExecuteParam;
+    this.jobExecuteParam.setExecuteAt(time());
   }
 
   @Override

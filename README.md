@@ -37,6 +37,7 @@ earth-frost是一个轻量级分布式任务调度框架。
 - 支持分片任务
 - 支持SimpleTrigger任务
 - 支持非spring项目开发执行器
+- misfire
 
 ## 开发
 	
@@ -161,6 +162,8 @@ frost.job.executor.ip=
 frost.job.executor.port=${server.port}
 # 是否支持执行脚本任务
 frost.job.executor.scriptJobEnabled=true
+# 错过执行的阈值(毫秒)
+frost.job.executor.misfireThreshold=5000
 
 # redis配置
 # 0:单机模式， 1：集群模式，2：云托管模式，3：哨兵模式，4：主从模式

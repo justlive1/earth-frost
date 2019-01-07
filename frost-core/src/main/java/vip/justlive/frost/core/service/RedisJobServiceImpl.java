@@ -51,7 +51,8 @@ public class RedisJobServiceImpl implements JobService {
     }
     if (jobInfo.isAuto()) {
       jobInfo.setStatus(JobInfo.STATUS.NORMAL.name());
-    } else {
+    }
+    if (jobInfo.getStatus() == null || jobInfo.getStatus().length() == 0) {
       jobInfo.setStatus(JobInfo.STATUS.PAUSED.name());
     }
     BeanStore.getBean(JobRepository.class).addJob(jobInfo);
