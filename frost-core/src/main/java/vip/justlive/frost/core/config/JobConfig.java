@@ -48,6 +48,7 @@ public class JobConfig {
   public static final String RECORD_STATUS = "frost:record:status";
 
   public static final String EVENT = "frost:event";
+  public static final String EVENT_SHARDING = "frost:event:sharding:%s:%s";
 
   public static final String LOG_BIND = "frost:logger:bind";
   public static final String LOG_REL = "frost:logger:rel";
@@ -185,7 +186,12 @@ public class JobConfig {
     /**
      * 错过执行的阈值(毫秒)
      */
-    private Long misfireThreshold = 5000L;
+    private long misfireThreshold = 5000L;
+
+    /**
+     * 最大日志数
+     */
+    private long maxLogSize = -1;
   }
 
 }

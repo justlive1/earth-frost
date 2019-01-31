@@ -283,6 +283,7 @@ public class RedisJobRepositoryImpl implements JobRepository {
       }
       statusMultimap.removeAll(key);
       map.remove(key);
+      redissonClient.getKeys().delete(String.format(JobConfig.EVENT_SHARDING, jobId, key));
     }
   }
 

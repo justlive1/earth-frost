@@ -4,10 +4,19 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.redisson.Redisson;
+import org.redisson.api.RList;
+import org.redisson.api.RListMultimap;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+import vip.justlive.frost.api.model.JobExecuteRecord;
+import vip.justlive.frost.api.model.JobGroup;
+import vip.justlive.frost.api.model.JobInfo;
+import vip.justlive.frost.api.model.JobRecordStatus;
 import vip.justlive.frost.core.config.JobConfig;
+import vip.justlive.frost.core.persistence.JobRepository;
+import vip.justlive.oxygen.core.constant.Constants;
 import vip.justlive.oxygen.core.ioc.Bean;
+import vip.justlive.oxygen.core.ioc.BeanStore;
 import vip.justlive.oxygen.core.ioc.Inject;
 
 /**
@@ -42,6 +51,54 @@ public class RedisJobLoggerImpl implements JobLogger {
     }
   }
 
+  private void removeOldestLogger(String loggerId) {
+    long maxLogSize = JobConfig.getExecutor().getMaxLogSize();
+    if (maxLogSize < 0) {
+      return;
+    }
+
+    RMap<String, String> logMap = redissonClient.getMap(JobConfig.LOG_BIND);
+    String jobId = logMap.get(loggerId);
+    if (jobId == null) {
+      return;
+    }
+
+    RListMultimap<String, String> sortmap = redissonClient.getListMultimap(JobConfig.RECORD_SORT);
+    RList<String> list = sortmap.get(jobId);
+    long size = list.size() - maxLogSize;
+    if (size <= 0) {
+      return;
+    }
+
+    JobInfo job = BeanStore.getBean(JobRepository.class).findJobInfoById(jobId);
+    if (job == null) {
+      return;
+    }
+
+    RListMultimap<String, JobRecordStatus> statusMultimap = redissonClient
+        .getListMultimap(JobConfig.RECORD_STATUS);
+    RMap<String, JobExecuteRecord> map = redissonClient.getMap(JobConfig.RECORD);
+    RList<String> logIds = redissonClient.<String, String>getListMultimap(JobConfig.LOG_REL)
+        .get(jobId);
+
+    JobGroup group = job.getGroup();
+    for (String key : list.subList(0, (int) size).readAll()) {
+      sortmap.get(Constants.EMPTY).remove(key);
+      if (group != null) {
+        sortmap.get(group.getGroupKey()).remove(key);
+        sortmap.get(String.join(Constants.COLON, group.getGroupKey(), group.getJobKey()))
+            .remove(key);
+      }
+      statusMultimap.removeAll(key);
+      list.remove(key);
+      map.remove(key);
+      logMap.remove(key);
+      logIds.remove(key);
+      redissonClient.getKeys().delete(String.format(JobConfig.EVENT_SHARDING, jobId, loggerId));
+    }
+
+  }
+
   @Override
   public void enter(String loggerId, String type) {
     // 运行中 ++
@@ -53,7 +110,7 @@ public class RedisJobLoggerImpl implements JobLogger {
   public void leave(String loggerId, String type, boolean success) {
     // 运行中 --
     redissonClient.getAtomicLong(JobConfig.STAT_TOTAL_RUNNING).decrementAndGet();
-// 每日统计
+    // 每日统计
     String date = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now());
     String key;
     if (success) {
@@ -62,5 +119,7 @@ public class RedisJobLoggerImpl implements JobLogger {
       key = String.format(JobConfig.STAT_DATE_TYPE_FAIL, date, type);
     }
     redissonClient.getAtomicLong(key).incrementAndGet();
+
+    removeOldestLogger(loggerId);
   }
 }
