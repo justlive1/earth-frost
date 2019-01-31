@@ -8,7 +8,7 @@
 	<packaging>pom</packaging>
 	<name>frost</name>
 	<url>https://gitee.com/justlive1/earth-frost</url>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

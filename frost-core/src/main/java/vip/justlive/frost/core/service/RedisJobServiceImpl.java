@@ -1,5 +1,6 @@
 package vip.justlive.frost.core.service;
 
+import com.google.common.collect.Lists;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import org.redisson.api.RedissonClient;
 import org.redisson.executor.CronExpression;
-import com.google.common.collect.Lists;
 import vip.justlive.frost.api.model.JobExecuteRecord;
 import vip.justlive.frost.api.model.JobExecutor;
 import vip.justlive.frost.api.model.JobInfo;
@@ -25,9 +25,8 @@ import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * redis调度服务实现类
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Bean
 public class RedisJobServiceImpl implements JobService {
@@ -222,51 +221,27 @@ public class RedisJobServiceImpl implements JobService {
     JobStatictis statictis = new JobStatictis();
     statictis.setTotalJobs((long) this.countJobInfos());
     statictis.setTotalExecutors((long) this.countExecutors());
-    statictis
-        .setTotalDispatches(BeanStore.getBean(RedissonClient.class)
-            .getAtomicLong(String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX,
-                JobConfig.CENTER_STATISTICS, JobConfig.CENTER_STATISTICS_DISPATCH,
-                JobConfig.CENTER_STATISTICS_RUNNING))
-            .get());
-    statictis
-        .setTotalRunningExecutions(BeanStore.getBean(RedissonClient.class)
-            .getAtomicLong(String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX,
-                JobConfig.CENTER_STATISTICS, JobConfig.CENTER_STATISTICS_EXECUTE,
-                JobConfig.CENTER_STATISTICS_RUNNING))
-            .get());
-
+    statictis.setTotalDispatches(BeanStore.getBean(RedissonClient.class)
+        .getAtomicLong(String.format(JobConfig.STAT_TOTAL_TYPE, JobConfig.STAT_TYPE_DISPATCH))
+        .get());
+    statictis.setTotalRunningExecutions(
+        BeanStore.getBean(RedissonClient.class).getAtomicLong(JobConfig.STAT_TOTAL_RUNNING).get());
     List<String> statictisDays = queryStatictisDays(begin, end);
     statictis.setStatictisDays(statictisDays);
-
     statictis.setFailDispatches(Lists.newArrayList());
     statictis.setSuccessDispatches(Lists.newArrayList());
     statictis.setFailExecutions(Lists.newArrayList());
     statictis.setSuccessExecutions(Lists.newArrayList());
     for (String day : statictisDays) {
-      statictis.getSuccessDispatches()
-          .add(BeanStore.getBean(RedissonClient.class)
-              .getAtomicLong(String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX,
-                  JobConfig.CENTER_STATISTICS, JobConfig.CENTER_STATISTICS_DISPATCH,
-                  JobConfig.CENTER_STATISTICS_SUCCESS, day))
-              .get());
-      statictis.getFailDispatches()
-          .add(BeanStore.getBean(RedissonClient.class)
-              .getAtomicLong(String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX,
-                  JobConfig.CENTER_STATISTICS, JobConfig.CENTER_STATISTICS_DISPATCH,
-                  JobConfig.CENTER_STATISTICS_FAIL, day))
-              .get());
-      statictis.getSuccessExecutions()
-          .add(BeanStore.getBean(RedissonClient.class)
-              .getAtomicLong(String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX,
-                  JobConfig.CENTER_STATISTICS, JobConfig.CENTER_STATISTICS_EXECUTE,
-                  JobConfig.CENTER_STATISTICS_SUCCESS, day))
-              .get());
-      statictis.getFailExecutions()
-          .add(BeanStore.getBean(RedissonClient.class)
-              .getAtomicLong(String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX,
-                  JobConfig.CENTER_STATISTICS, JobConfig.CENTER_STATISTICS_EXECUTE,
-                  JobConfig.CENTER_STATISTICS_FAIL, day))
-              .get());
+      statictis.getSuccessDispatches().add(BeanStore.getBean(RedissonClient.class).getAtomicLong(
+          String.format(JobConfig.STAT_DATE_TYPE_SUCCESS, day, JobConfig.STAT_TYPE_DISPATCH))
+          .get());
+      statictis.getFailDispatches().add(BeanStore.getBean(RedissonClient.class).getAtomicLong(
+          String.format(JobConfig.STAT_DATE_TYPE_FAIL, day, JobConfig.STAT_TYPE_DISPATCH)).get());
+      statictis.getSuccessExecutions().add(BeanStore.getBean(RedissonClient.class).getAtomicLong(
+          String.format(JobConfig.STAT_DATE_TYPE_SUCCESS, day, JobConfig.STAT_TYPE_EXECUTE)).get());
+      statictis.getFailExecutions().add(BeanStore.getBean(RedissonClient.class).getAtomicLong(
+          String.format(JobConfig.STAT_DATE_TYPE_FAIL, day, JobConfig.STAT_TYPE_EXECUTE)).get());
     }
 
     return statictis;

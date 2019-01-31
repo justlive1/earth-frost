@@ -26,9 +26,8 @@ import vip.justlive.oxygen.core.util.Checks;
 
 /**
  * job分发包装
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -77,7 +76,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     } else {
       failRetry = true;
     }
-    jobLogger.enter(loggerId, JobConfig.CENTER_STATISTICS_DISPATCH);
+    jobLogger.enter(loggerId, JobConfig.STAT_TYPE_DISPATCH);
     jobRecordStatus = this.recordStatus(loggerId);
     jobRecordStatus.setTime(time);
     if (failRetry) {
@@ -89,15 +88,13 @@ public class JobDispatchWrapper extends AbstractWrapper {
     String key;
     if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), jobInfo.getType())) {
       if (jobInfo.getGroup() != null && jobInfo.getGroup().getGroupKey() != null) {
-        key = String.join(JobConfig.SEPERATOR, JobConfig.JOB_SCRIPT_PREFIX,
-            jobInfo.getGroup().getGroupKey());
+        key = String.format(JobConfig.JOB_SCRIPT_CHANNEL, jobInfo.getGroup().getGroupKey());
       } else {
-        key = JobConfig.JOB_SCRIPT_PREFIX;
+        key = String.format(JobConfig.JOB_SCRIPT_CHANNEL, "");
       }
     } else {
       JobGroup jobGroup = Checks.notNull(Checks.notNull(jobInfo).getGroup());
-      key = String.join(JobConfig.SEPERATOR, JobConfig.JOB_GROUP_PREFIX, jobGroup.getGroupKey(),
-          jobGroup.getJobKey());
+      key = String.format(JobConfig.JOB_BEAN_CHANNEL, jobGroup.getGroupKey(), jobGroup.getJobKey());
       param.setHandlerId(jobInfo.getGroup().getJobKey());
     }
     param.setTopicKey(key);
@@ -113,7 +110,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     }
   }
 
-  void handleSharding(Dispatcher dispatcher) {
+  private void handleSharding(Dispatcher dispatcher) {
     Integer total = jobInfo.getSharding();
     if (total == null) {
       total = dispatcher.count(param);
@@ -176,6 +173,6 @@ public class JobDispatchWrapper extends AbstractWrapper {
       jobRepository.addJobRecordStatus(status);
     }
     JobLogger jobLogger = BeanStore.getBean(JobLogger.class);
-    jobLogger.leave(loggerId, JobConfig.CENTER_STATISTICS_DISPATCH, success);
+    jobLogger.leave(loggerId, JobConfig.STAT_TYPE_DISPATCH, success);
   }
 }

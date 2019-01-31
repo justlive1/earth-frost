@@ -1,9 +1,9 @@
 package vip.justlive.frost.core.registry;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.redisson.api.RSemaphore;
-import org.redisson.api.RedissonClient;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import vip.justlive.frost.api.model.JobExecutor;
 import vip.justlive.frost.api.model.JobGroup;
 import vip.justlive.frost.core.config.JobConfig;
@@ -11,9 +11,8 @@ import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * redis注册实现类
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Slf4j
 public class RedisRegistry implements Registry {
@@ -29,39 +28,38 @@ public class RedisRegistry implements Registry {
   @Override
   public void register() {
 
+    List<JobGroup> jobGroups = jobExecutor.getGroups();
+    if (jobGroups == null || jobGroups.isEmpty()) {
+      log.info("no jobs need to register");
+      return;
+    }
     // 注册job执行器
-    for (JobGroup jobGroup : jobExecutor.getGroups()) {
-      String key = String.join(JobConfig.SEPERATOR, JobConfig.JOB_GROUP_PREFIX,
-          jobGroup.getGroupKey(), jobGroup.getJobKey());
+    for (JobGroup jobGroup : jobGroups) {
+      String key = String
+          .format(JobConfig.JOB_BEAN_CHANNEL, jobGroup.getGroupKey(), jobGroup.getJobKey());
       log.info("register job [{}]", key);
       redissonClient.getExecutorService(key).registerWorkers(JobConfig.getParallel());
     }
 
     // script执行器
     if (JobConfig.getExecutor().getScriptJobEnabled()) {
-      redissonClient.getExecutorService(JobConfig.JOB_SCRIPT_PREFIX)
+      redissonClient.getExecutorService(String.format(JobConfig.JOB_SCRIPT_CHANNEL, ""))
           .registerWorkers(JobConfig.getParallel());
       redissonClient
-          .getExecutorService(
-              String.join(JobConfig.SEPERATOR, JobConfig.JOB_SCRIPT_PREFIX, jobExecutor.getKey()))
+          .getExecutorService(String.format(JobConfig.JOB_SCRIPT_CHANNEL, jobExecutor.getKey()))
           .registerWorkers(JobConfig.getParallel());
     }
 
     // 订阅worker
-    redissonClient.<String>getTopic(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobConfig.JOB_REGIST_PREFIX))
-        .addListener((channel, uuid) -> {
-          redissonClient
-              .getMapCache(String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX,
-                  JobExecutor.class.getName(), uuid))
-              .put(jobExecutor.getId(), jobExecutor, 20, TimeUnit.SECONDS);
-
-          redissonClient.getSemaphore(String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX,
-              JobExecutor.class.getName(), RSemaphore.class.getSimpleName(), uuid)).release();
-        });
+    redissonClient.<String>getTopic(JobConfig.WORKER_REGISTER).addListener((channel, uuid) -> {
+      redissonClient.getMapCache(String.format(JobConfig.WORKER_REQ_VAL, uuid))
+          .put(jobExecutor.getId(), jobExecutor, 20, TimeUnit.SECONDS);
+      redissonClient.getSemaphore(String.format(JobConfig.WORKER_REQ, uuid)).release();
+    });
   }
 
   @Override
-  public void unregister() {}
+  public void unregister() {
+  }
 
 }

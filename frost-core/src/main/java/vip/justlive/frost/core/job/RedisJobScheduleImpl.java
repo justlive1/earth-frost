@@ -1,12 +1,11 @@
 package vip.justlive.frost.core.job;
 
 import java.time.ZonedDateTime;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.CronSchedule;
-import org.redisson.api.RList;
 import org.redisson.api.RListMultimap;
 import org.redisson.api.RScheduledExecutorService;
-import org.redisson.api.RScheduledFuture;
 import org.redisson.api.RedissonClient;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.core.config.JobConfig;
@@ -19,9 +18,8 @@ import vip.justlive.oxygen.core.util.ThreadUtils;
 
 /**
  * redis任务定时实现
- * 
- * @author wubo
  *
+ * @author wubo
  */
 public class RedisJobScheduleImpl implements JobSchedule {
 
@@ -31,10 +29,10 @@ public class RedisJobScheduleImpl implements JobSchedule {
 
   public RedisJobScheduleImpl() {
     SystemProperties props = ConfigFactory.load(SystemProperties.class);
-    getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX).registerWorkers(
-        JobConfig.getParallel(),
-        ThreadUtils.newThreadPool(props.getCorePoolSize(), props.getMaximumPoolSize(),
-            props.getKeepAliveTime(), props.getQueueCapacity(), "redisson-executor-pool-%d"));
+    getRedissonClient().getExecutorService(JobConfig.WORKER)
+        .registerWorkers(JobConfig.getParallel(), ThreadUtils
+            .newThreadPool(props.getCorePoolSize(), props.getMaximumPoolSize(),
+                props.getKeepAliveTime(), props.getQueueCapacity(), "redisson-executor-pool-%d"));
   }
 
   @Override
@@ -54,87 +52,60 @@ public class RedisJobScheduleImpl implements JobSchedule {
 
   @Override
   public String addSimpleJob(String jobId, long timestamp) {
-
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
-    long delay = timestamp - ZonedDateTime.now().toInstant().toEpochMilli();
-    RScheduledFuture<?> future =
-        service.scheduleAsync(new JobDispatchWrapper(jobId), delay, TimeUnit.MILLISECONDS);
-
-    String taskId = future.getTaskId();
-    RListMultimap<String, String> listmap = getRedissonClient().getListMultimap(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobSchedule.class.getName()));
-    listmap.put(jobId, taskId);
-
+    String taskId = getRedissonClient().getExecutorService(JobConfig.WORKER)
+        .scheduleAsync(new JobDispatchWrapper(jobId),
+            timestamp - ZonedDateTime.now().toInstant().toEpochMilli(), TimeUnit.MILLISECONDS)
+        .getTaskId();
+    getRedissonClient().<String, String>getListMultimap(JobConfig.TASK_ID).put(jobId, taskId);
     return taskId;
   }
 
   @Override
   public String addDelayJob(String jobId, long initDelay, long delay) {
-
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
-
-    RScheduledFuture<?> future = service.scheduleAtFixedRateAsync(new JobDispatchWrapper(jobId),
-        initDelay, delay, TimeUnit.SECONDS);
-
-    String taskId = future.getTaskId();
-    RListMultimap<String, String> listmap = getRedissonClient().getListMultimap(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobSchedule.class.getName()));
-    listmap.put(jobId, taskId);
-
+    String taskId = getRedissonClient().getExecutorService(JobConfig.WORKER)
+        .scheduleAtFixedRateAsync(new JobDispatchWrapper(jobId), initDelay, delay, TimeUnit.SECONDS)
+        .getTaskId();
+    getRedissonClient().<String, String>getListMultimap(JobConfig.TASK_ID).put(jobId, taskId);
     return taskId;
   }
 
   @Override
   public String addCronJob(String jobId, String cron) {
-
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
-    RScheduledFuture<?> future =
-        service.scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron));
-
-    String taskId = future.getTaskId();
-    RListMultimap<String, String> listmap = getRedissonClient().getListMultimap(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobSchedule.class.getName()));
-    listmap.put(jobId, taskId);
-
+    String taskId = getRedissonClient().getExecutorService(JobConfig.WORKER)
+        .scheduleAsync(new JobDispatchWrapper(jobId), CronSchedule.of(cron)).getTaskId();
+    getRedissonClient().<String, String>getListMultimap(
+        JobConfig.TASK_ID).put(jobId, taskId);
     return taskId;
   }
 
   @Override
   public String refreshJob(String jobId, String cron) {
-
     this.pauseJob(jobId);
     return this.addCronJob(jobId, cron);
   }
 
   @Override
   public String refreshJob(String jobId, Long timestamp) {
-
     this.pauseJob(jobId);
     return this.addSimpleJob(jobId, timestamp);
   }
 
   @Override
   public String refreshJob(String jobId, Long initDelay, Long delay) {
-
     this.pauseJob(jobId);
     return this.addDelayJob(jobId, initDelay, delay);
   }
 
   @Override
   public void pauseJob(String jobId) {
-
-    RListMultimap<String, String> listmap = getRedissonClient().getListMultimap(
-        String.join(JobConfig.SEPERATOR, JobConfig.EXECUTOR_PREFIX, JobSchedule.class.getName()));
-    RList<String> list = listmap.get(jobId);
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
-    for (String id : list) {
+    RListMultimap<String, String> listmap = getRedissonClient().getListMultimap(JobConfig.TASK_ID);
+    RScheduledExecutorService service = getRedissonClient().getExecutorService(JobConfig.WORKER);
+    Iterator<String> it = listmap.get(jobId).iterator();
+    while (it.hasNext()) {
+      String id = it.next();
       service.cancelTask(id);
+      it.remove();
     }
-    listmap.removeAll(jobId);
   }
 
   @Override
@@ -145,35 +116,26 @@ public class RedisJobScheduleImpl implements JobSchedule {
 
   @Override
   public void removeJob(String jobId) {
-
     this.pauseJob(jobId);
   }
 
   @Override
   public void triggerJob(String jobId) {
-
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
-    service.submit(new JobDispatchWrapper(jobId));
+    getRedissonClient().getExecutorService(JobConfig.WORKER).submit(new JobDispatchWrapper(jobId));
   }
 
   @Override
   public void retryJob(String jobId, String loggerId, String parentLoggerId) {
-
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
     JobDispatchWrapper wrapper = new JobDispatchWrapper(jobId, loggerId);
     wrapper.setParentLoggerId(parentLoggerId);
-    service.submit(wrapper);
+    getRedissonClient().getExecutorService(JobConfig.WORKER).submit(wrapper);
   }
 
   @Override
   public void triggerChildJob(String jobId, String loggerId) {
-    RScheduledExecutorService service =
-        getRedissonClient().getExecutorService(JobConfig.CENTER_PREFIX);
     JobDispatchWrapper wrapper = new JobDispatchWrapper(jobId);
     wrapper.setParentLoggerId(loggerId);
-    service.submit(wrapper);
+    getRedissonClient().getExecutorService(JobConfig.WORKER).submit(wrapper);
   }
 
   private JobInfo getJobInfo(String jobId) {

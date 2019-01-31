@@ -2,7 +2,6 @@ package vip.justlive.frost.center.config;
 
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import org.redisson.api.RScheduledExecutorService;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -18,11 +17,9 @@ import vip.justlive.frost.center.notifier.MailEventNotifier;
 import vip.justlive.frost.center.notifier.RetryEventNotifier;
 import vip.justlive.frost.core.config.JobConfig;
 import vip.justlive.frost.core.config.SystemProperties;
-import vip.justlive.frost.core.dispacher.Dispatcher;
 import vip.justlive.frost.core.dispacher.RedisDispatcher;
 import vip.justlive.frost.core.job.RedisJobScheduleImpl;
 import vip.justlive.frost.core.notify.EventListener;
-import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.notify.Notifier;
 import vip.justlive.frost.core.persistence.JobRepository;
 import vip.justlive.oxygen.core.Bootstrap;
@@ -31,9 +28,8 @@ import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 通知配置
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Configuration
 public class CenterConfig {
@@ -81,12 +77,10 @@ public class CenterConfig {
     // schedule
     BeanStore.putBean(RedisJobScheduleImpl.class.getName(), new RedisJobScheduleImpl());
     // dispatcher
-    Dispatcher dispatcher = new RedisDispatcher(redissonClient, jobRepository);
-    BeanStore.putBean(RedisDispatcher.class.getName(), dispatcher);
-    RScheduledExecutorService executor = redissonClient.getExecutorService(
-        String.join(JobConfig.SEPERATOR, JobConfig.CENTER_PREFIX, EventPublisher.class.getName()));
-    executor.registerWorkers(ConfigFactory.load(SystemProperties.class).getWorkers());
-    EventListener listener = new EventListener(notifier);
-    BeanStore.putBean(EventListener.class.getName(), listener);
+    BeanStore.putBean(RedisDispatcher.class.getName(),
+        new RedisDispatcher(redissonClient, jobRepository));
+    redissonClient.getExecutorService(JobConfig.EVENT)
+        .registerWorkers(ConfigFactory.load(SystemProperties.class).getWorkers());
+    BeanStore.putBean(EventListener.class.getName(), new EventListener(notifier));
   }
 }

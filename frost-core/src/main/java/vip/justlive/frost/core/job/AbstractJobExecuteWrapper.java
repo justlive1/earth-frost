@@ -23,9 +23,8 @@ import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 执行job抽象
- * 
- * @author wubo
  *
+ * @author wubo
  */
 public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
 
@@ -44,7 +43,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     publisher.publish(
         new Event(jobExecuteParam, Event.TYPE.EXECUTE_ENTER.name(), null, instant.toEpochMilli()));
     JobLogger jobLogger = BeanStore.getBean(JobLogger.class);
-    jobLogger.enter(jobExecuteParam.getLoggerId(), JobConfig.CENTER_STATISTICS_EXECUTE);
+    jobLogger.enter(jobExecuteParam.getLoggerId(), JobConfig.STAT_TYPE_EXECUTE);
     JobRepository jobRepository = BeanStore.getBean(JobRepository.class);
     jobInfo = jobRepository.findJobInfoById(jobExecuteParam.getJobId());
     jobRecordStatus = new JobRecordStatus();
@@ -130,19 +129,19 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     Monitor monitor = BeanStore.getBean(Monitor.class);
     monitor.unWatch(jobExecuteParam);
     JobLogger jobLogger = BeanStore.getBean(JobLogger.class);
-    jobLogger.leave(jobExecuteParam.getLoggerId(), JobConfig.CENTER_STATISTICS_EXECUTE, success);
+    jobLogger.leave(jobExecuteParam.getLoggerId(), JobConfig.STAT_TYPE_EXECUTE, success);
   }
 
   /**
    * 获取任务处理逻辑
-   * 
+   *
    * @return
    */
   protected abstract BaseJob getIJob();
 
   /**
    * 获取当前时间
-   * 
+   *
    * @return time
    */
   protected long time() {

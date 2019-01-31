@@ -1,6 +1,7 @@
 package vip.justlive.frost.center.controller;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +21,10 @@ import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 调度中心Controller
- * 
- * @author wubo
  *
+ * @author wubo
  */
+@Slf4j
 @RestController
 public class CenterController {
 
@@ -35,7 +36,7 @@ public class CenterController {
 
   /**
    * 登录页面
-   * 
+   *
    * @return
    */
   @RequestMapping("/login.html")
@@ -46,7 +47,7 @@ public class CenterController {
 
   /**
    * 首页
-   * 
+   *
    * @return
    */
   @RequestMapping({"/", "index.html"})
@@ -58,7 +59,7 @@ public class CenterController {
 
   /**
    * 获取当前执行器列表
-   * 
+   *
    * @return
    */
   @RequestMapping("/queryExecutors")
@@ -69,7 +70,7 @@ public class CenterController {
 
   /**
    * 增加job
-   * 
+   *
    * @param jobInfo
    * @return
    */
@@ -81,7 +82,7 @@ public class CenterController {
 
   /**
    * 修改job
-   * 
+   *
    * @param jobInfo
    * @return
    */
@@ -93,7 +94,7 @@ public class CenterController {
 
   /**
    * 暂停job
-   * 
+   *
    * @param id
    * @return
    */
@@ -105,7 +106,7 @@ public class CenterController {
 
   /**
    * 恢复job
-   * 
+   *
    * @param id
    * @return
    */
@@ -117,7 +118,7 @@ public class CenterController {
 
   /**
    * 删除job
-   * 
+   *
    * @param id
    * @return
    */
@@ -129,7 +130,7 @@ public class CenterController {
 
   /**
    * 触发job
-   * 
+   *
    * @param id
    * @return
    */
@@ -142,7 +143,7 @@ public class CenterController {
 
   /**
    * 获取job列表
-   * 
+   *
    * @return
    */
   @RequestMapping("/queryJobInfos")
@@ -154,9 +155,7 @@ public class CenterController {
 
   /**
    * 获取所有任务
-   * 
-   * @param pageIndex
-   * @param pageSize
+   *
    * @return
    */
   @RequestMapping("/queryAllJobs")
@@ -167,7 +166,7 @@ public class CenterController {
 
   /**
    * 获取job
-   * 
+   *
    * @param id
    * @return
    */
@@ -178,12 +177,12 @@ public class CenterController {
 
   /**
    * 获取job执行记录列表
-   * 
+   *
    * @param groupKey
    * @param jobKey
    * @param jobId
-   * @param from
-   * @param to
+   * @param pageIndex
+   * @param pageSize
    * @return
    */
   @RequestMapping("/queryJobExecuteRecords")
@@ -197,7 +196,7 @@ public class CenterController {
 
   /**
    * 增加任务脚本
-   * 
+   *
    * @param script
    * @return
    */
@@ -209,7 +208,7 @@ public class CenterController {
 
   /**
    * 查询任务脚本
-   * 
+   *
    * @param jobId
    * @return
    */
@@ -220,7 +219,7 @@ public class CenterController {
 
   /**
    * 任务统计
-   * 
+   *
    * @param begin
    * @param end
    * @return
@@ -232,7 +231,7 @@ public class CenterController {
 
   /**
    * 删除日志
-   * 
+   *
    * @param jobId
    * @return
    */
@@ -244,7 +243,8 @@ public class CenterController {
 
   @ExceptionHandler({Exception.class})
   public Resp exception(Exception ex) {
-    if (CodedException.class.isInstance(ex)) {
+    log.error("", ex);
+    if (ex instanceof CodedException) {
       ErrorCode errorCode = ((CodedException) ex).getErrorCode();
       return Resp.error(errorCode.getCode(), errorCode.getMessage());
     }

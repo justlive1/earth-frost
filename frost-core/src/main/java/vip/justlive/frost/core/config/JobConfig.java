@@ -1,10 +1,10 @@
 package vip.justlive.frost.core.config;
 
+import com.google.common.collect.Maps;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import vip.justlive.frost.api.model.JobExecutor;
@@ -24,29 +24,46 @@ import vip.justlive.oxygen.core.util.ClassUtils;
 
 /**
  * 执行器配置属性
- * 
+ *
  * @author wubo
  */
 @Slf4j
 public class JobConfig {
 
-  public static final String SEPERATOR = ":";
-  public static final String CENTER_PREFIX = "frost-center";
-  public static final String EXECUTOR_PREFIX = "frost-executor";
-  public static final String JOB_GROUP_PREFIX = "frost-job-group";
-  public static final String JOB_SCRIPT_PREFIX = "frost-job-script";
-  public static final String JOB_REGIST_PREFIX = "frost-regist";
-  public static final String CENTER_STATISTICS = "center_statistics";
-  public static final String CENTER_STATISTICS_DISPATCH = "dispatch";
-  public static final String CENTER_STATISTICS_EXECUTE = "execute";
-  public static final String CENTER_STATISTICS_RUNNING = "running";
-  public static final String CENTER_STATISTICS_SUCCESS = "success";
-  public static final String CENTER_STATISTICS_FAIL = "fail";
+
+  public static final String TASK_ID = "frost:taskid";
+  public static final String WORKER = "frost:workers";
+  public static final String WORKER_REGISTER = "frost:workers:register";
+  public static final String WORKER_REQ = "frost:workers:req:%s";
+  public static final String WORKER_REQ_VAL = "frost:workers:reqval:%s";
+
+  public static final String JOB_BEAN_CHANNEL = "frost:job:bean:%s:%s";
+  public static final String JOB_SCRIPT_CHANNEL = "frost:job:script:%s";
+  public static final String JOB_INFO = "frost:jobinfo";
+  public static final String JOB_INFO_SORT = "frost:jobinfo:sort";
+  public static final String JOB_INFO_SCRIPT = "frost:jobinfo:script";
+
+  public static final String RECORD = "frost:record";
+  public static final String RECORD_SORT = "frost:record:sort";
+  public static final String RECORD_STATUS = "frost:record:status";
+
+  public static final String EVENT = "frost:event";
+
+  public static final String LOG_BIND = "frost:logger:bind";
+  public static final String LOG_REL = "frost:logger:rel";
+
+  public static final String STAT_TOTAL_TYPE = "frost:stat:total:%s";
+  public static final String STAT_TOTAL_RUNNING = "frost:stat:total:running";
+  public static final String STAT_DATE_TYPE_SUCCESS = "frost:stat:%s:%s:success";
+  public static final String STAT_DATE_TYPE_FAIL = "frost:stat:%s:%s:fail";
+  public static final String STAT_TYPE_DISPATCH = "dispatch";
+  public static final String STAT_TYPE_EXECUTE = "execute";
 
   private static final Map<String, BaseJob> JOBS = Maps.newConcurrentMap();
   private static final List<JobGroup> JOB_GROUPS = new LinkedList<>();
 
-  private JobConfig() {}
+  private JobConfig() {
+  }
 
   /**
    * 初始化executor
@@ -62,7 +79,7 @@ public class JobConfig {
 
   /**
    * 添加job
-   * 
+   *
    * @param job job
    */
   public static void addJob(BaseJob job) {
@@ -93,7 +110,7 @@ public class JobConfig {
 
   /**
    * 获取job
-   * 
+   *
    * @param key key
    * @return job
    */
@@ -103,7 +120,7 @@ public class JobConfig {
 
   /**
    * 获取jobExecutor
-   * 
+   *
    * @return JobExecutor
    */
   public static JobExecutor getJobExecutor() {
