@@ -1,29 +1,25 @@
 package vip.justlive.frost.core.notify;
 
-import org.redisson.Redisson;
+import org.redisson.api.RScheduledExecutorService;
 import org.redisson.api.RedissonClient;
-import vip.justlive.frost.core.config.JobConfig;
-import vip.justlive.oxygen.core.ioc.Bean;
-import vip.justlive.oxygen.core.ioc.Inject;
+import vip.justlive.frost.core.config.Container;
 
 /**
  * redis实现的事件发布
  *
  * @author wubo
  */
-@Bean
 public class RedisEventPublisherImpl implements EventPublisher {
 
-  private final RedissonClient redissonClient;
+  private final RScheduledExecutorService executorService;
 
-  @Inject
-  public RedisEventPublisherImpl(Redisson redissonClient) {
-    this.redissonClient = redissonClient;
+  public RedisEventPublisherImpl(RedissonClient redissonClient) {
+    this.executorService = redissonClient.getExecutorService(Container.EVENT);
   }
 
   @Override
   public void publish(Event event) {
-    redissonClient.getExecutorService(JobConfig.EVENT).execute(new EventExecuteWrapper(event));
+    executorService.execute(new EventExecuteWrapper(event));
   }
 
 }

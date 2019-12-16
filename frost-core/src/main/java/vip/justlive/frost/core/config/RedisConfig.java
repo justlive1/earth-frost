@@ -8,36 +8,24 @@ import org.redisson.config.MasterSlaveServersConfig;
 import org.redisson.config.ReplicatedServersConfig;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
-import vip.justlive.oxygen.core.config.ConfigFactory;
-import vip.justlive.oxygen.core.ioc.Bean;
-import vip.justlive.oxygen.core.ioc.Configuration;
 
 /**
  * redis配置
- * 
- * @author wubo
  *
+ * @author wubo
  */
-@Configuration
 public class RedisConfig {
 
-  /**
-   * redisson client
-   * 
-   * @return client
-   */
-  @Bean
-  public RedissonClient redissonClient() {
-    RedissonProperties redissonProperties = ConfigFactory.load(RedissonProperties.class);
+  static RedissonClient redissonClient(RedissonProperties redissonProperties) {
     switch (redissonProperties.getMode()) {
       case 1:
         return redissonCluster(redissonProperties);
       case 2:
         return redissonReplicatedServers(redissonProperties);
       case 3:
-        return redissonuseSentinelServers(redissonProperties);
+        return redissonUseSentinelServers(redissonProperties);
       case 4:
-        return redissonuseMasterSlaveServers(redissonProperties);
+        return redissonUseMasterSlaveServers(redissonProperties);
       default:
         return redissonSingle(redissonProperties);
     }
@@ -45,11 +33,11 @@ public class RedisConfig {
 
   /**
    * 单机模式
-   * 
-   * @param redissonProperties
+   *
+   * @param redissonProperties redisson配置
    * @return client
    */
-  private RedissonClient redissonSingle(RedissonProperties redissonProperties) {
+  static RedissonClient redissonSingle(RedissonProperties redissonProperties) {
     Config config = new Config();
     SingleServerConfig serverConfig = config.useSingleServer()
         .setAddress(redissonProperties.getAddress()).setTimeout(redissonProperties.getTimeout())
@@ -65,18 +53,18 @@ public class RedisConfig {
 
   /**
    * 集群模式
-   * 
-   * @param redissonProperties
+   *
+   * @param redissonProperties redisson配置
    * @return client
    */
-  private RedissonClient redissonCluster(RedissonProperties redissonProperties) {
+  static RedissonClient redissonCluster(RedissonProperties redissonProperties) {
     Config config = new Config();
-    ClusterServersConfig serverConfig =
-        config.useClusterServers().addNodeAddress(redissonProperties.getNodeAddresses())
-            .setTimeout(redissonProperties.getTimeout())
-            .setScanInterval(redissonProperties.getScanInterval())
-            .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
-            .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
+    ClusterServersConfig serverConfig = config.useClusterServers()
+        .addNodeAddress(redissonProperties.getNodeAddresses())
+        .setTimeout(redissonProperties.getTimeout())
+        .setScanInterval(redissonProperties.getScanInterval())
+        .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
+        .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
 
     if (redissonProperties.getPassword() != null && redissonProperties.getPassword().length() > 0) {
       serverConfig.setPassword(redissonProperties.getPassword());
@@ -87,19 +75,19 @@ public class RedisConfig {
 
   /**
    * 云托管模式
-   * 
-   * @param redissonProperties
+   *
+   * @param redissonProperties redisson配置
    * @return client
    */
-  private RedissonClient redissonReplicatedServers(RedissonProperties redissonProperties) {
+  static RedissonClient redissonReplicatedServers(RedissonProperties redissonProperties) {
     Config config = new Config();
-    ReplicatedServersConfig serverConfig =
-        config.useReplicatedServers().addNodeAddress(redissonProperties.getNodeAddresses())
-            .setTimeout(redissonProperties.getTimeout())
-            .setScanInterval(redissonProperties.getScanInterval())
-            .setDnsMonitoringInterval(redissonProperties.getDnsMonitoringInterval())
-            .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
-            .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
+    ReplicatedServersConfig serverConfig = config.useReplicatedServers()
+        .addNodeAddress(redissonProperties.getNodeAddresses())
+        .setTimeout(redissonProperties.getTimeout())
+        .setScanInterval(redissonProperties.getScanInterval())
+        .setDnsMonitoringInterval(redissonProperties.getDnsMonitoringInterval())
+        .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
+        .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
 
     if (redissonProperties.getPassword() != null && redissonProperties.getPassword().length() > 0) {
       serverConfig.setPassword(redissonProperties.getPassword());
@@ -110,42 +98,41 @@ public class RedisConfig {
 
   /**
    * 哨兵模式
-   * 
-   * @param redissonProperties
+   *
+   * @param redissonProperties redisson配置
    * @return client
    */
-  private RedissonClient redissonuseSentinelServers(RedissonProperties redissonProperties) {
+  static RedissonClient redissonUseSentinelServers(RedissonProperties redissonProperties) {
     Config config = new Config();
-    SentinelServersConfig serverConfig =
-        config.useSentinelServers().addSentinelAddress(redissonProperties.getSentinelAddresses())
-            .setTimeout(redissonProperties.getTimeout())
-            .setScanInterval(redissonProperties.getScanInterval())
-            .setMasterName(redissonProperties.getMasterName())
-            .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
-            .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
+    SentinelServersConfig serverConfig = config.useSentinelServers()
+        .addSentinelAddress(redissonProperties.getSentinelAddresses())
+        .setTimeout(redissonProperties.getTimeout())
+        .setScanInterval(redissonProperties.getScanInterval())
+        .setMasterName(redissonProperties.getMasterName())
+        .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
+        .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
     if (redissonProperties.getPassword() != null && redissonProperties.getPassword().length() > 0) {
       serverConfig.setPassword(redissonProperties.getPassword());
     }
-
 
     return Redisson.create(config);
   }
 
   /**
    * 主从模式
-   * 
-   * @param redissonProperties
+   *
+   * @param redissonProperties redisson配置
    * @return client
    */
-  private RedissonClient redissonuseMasterSlaveServers(RedissonProperties redissonProperties) {
+  static RedissonClient redissonUseMasterSlaveServers(RedissonProperties redissonProperties) {
     Config config = new Config();
-    MasterSlaveServersConfig serverConfig =
-        config.useMasterSlaveServers().setMasterAddress(redissonProperties.getMasterAddress())
-            .addSlaveAddress(redissonProperties.getSlaveAddresses())
-            .setTimeout(redissonProperties.getTimeout())
-            .setDnsMonitoringInterval(redissonProperties.getDnsMonitoringInterval())
-            .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
-            .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
+    MasterSlaveServersConfig serverConfig = config.useMasterSlaveServers()
+        .setMasterAddress(redissonProperties.getMasterAddress())
+        .addSlaveAddress(redissonProperties.getSlaveAddresses())
+        .setTimeout(redissonProperties.getTimeout())
+        .setDnsMonitoringInterval(redissonProperties.getDnsMonitoringInterval())
+        .setSlaveConnectionPoolSize(redissonProperties.getSlaveConnectionPoolSize())
+        .setMasterConnectionPoolSize(redissonProperties.getMasterConnectionPoolSize());
 
     if (redissonProperties.getPassword() != null && redissonProperties.getPassword().length() > 0) {
       serverConfig.setPassword(redissonProperties.getPassword());

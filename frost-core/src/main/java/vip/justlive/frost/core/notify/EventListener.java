@@ -4,9 +4,8 @@ import lombok.Data;
 
 /**
  * 事件监听
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Data
 public class EventListener {
@@ -15,10 +14,12 @@ public class EventListener {
 
   /**
    * 处理事件
-   * 
-   * @param event
+   *
+   * @param event 事件
    */
   public void onEvent(Event event) {
-    notifier.notify(event);
+    if (notifier != null) {
+      notifier.notify(event);
+    }
   }
 }

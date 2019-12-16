@@ -1,23 +1,21 @@
 package vip.justlive.frost.core.monitor;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import com.google.common.collect.Maps;
 import vip.justlive.frost.api.model.JobExecuteParam;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.core.notify.Event;
 import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.persistence.JobRepository;
-import vip.justlive.oxygen.core.ioc.BeanStore;
 import vip.justlive.oxygen.core.util.ThreadUtils;
 
 /**
  * 超时监听
- * 
- * @author wubo
  *
+ * @author wubo
  */
 public class TimeoutMonitorImpl implements Monitor {
 
@@ -28,11 +26,11 @@ public class TimeoutMonitorImpl implements Monitor {
   private final ScheduledExecutorService executorService;
   private final Map<String, ScheduledFuture<?>> futureMap;
 
-  public TimeoutMonitorImpl() {
-    this.jobRepository = BeanStore.getBean(JobRepository.class);
-    this.publisher = BeanStore.getBean(EventPublisher.class);
+  public TimeoutMonitorImpl(JobRepository jobRepository, EventPublisher publisher) {
+    this.jobRepository = jobRepository;
+    this.publisher = publisher;
     this.executorService = ThreadUtils.newScheduledExecutor(10, "timeout-monitor");
-    this.futureMap = Maps.newConcurrentMap();
+    this.futureMap = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -45,7 +43,7 @@ public class TimeoutMonitorImpl implements Monitor {
 
     String message =
         String.format(MESSAGE_TEMPLATE, jobInfo.getName(), jobInfo.getId(), jobInfo.getTimeout());
-    ScheduledFuture<?> future = executorService.schedule(new Commond(target, message),
+    ScheduledFuture<?> future = executorService.schedule(new Command(target, message),
         jobInfo.getTimeout(), TimeUnit.SECONDS);
 
     futureMap.put(target.getLoggerId(), future);
@@ -60,12 +58,12 @@ public class TimeoutMonitorImpl implements Monitor {
     }
   }
 
-  class Commond implements Runnable {
+  class Command implements Runnable {
 
     JobExecuteParam data;
     String message;
 
-    public Commond(JobExecuteParam data, String message) {
+    Command(JobExecuteParam data, String message) {
       this.data = data;
       this.message = message;
     }

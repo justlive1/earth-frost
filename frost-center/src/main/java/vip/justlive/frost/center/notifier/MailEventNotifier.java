@@ -2,27 +2,26 @@ package vip.justlive.frost.center.notifier;
 
 import java.util.Arrays;
 import java.util.List;
+import lombok.Data;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import lombok.Data;
 import vip.justlive.frost.api.model.JobInfo;
+import vip.justlive.frost.core.config.Container;
 import vip.justlive.frost.core.notify.Event;
-import vip.justlive.frost.core.persistence.JobRepository;
-import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 邮件事件通知器
- * 
- * @author wubo
  *
+ * @author wubo
  */
+
 /**
  * 邮件事件通知器
- * 
+ *
  * @author wubo
  *
  */
@@ -72,8 +71,8 @@ public class MailEventNotifier extends AbstractEventNotifier {
   @Override
   protected void doNotify(Event event) {
 
-    JobInfo jobInfo =
-        BeanStore.getBean(JobRepository.class).findJobInfoById(event.getData().getJobId());
+    JobInfo jobInfo = Container.get().getJobRepository()
+        .findJobInfoById(event.getData().getJobId());
     if (jobInfo == null) {
       return;
     }
@@ -143,6 +142,7 @@ public class MailEventNotifier extends AbstractEventNotifier {
 
   @Data
   public static class Msg {
+
     private Event event;
     private JobInfo job;
   }

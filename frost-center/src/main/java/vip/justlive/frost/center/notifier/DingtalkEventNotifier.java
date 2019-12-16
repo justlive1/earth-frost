@@ -1,25 +1,24 @@
 package vip.justlive.frost.center.notifier;
 
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import lombok.Data;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import lombok.Data;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import vip.justlive.frost.api.model.JobInfo;
+import vip.justlive.frost.core.config.Container;
 import vip.justlive.frost.core.notify.Event;
-import vip.justlive.frost.core.persistence.JobRepository;
-import vip.justlive.oxygen.core.ioc.BeanStore;
+import vip.justlive.oxygen.core.net.http.HttpRequest;
+import vip.justlive.oxygen.core.net.http.HttpResponse;
+import vip.justlive.oxygen.core.util.MoreObjects;
 
 /**
  * 钉钉事件通知
@@ -78,8 +77,8 @@ public class DingtalkEventNotifier extends AbstractEventNotifier {
   @Override
   protected void doNotify(Event event) {
 
-    JobInfo jobInfo =
-        BeanStore.getBean(JobRepository.class).findJobInfoById(event.getData().getJobId());
+    JobInfo jobInfo = Container.get().getJobRepository()
+        .findJobInfoById(event.getData().getJobId());
     if (jobInfo == null) {
       return;
     }
@@ -92,16 +91,13 @@ public class DingtalkEventNotifier extends AbstractEventNotifier {
     String subjectVal = subject.getValue(context, String.class);
     String textVal = text.getValue(context, String.class);
 
-    Map<String, Object> map = ImmutableMap.of("msgtype", "link", "link",
-        ImmutableMap.of("title", subjectVal, "text", textVal, "messageUrl", linkUrl));
+    Map<String, Object> map = MoreObjects.mapOf("msgtype", "link", "link",
+        MoreObjects.mapOf("title", subjectVal, "text", textVal, "messageUrl", linkUrl));
 
     String json = gson.toJson(map);
 
-    RequestBody body = RequestBody.create(MEDIA_JSON, json);
-    Request request = new Request.Builder().url(url).post(body).build();
-    try {
-      okhttp3.Response resp = client.newCall(request).execute();
-      String respBody = resp.body().string();
+    try (HttpResponse response = HttpRequest.post(url).jsonBody(json).execute()) {
+      String respBody = response.bodyAsString();
       if (getLogger().isDebugEnabled()) {
         getLogger().debug("dingtalk resp: {}", respBody);
       }
@@ -136,6 +132,7 @@ public class DingtalkEventNotifier extends AbstractEventNotifier {
 
   @Data
   public static class Msg {
+
     private Event event;
     private JobInfo job;
   }

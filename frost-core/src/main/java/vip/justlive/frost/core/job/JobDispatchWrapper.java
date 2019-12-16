@@ -15,14 +15,13 @@ import vip.justlive.frost.api.model.JobGroup;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.api.model.JobRecordStatus;
 import vip.justlive.frost.api.model.JobSharding;
-import vip.justlive.frost.core.config.JobConfig;
+import vip.justlive.frost.core.config.Container;
 import vip.justlive.frost.core.dispacher.Dispatcher;
 import vip.justlive.frost.core.notify.Event;
 import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.persistence.JobRepository;
 import vip.justlive.oxygen.core.exception.CodedException;
-import vip.justlive.oxygen.core.ioc.BeanStore;
-import vip.justlive.oxygen.core.util.Checks;
+import vip.justlive.oxygen.core.util.MoreObjects;
 
 /**
  * job分发包装
@@ -66,9 +65,9 @@ public class JobDispatchWrapper extends AbstractWrapper {
   public void doRun() {
     Date time = Date.from(ZonedDateTime.now().toInstant());
     param = new JobExecuteParam(id);
-    JobRepository jobRepository = BeanStore.getBean(JobRepository.class);
+    JobRepository jobRepository = Container.get().getJobRepository();
     jobInfo = jobRepository.findJobInfoById(id);
-    JobLogger jobLogger = BeanStore.getBean(JobLogger.class);
+    JobLogger jobLogger = Container.get().getJobLogger();
     if (loggerId == null) {
       loggerId = jobLogger.bindLog(id);
       JobExecuteRecord record = this.record(id, loggerId);
@@ -76,7 +75,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     } else {
       failRetry = true;
     }
-    jobLogger.enter(loggerId, JobConfig.STAT_TYPE_DISPATCH);
+    jobLogger.enter(loggerId, Container.STAT_TYPE_DISPATCH);
     jobRecordStatus = this.recordStatus(loggerId);
     jobRecordStatus.setTime(time);
     if (failRetry) {
@@ -88,20 +87,20 @@ public class JobDispatchWrapper extends AbstractWrapper {
     String key;
     if (Objects.equals(JobInfo.TYPE.SCRIPT.name(), jobInfo.getType())) {
       if (jobInfo.getGroup() != null && jobInfo.getGroup().getGroupKey() != null) {
-        key = String.format(JobConfig.JOB_SCRIPT_CHANNEL, jobInfo.getGroup().getGroupKey());
+        key = String.format(Container.JOB_SCRIPT_CHANNEL, jobInfo.getGroup().getGroupKey());
       } else {
-        key = String.format(JobConfig.JOB_SCRIPT_CHANNEL, "");
+        key = String.format(Container.JOB_SCRIPT_CHANNEL, "");
       }
     } else {
-      JobGroup jobGroup = Checks.notNull(Checks.notNull(jobInfo).getGroup());
-      key = String.format(JobConfig.JOB_BEAN_CHANNEL, jobGroup.getGroupKey(), jobGroup.getJobKey());
+      JobGroup jobGroup = MoreObjects.notNull(MoreObjects.notNull(jobInfo).getGroup());
+      key = String.format(Container.JOB_BEAN_CHANNEL, jobGroup.getGroupKey(), jobGroup.getJobKey());
       param.setHandlerId(jobInfo.getGroup().getJobKey());
     }
     param.setTopicKey(key);
     param.setLoggerId(loggerId);
     param.setFailRetry(failRetry);
 
-    Dispatcher dispatcher = BeanStore.getBean(Dispatcher.class);
+    Dispatcher dispatcher = Container.get().getDispatcher();
 
     if (jobInfo.isUseSharding()) {
       handleSharding(dispatcher);
@@ -125,7 +124,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
   @Override
   public void success() {
     success = true;
-    JobRepository jobRepository = BeanStore.getBean(JobRepository.class);
+    JobRepository jobRepository = Container.get().getJobRepository();
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.SUCCESS.name());
     jobRecordStatus.setMsg("调度成功");
     jobRepository.addJobRecordStatus(jobRecordStatus);
@@ -136,7 +135,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     success = false;
     super.exception(e);
 
-    JobRepository jobRepository = BeanStore.getBean(JobRepository.class);
+    JobRepository jobRepository = Container.get().getJobRepository();
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.FAIL.name());
     if (e instanceof CodedException) {
       jobRecordStatus.setMsg(((CodedException) e).getErrorCode().toString());
@@ -145,7 +144,7 @@ public class JobDispatchWrapper extends AbstractWrapper {
     }
     jobRepository.addJobRecordStatus(jobRecordStatus);
 
-    EventPublisher publisher = BeanStore.getBean(EventPublisher.class);
+    EventPublisher publisher = Container.get().getPublisher();
     publisher.publish(new Event(param, Event.TYPE.DISPATCH_FAIL.name(), jobRecordStatus.getMsg(),
         jobRecordStatus.getTime().getTime()));
 
@@ -153,26 +152,26 @@ public class JobDispatchWrapper extends AbstractWrapper {
       param.setLoggerId(loggerId);
       param.setFailRetry(failRetry);
       param.setParentLoggerId(parentLoggerId);
-      publisher.publish(new Event(param, Event.TYPE.DISPATCH_FAIL_RETRY.name(),
-          jobRecordStatus.getMsg(), jobRecordStatus.getTime().getTime()));
+      publisher.publish(
+          new Event(param, Event.TYPE.DISPATCH_FAIL_RETRY.name(), jobRecordStatus.getMsg(),
+              jobRecordStatus.getTime().getTime()));
     }
   }
 
   @Override
-  public void finshed() {
+  public void finished() {
     if (parentLoggerId != null) {
       JobRecordStatus status = recordStatus(parentLoggerId);
       status.setType(5);
       status.setTime(jobRecordStatus.getTime());
-      status.setMsg(String.format("[%s]触发调度[%s]-[%s]",
-          DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime
-              .ofInstant(jobRecordStatus.getTime().toInstant(), ZoneId.systemDefault())),
+      status.setMsg(String.format("[%s]触发调度[%s]-[%s]", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(
+          LocalDateTime.ofInstant(jobRecordStatus.getTime().toInstant(), ZoneId.systemDefault())),
           jobInfo.getName(), jobInfo.getId()));
       status.setStatus(jobRecordStatus.getStatus());
-      JobRepository jobRepository = BeanStore.getBean(JobRepository.class);
+      JobRepository jobRepository = Container.get().getJobRepository();
       jobRepository.addJobRecordStatus(status);
     }
-    JobLogger jobLogger = BeanStore.getBean(JobLogger.class);
-    jobLogger.leave(loggerId, JobConfig.STAT_TYPE_DISPATCH, success);
+    JobLogger jobLogger = Container.get().getJobLogger();
+    jobLogger.leave(loggerId, Container.STAT_TYPE_DISPATCH, success);
   }
 }

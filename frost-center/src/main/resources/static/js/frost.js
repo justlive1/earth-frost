@@ -786,9 +786,9 @@ function statisticsController($scope, $http, $filter) {
 			begin: $filter('date')($scope.begin.value, 'yyyy-MM-dd'),
 			end: $filter('date')($scope.end.value, 'yyyy-MM-dd')
 		};
-		$http.post('queryJobStatictis', null, {params: params}).success(function(data) {
+		$http.post('queryJobStatistic', null, {params: params}).success(function(data) {
 			if (data.success) {
-				$scope.option.xAxis[0].data = data.data.statictisDays;
+				$scope.option.xAxis[0].data = data.data.statisticDays;
 				$scope.option.series[0].data = data.data.successDispatches;
 				$scope.option.series[1].data = data.data.failDispatches;
 				$scope.option.series[2].data = data.data.successExecutions;

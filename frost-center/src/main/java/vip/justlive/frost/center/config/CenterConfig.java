@@ -1,9 +1,6 @@
 package vip.justlive.frost.center.config;
 
 import java.util.Map;
-import javax.annotation.PostConstruct;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,16 +12,10 @@ import vip.justlive.frost.center.notifier.CompositeNotifier;
 import vip.justlive.frost.center.notifier.DingtalkEventNotifier;
 import vip.justlive.frost.center.notifier.MailEventNotifier;
 import vip.justlive.frost.center.notifier.RetryEventNotifier;
-import vip.justlive.frost.core.config.JobConfig;
+import vip.justlive.frost.core.config.Container;
+import vip.justlive.frost.core.config.RedissonProperties;
 import vip.justlive.frost.core.config.SystemProperties;
-import vip.justlive.frost.core.dispacher.RedisDispatcher;
-import vip.justlive.frost.core.job.RedisJobScheduleImpl;
-import vip.justlive.frost.core.notify.EventListener;
 import vip.justlive.frost.core.notify.Notifier;
-import vip.justlive.frost.core.persistence.JobRepository;
-import vip.justlive.oxygen.core.Bootstrap;
-import vip.justlive.oxygen.core.config.ConfigFactory;
-import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 通知配置
@@ -35,52 +26,52 @@ import vip.justlive.oxygen.core.ioc.BeanStore;
 public class CenterConfig {
 
   @Bean
-  @ConditionalOnProperty(value = "frost.notifier.mail.enabled", havingValue = "true",
-      matchIfMissing = true)
+  @ConditionalOnProperty(value = "frost.notifier.mail.enabled", havingValue = "true", matchIfMissing = true)
   @ConfigurationProperties("frost.notifier.mail")
-  MailEventNotifier mailEventNotifier(MailSender sender) {
+  public MailEventNotifier mailEventNotifier(MailSender sender) {
     return new MailEventNotifier(sender);
   }
 
   @Bean
-  @ConditionalOnProperty(value = "frost.notifier.dingtalk.enabled", havingValue = "true",
-      matchIfMissing = true)
+  @ConditionalOnProperty(value = "frost.notifier.dingtalk.enabled", havingValue = "true", matchIfMissing = true)
   @ConfigurationProperties("frost.notifier.dingtalk")
-  DingtalkEventNotifier dingtalkEventNotifier() {
+  public DingtalkEventNotifier dingtalkEventNotifier() {
     return new DingtalkEventNotifier();
   }
 
   @Bean
-  RetryEventNotifier retryEventNotifier() {
+  public RetryEventNotifier retryEventNotifier() {
     return new RetryEventNotifier();
   }
 
   @Bean
-  ChildrenJobEventNotifier childrenJobEventNotifier() {
+  public ChildrenJobEventNotifier childrenJobEventNotifier() {
     return new ChildrenJobEventNotifier();
   }
 
   @Bean
   @ConditionalOnBean(Notifier.class)
-  CompositeNotifier compositeNotifier(Map<String, Notifier> notifiers) {
+  public CompositeNotifier compositeNotifier(Map<String, Notifier> notifiers) {
     return new CompositeNotifier(notifiers.values());
   }
 
-  @Autowired
-  CompositeNotifier notifier;
-
-  @PostConstruct
-  public void initCenter() {
-    Bootstrap.start();
-    RedissonClient redissonClient = BeanStore.getBean(RedissonClient.class);
-    JobRepository jobRepository = BeanStore.getBean(JobRepository.class);
-    // schedule
-    BeanStore.putBean(RedisJobScheduleImpl.class.getName(), new RedisJobScheduleImpl());
-    // dispatcher
-    BeanStore.putBean(RedisDispatcher.class.getName(),
-        new RedisDispatcher(redissonClient, jobRepository));
-    redissonClient.getExecutorService(JobConfig.EVENT)
-        .registerWorkers(ConfigFactory.load(SystemProperties.class).getWorkers());
-    BeanStore.putBean(EventListener.class.getName(), new EventListener(notifier));
+  @Bean
+  @ConfigurationProperties("frost.system")
+  public SystemProperties systemProperties() {
+    return new SystemProperties();
   }
+
+  @Bean
+  @ConfigurationProperties("frost.redisson")
+  public RedissonProperties redissonProperties() {
+    return new RedissonProperties();
+  }
+
+  @Bean
+  public Container container(CompositeNotifier notifier, SystemProperties systemProperties,
+      RedissonProperties redissonProperties) {
+    Container.initCenter(redissonProperties, systemProperties, notifier);
+    return Container.get();
+  }
+
 }

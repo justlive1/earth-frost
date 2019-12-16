@@ -8,13 +8,13 @@ import vip.justlive.oxygen.core.exception.Exceptions;
 
 /**
  * script模式job包装
- * 
- * @author wubo
  *
+ * @author wubo
  */
 public class JobScriptExecuteWrapper extends AbstractJobExecuteWrapper {
 
-  public JobScriptExecuteWrapper() {}
+  public JobScriptExecuteWrapper() {
+  }
 
   public JobScriptExecuteWrapper(JobExecuteParam jobExecuteParam) {
     this.jobExecuteParam = jobExecuteParam;

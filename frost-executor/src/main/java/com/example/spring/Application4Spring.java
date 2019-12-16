@@ -2,17 +2,47 @@ package com.example.spring;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import vip.justlive.frost.core.config.JobConfig;
-import vip.justlive.oxygen.core.Bootstrap;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import vip.justlive.frost.core.config.Container;
+import vip.justlive.frost.core.config.JobExecutorProperties;
+import vip.justlive.frost.core.config.RedissonProperties;
+import vip.justlive.frost.core.config.SystemProperties;
 
 @SpringBootApplication
 public class Application4Spring {
 
+  @Configuration
+  static class Config {
+
+    @Bean
+    @ConfigurationProperties("frost.system")
+    public SystemProperties systemProperties() {
+      return new SystemProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties("frost.redisson")
+    public RedissonProperties redissonProperties() {
+      return new RedissonProperties();
+    }
+
+    @Bean
+    @ConfigurationProperties("frost.executor")
+    public JobExecutorProperties jobExecutorProperties() {
+      return new JobExecutorProperties();
+    }
+
+    @Bean
+    public Container container(SystemProperties systemProperties,
+        RedissonProperties redissonProperties, JobExecutorProperties jobExecutorProperties) {
+      Container.initExecutor(jobExecutorProperties, redissonProperties, systemProperties);
+      return Container.get();
+    }
+  }
+
   public static void main(String[] args) {
-    // 初始化job配置文件 因为job未使用spring，需要指定配置文件
-    Bootstrap.initConfig("classpath:config/*.properties");
     SpringApplication.run(Application4Spring.class, args);
-    // 注册job
-    JobConfig.initExecutor();
   }
 }

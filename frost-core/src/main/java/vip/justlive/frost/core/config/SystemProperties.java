@@ -5,18 +5,17 @@ import vip.justlive.oxygen.core.config.ValueConfig;
 
 /**
  * 系统属性
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Data
-@ValueConfig("system")
+@ValueConfig("frost.system")
 public class SystemProperties {
 
   /**
    * 线程池中最小线程数
    */
-  private Integer corePoolSize = 5;
+  private Integer corePoolSize = 50;
 
   /**
    * 最大线程数
@@ -33,6 +32,14 @@ public class SystemProperties {
    */
   private Integer queueCapacity = 200;
 
+  /**
+   * worker数量
+   */
   private Integer workers = 10;
+
+  /**
+   * job并行数
+   */
+  private int parallel = 1;
 
 }

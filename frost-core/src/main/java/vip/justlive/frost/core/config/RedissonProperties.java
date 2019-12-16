@@ -5,12 +5,11 @@ import vip.justlive.oxygen.core.config.ValueConfig;
 
 /**
  * redis配置属性
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Data
-@ValueConfig("redisson")
+@ValueConfig("frost.redisson")
 public class RedissonProperties {
 
   /**

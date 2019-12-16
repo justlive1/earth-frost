@@ -8,9 +8,8 @@ import java.lang.annotation.Target;
 
 /**
  * 标记当前类是job
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -19,15 +18,15 @@ public @interface Job {
 
   /**
    * job名称
-   * 
-   * @return
+   *
+   * @return value
    */
   String value() default "";
 
   /**
    * 描述
-   * 
-   * @return
+   *
+   * @return description
    */
   String desc() default "";
 }

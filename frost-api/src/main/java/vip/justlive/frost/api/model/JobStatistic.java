@@ -5,12 +5,11 @@ import lombok.Data;
 
 /**
  * job 统计
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Data
-public class JobStatictis {
+public class JobStatistic {
 
   /**
    * 任务总数
@@ -35,8 +34,7 @@ public class JobStatictis {
   /**
    * 统计日期
    */
-  private List<String> statictisDays;
-
+  private List<String> statisticDays;
 
   /**
    * 成功的调度

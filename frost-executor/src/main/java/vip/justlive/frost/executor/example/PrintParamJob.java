@@ -4,13 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import vip.justlive.frost.core.job.BaseJob;
 import vip.justlive.frost.core.job.Job;
 import vip.justlive.frost.core.job.JobContext;
-import vip.justlive.oxygen.core.ioc.Bean;
+import vip.justlive.oxygen.ioc.annotation.Bean;
 
 /**
  * 打印执行参数job例子
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Slf4j
 @Job(value = "printParamJob", desc = "打印执行参数job例子")

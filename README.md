@@ -1,7 +1,10 @@
-# earth-frost
-
-earth-frost是一个轻量级分布式任务调度框架。
-
+<p align="center">
+    <img src="http://www.justlive.vip/images/earth-frost.png" width="150" alt="" />
+</p>
+<h3 align="center">earth-frost</h3>
+<p align="center">
+    earth-frost是一个轻量级分布式任务调度框架。
+</p>    
 
 ## 介绍
 - 调度模块和执行模块分离
@@ -38,6 +41,11 @@ earth-frost是一个轻量级分布式任务调度框架。
 - 支持SimpleTrigger任务
 - 支持非spring项目开发执行器
 - misfire
+
+1.2.0
+- 修复分片父子任务执行多次问题
+- 增加配置最大日志数
+- 增加Spring项目执行案例
 
 ## 开发
 	
@@ -90,37 +98,47 @@ frost.notifier.dingtalk.text=#{job.name} (#{job.id}) \n #{event.message}
 frost.notifier.dingtalk.accessToken=
 frost.notifier.dingtalk.linkUrl=localhost:20000/center
 
+# 系统配置
+frost.system.corePoolSize=50
+frost.system.maximumPoolSize=50
+frost.system.keepAliveTime=300
+frost.system.queueCapacity=200
+# center处理worker数
+frost.system.workers=10
+# job并行处理个数
+frost.system.parallel=2
+
 # redis配置
 # 0:单机模式， 1：集群模式，2：云托管模式，3：哨兵模式，4：主从模式
-redisson.mode=0
+frost.redisson.mode=0
 
 # 公共配置
-redisson.password=
-redisson.slaveConnectionPoolSize=50
-redisson.masterConnectionPoolSize=50
-redisson.timeout=3000
+frost.redisson.password=
+frost.redisson.slaveConnectionPoolSize=50
+frost.redisson.masterConnectionPoolSize=50
+frost.redisson.timeout=3000
 
 # 单机模式
-redisson.address=redis://localhost:6379
+frost.redisson.address=redis://localhost:6379
 
 # 集群模式
-redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
-redisson.scanInterval=2000
+frost.redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+frost.redisson.scanInterval=2000
 
 # 云托管模式
-redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
-redisson.scanInterval=2000
-redisson.dnsMonitoringInterval=5000
+frost.redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+frost.redisson.scanInterval=2000
+frost.redisson.dnsMonitoringInterval=5000
 
 # 哨兵模式
-redisson.sentinelAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
-redisson.scanInterval=2000
-redisson.masterName=mymaster
+frost.redisson.sentinelAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+frost.redisson.scanInterval=2000
+frost.redisson.masterName=mymaster
 
 # 主从模式
-redisson.masterAddress=redis://127.0.0.1:6379
-redisson.slaveAddresses=redis://localhost:6380,redis://localhost:6381
-redisson.dnsMonitoringInterval=5000
+frost.redisson.masterAddress=redis://127.0.0.1:6379
+frost.redisson.slaveAddresses=redis://localhost:6380,redis://localhost:6381
+frost.redisson.dnsMonitoringInterval=5000
 ```
 
 #### 2.部署项目
@@ -151,55 +169,62 @@ redisson.dnsMonitoringInterval=5000
 #### 2.配置说明
 
 ```
-# 每个job支持并行处理数
-frost.job.parallel=2
+# 系统配置
+frost.system.corePoolSize=50
+frost.system.maximumPoolSize=50
+frost.system.keepAliveTime=300
+frost.system.queueCapacity=200
+# job并行处理个数
+frost.system.parallel=2
 
 # 执行器名称
-frost.job.executor.name=${spring.application.name}
+frost.executor.name=${spring.application.name}
 # 执行器Key
-frost.job.executor.key=executor-demo
-frost.job.executor.ip=
-frost.job.executor.port=${server.port}
+frost.executor.key=executor-demo
+frost.executor.ip=
+frost.executor.port=${server.port}
 # 是否支持执行脚本任务
-frost.job.executor.scriptJobEnabled=true
+frost.executor.scriptJobEnabled=true
 # 错过执行的阈值(毫秒)
-frost.job.executor.misfireThreshold=5000
+frost.executor.misfireThreshold=5000
+# 每个job最大日志保留数
+frost.executor.maxLogSize=-1
 
 # redis配置
 # 0:单机模式， 1：集群模式，2：云托管模式，3：哨兵模式，4：主从模式
-redisson.mode=0
+frost.redisson.mode=0
 
 # 公共配置
-redisson.password=
-redisson.slaveConnectionPoolSize=50
-redisson.masterConnectionPoolSize=50
-redisson.timeout=3000
+frost.redisson.password=
+frost.redisson.slaveConnectionPoolSize=50
+frost.redisson.masterConnectionPoolSize=50
+frost.redisson.timeout=3000
 
 # 单机模式
-redisson.address=redis://localhost:6379
+frost.redisson.address=redis://localhost:6379
 
 # 集群模式
-redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
-redisson.scanInterval=2000
+frost.redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+frost.redisson.scanInterval=2000
 
 # 云托管模式
-redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
-redisson.scanInterval=2000
-redisson.dnsMonitoringInterval=5000
+frost.redisson.nodeAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+frost.redisson.scanInterval=2000
+frost.redisson.dnsMonitoringInterval=5000
 
 # 哨兵模式
-redisson.sentinelAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
-redisson.scanInterval=2000
-redisson.masterName=mymaster
+frost.redisson.sentinelAddresses=redis://localhost:6379,redis://localhost:6380,redis://localhost:6381
+frost.redisson.scanInterval=2000
+frost.redisson.masterName=mymaster
 
 # 主从模式
-redisson.masterAddress=redis://127.0.0.1:6379
-redisson.slaveAddresses=redis://localhost:6380,redis://localhost:6381
-redisson.dnsMonitoringInterval=5000
+frost.redisson.masterAddress=redis://127.0.0.1:6379
+frost.redisson.slaveAddresses=redis://localhost:6380,redis://localhost:6381
+frost.redisson.dnsMonitoringInterval=5000
 ```
 
 #### 3.部署执行器
-执行 `JobConfig.initExecutor()` 进行初始化执行器，项目打包按照集成项目打包方式即可，部署后打开调度中心页面查看执行器页面
+执行 `Container.initExecutor(...)` 进行初始化执行器，项目打包按照集成项目打包方式即可，部署后打开调度中心页面查看执行器页面。具体代码可参照`frost-executor`，包含Spring和非Spring项目启动方式
 ![执行器列表](https://gitee.com/justlive1/earth-frost/raw/master/images/executor.jpeg)
 列表中出现部署的执行器则说明部署成功
 
@@ -379,30 +404,20 @@ public class ShardingJob extends BaseJob {
 </dependency>
 ```
 
-3.2 配置frost连接地址
+3.2 实例化client
 
 ```
-# 调度中心地址
-frost.client.baseUrl=http://localhost:20000/center
-# 用户名
-frost.client.username=frost
-# 密码
-frost.client.password=frost
+ClientProperties clientProps = new ClientProperties();
+clientProps.setBaseUrl("http://localhost:20000/center");
+clientProps.setUsername("frost");
+clientProps.setPassword("frost");
+JobApiFacade jobApiFacade = new JobApiFacadeImpl(clientProps);
 ```
 
-3.3 实例化client
-
-```
-FacadeProxy proxy = FacadeProxy.newProxy("classpath:frost.properties", "classpath:frost-override.properties");
-JobApiFacade jobApiFacade = proxy.getJobApiFacade();
-```
-
-3.4 调用JobApiFacade进行操作
+3.3 调用JobApiFacade进行操作
 
 …
 
 ## 联系信息
 
 E-mail: qq11419041@163.com
-
-QQ群: 950216299

@@ -2,14 +2,13 @@ package vip.justlive.frost.core.notify;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import vip.justlive.frost.core.config.Container;
 import vip.justlive.frost.core.job.AbstractWrapper;
-import vip.justlive.oxygen.core.ioc.BeanStore;
 
 /**
  * 事件执行包装
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +18,9 @@ public class EventExecuteWrapper extends AbstractWrapper {
 
   @Override
   public void doRun() {
-    EventListener listener = BeanStore.getBean(EventListener.class);
-    listener.onEvent(event);
+    EventListener listener = Container.get().getListener();
+    if (listener != null) {
+      listener.onEvent(event);
+    }
   }
 }

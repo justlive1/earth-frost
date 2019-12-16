@@ -1,117 +1,86 @@
 package vip.justlive.frost.client;
 
-import java.io.IOException;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import okhttp3.Authenticator;
-import okhttp3.Credentials;
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Route;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import vip.justlive.frost.api.facade.JobApiFacade;
 import vip.justlive.frost.api.model.JobInfo;
-import vip.justlive.oxygen.core.constant.Constants;
 import vip.justlive.oxygen.core.exception.Exceptions;
+import vip.justlive.oxygen.core.net.http.HttpRequest;
+import vip.justlive.oxygen.core.net.http.HttpResponse;
+import vip.justlive.oxygen.core.util.MoreObjects;
+import vip.justlive.oxygen.core.util.Resp;
+import vip.justlive.oxygen.core.util.Strings;
 
 /**
  * job api facade 实现类
- * 
- * @author wubo
  *
+ * @author wubo
  */
 public class JobApiFacadeImpl implements JobApiFacade {
 
-  public static final MediaType MEDIA_JSON = MediaType.parse("application/json; charset=utf-8");
-
-  private OkHttpClient client;
   private Gson gson = new Gson();
   private ClientProperties clientProps;
+  private String auth;
 
   public JobApiFacadeImpl(ClientProperties clientProps) {
     this.clientProps = clientProps;
-    this.init();
+    this.auth = "Basic " + Base64.getEncoder().encodeToString(
+        (clientProps.getUsername() + Strings.COLON + clientProps.getPassword())
+            .getBytes(StandardCharsets.UTF_8));
   }
 
-  void init() {
-    client = new OkHttpClient.Builder().authenticator(new Authenticator() {
-      @Override
-      public Request authenticate(Route route, okhttp3.Response response) throws IOException {
-        String credential = Credentials.basic(clientProps.getUsername(), clientProps.getPassword());
-        return response.request().newBuilder().header("Authorization", credential).build();
+  String handle(HttpRequest request) {
+    try (HttpResponse response = request.addHeader("Authorization", auth).execute()) {
+      Resp resp = gson.fromJson(response.bodyAsString(), Resp.class);
+      if (!resp.isSuccess()) {
+        throw Exceptions.fail(resp.getCode(), resp.getMessage());
       }
-    }).build();
-  }
-
-  <T> T postJson(String url, Object obj, Class<T> clazz) {
-    String json = gson.toJson(obj);
-    RequestBody body = RequestBody.create(MEDIA_JSON, json);
-    Request request = new Request.Builder().url(url).post(body).build();
-    return handle(request, clazz);
-  }
-
-  <T> T handle(Request request, Class<T> clazz) {
-    try {
-      okhttp3.Response resp = client.newCall(request).execute();
-      String respBody = resp.body().string();
-      JsonElement element = new JsonParser().parse(respBody);
-      JsonObject data = element.getAsJsonObject();
-      if (data.get(Constants.RESP_IS_SUCCESS).getAsBoolean()) {
-        return gson.fromJson(data.get("data"), clazz);
-      } else {
-        throw Exceptions.fail(data.get(Constants.RESP_CODE_FIELD).getAsString(),
-            data.get(Constants.RESP_MESSAGE_FIELD).getAsString());
+      Object data = resp.getData();
+      if (data != null) {
+        return data.toString();
       }
+      return null;
     } catch (IOException e) {
       throw Exceptions.wrap(e);
     }
   }
 
-
   @Override
   public String addJob(JobInfo jobInfo) {
-    return postJson(clientProps.getBaseUrl() + "/addJob", jobInfo, String.class);
+    return handle(
+        HttpRequest.post(clientProps.getBaseUrl() + "/addJob").jsonBody(gson.toJson(jobInfo)));
   }
 
   @Override
   public void updateJob(JobInfo jobInfo) {
-    postJson(clientProps.getBaseUrl() + "/updateJob", jobInfo, String.class);
+    handle(
+        HttpRequest.post(clientProps.getBaseUrl() + "/updateJob").jsonBody(gson.toJson(jobInfo)));
   }
 
   @Override
   public void pauseJob(String jobId) {
-    FormBody body = new FormBody.Builder().add("id", jobId).build();
-    Request request =
-        new Request.Builder().url(clientProps.getBaseUrl() + "/pauseJob").post(body).build();
-    handle(request, String.class);
+    handle(HttpRequest.post(clientProps.getBaseUrl() + "/pauseJob")
+        .formBody(MoreObjects.mapOf("id", jobId)));
   }
 
   @Override
   public void resumeJob(String jobId) {
-    FormBody body = new FormBody.Builder().add("id", jobId).build();
-    Request request =
-        new Request.Builder().url(clientProps.getBaseUrl() + "/resumeJob").post(body).build();
-    handle(request, String.class);
+    handle(HttpRequest.post(clientProps.getBaseUrl() + "/resumeJob")
+        .formBody(MoreObjects.mapOf("id", jobId)));
   }
 
   @Override
   public void removeJob(String jobId) {
-    FormBody body = new FormBody.Builder().add("id", jobId).build();
-    Request request =
-        new Request.Builder().url(clientProps.getBaseUrl() + "/removeJob").post(body).build();
-    handle(request, String.class);
+    handle(HttpRequest.post(clientProps.getBaseUrl() + "/removeJob")
+        .formBody(MoreObjects.mapOf("id", jobId)));
   }
 
   @Override
   public void triggerJob(String jobId) {
-    FormBody body = new FormBody.Builder().add("id", jobId).build();
-    Request request =
-        new Request.Builder().url(clientProps.getBaseUrl() + "/triggerJob").post(body).build();
-    handle(request, String.class);
+    handle(HttpRequest.post(clientProps.getBaseUrl() + "/triggerJob")
+        .formBody(MoreObjects.mapOf("id", jobId)));
   }
 
 }

@@ -1,7 +1,7 @@
 package vip.justlive.frost.core.job;
 
 import vip.justlive.frost.api.model.JobExecuteParam;
-import vip.justlive.frost.core.config.JobConfig;
+import vip.justlive.frost.core.config.Container;
 
 /**
  * bean模式job包装
@@ -27,7 +27,7 @@ public class JobBeanExecuteWrapper extends AbstractJobExecuteWrapper {
 
   @Override
   protected BaseJob getIJob() {
-    return JobConfig.findJob(jobExecuteParam.getHandlerId());
+    return Container.findJob(jobExecuteParam.getHandlerId());
   }
 
 }

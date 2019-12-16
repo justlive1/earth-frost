@@ -11,9 +11,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * security配置
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Configuration("mySecurityConf")
 @ConditionalOnProperty(name = "spring.boot.auth.enabled", havingValue = "true")
@@ -29,10 +28,11 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
     http.logout().logoutUrl("/logout");
     // The ui currently doesn't support csrf
     http.csrf().disable();
-    
+
     http.headers().frameOptions().disable();
     // Requests for the login page and the static assets are allowed
-    http.authorizeRequests().antMatchers("/**/ui/**", "/**/*.css").permitAll();
+    http.authorizeRequests().antMatchers("/**/ui/**", "/**/css/**", "/**/js/**", "/**/images/**")
+        .permitAll();
     // ... and any other request needs to be authorized
     http.authorizeRequests().antMatchers("/**").authenticated();
 

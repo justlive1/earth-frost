@@ -1,19 +1,18 @@
 package vip.justlive.frost.executor.example;
 
+import java.util.ArrayList;
 import java.util.List;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import vip.justlive.frost.api.model.JobSharding;
 import vip.justlive.frost.core.job.BaseJob;
 import vip.justlive.frost.core.job.Job;
 import vip.justlive.frost.core.job.JobContext;
-import vip.justlive.oxygen.core.ioc.Bean;
+import vip.justlive.oxygen.ioc.annotation.Bean;
 
 /**
  * 分片job
- * 
- * @author wubo
  *
+ * @author wubo
  */
 @Slf4j
 @Bean
@@ -29,7 +28,7 @@ public class ShardingJob extends BaseJob {
     if (sharding != null) {
       msg = String.format("[%s of %s]", sharding.getIndex(), sharding.getTotal());
     }
-    List<Integer> list = Lists.newArrayList();
+    List<Integer> list = new ArrayList<>();
     for (int i = 0; i < max; i++) {
       if (sharding != null) {
         if (i % sharding.getTotal() == sharding.getIndex()) {
