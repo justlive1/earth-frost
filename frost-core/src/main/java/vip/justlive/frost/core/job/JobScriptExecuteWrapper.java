@@ -27,12 +27,12 @@ public class JobScriptExecuteWrapper extends AbstractJobExecuteWrapper {
     if (!Objects.equals(jobInfo.getType(), JobInfo.TYPE.SCRIPT.name())) {
       throw Exceptions.fail("30002", "执行job类型不匹配");
     }
-    BaseJob job = getIJob();
+    BaseJob job = getJob();
     job.execute(new DefaultJobContext(jobInfo, jobExecuteParam));
   }
 
   @Override
-  protected BaseJob getIJob() {
+  protected BaseJob getJob() {
     return ScriptJobFactory.parse(jobInfo.getScript());
   }
 

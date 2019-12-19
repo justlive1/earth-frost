@@ -106,7 +106,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     JobRepository jobRepository = Container.get().getJobRepository();
     jobRepository.addJobRecordStatus(jobRecordStatus);
 
-    BaseJob job = getIJob();
+    BaseJob job = getJob();
     if (job.exception()) {
       // 通知事件
       EventPublisher publisher = Container.get().getPublisher();
@@ -135,7 +135,7 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
    *
    * @return job
    */
-  protected abstract BaseJob getIJob();
+  protected abstract BaseJob getJob();
 
   /**
    * 获取当前时间

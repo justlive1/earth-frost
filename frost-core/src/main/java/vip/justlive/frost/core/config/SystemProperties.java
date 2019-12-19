@@ -42,4 +42,9 @@ public class SystemProperties {
    */
   private int parallel = 1;
 
+  /**
+   * script脚本最大历史数
+   */
+  private int maxScriptHistory = 20;
+
 }

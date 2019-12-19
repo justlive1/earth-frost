@@ -35,7 +35,7 @@ public class JobExecutorProperties {
   /**
    * 是否开启脚本任务执行
    */
-  private Boolean scriptJobEnabled = true;
+  private boolean scriptJobEnabled = true;
 
   /**
    * 错过执行的阈值(毫秒)

@@ -76,7 +76,7 @@ public class Container {
 
   private static final Map<String, BaseJob> JOBS = new ConcurrentHashMap<>();
   private static final List<JobGroup> JOB_GROUPS = new LinkedList<>();
-  private static Container CT;
+  private static Container container;
 
   private SystemProperties systemProperties;
   private JobExecutorProperties jobExecutorProperties;
@@ -98,7 +98,7 @@ public class Container {
    * @return container
    */
   public static Container get() {
-    return MoreObjects.notNull(CT);
+    return MoreObjects.notNull(container);
   }
 
   /**
@@ -116,12 +116,13 @@ public class Container {
 
     init(redissonProperties, systemProperties);
 
-    CT.jobService = new RedisJobServiceImpl(CT.jobRepository, CT.jobSchedule, CT.jobLogger);
-    CT.jobExecutorProperties = jobExecutorProperties;
-    CT.monitor = new TimeoutMonitorImpl(CT.jobRepository, CT.publisher);
-    CT.jobExecutor = CT.buildJobExecutor();
-    CT.registry = new RedisRegistry(CT.redissonClient, CT.getJobExecutor());
-    CT.registry.register();
+    container.jobService = new RedisJobServiceImpl(container.jobRepository, container.jobSchedule,
+        container.jobLogger);
+    container.jobExecutorProperties = jobExecutorProperties;
+    container.monitor = new TimeoutMonitorImpl(container.jobRepository, container.publisher);
+    container.jobExecutor = container.buildJobExecutor();
+    container.registry = new RedisRegistry(container.redissonClient, container.getJobExecutor());
+    container.registry.register();
   }
 
   /**
@@ -139,12 +140,13 @@ public class Container {
 
     init(redissonProperties, systemProperties);
 
-    CT.jobSchedule = new RedisJobScheduleImpl(CT.redissonClient, systemProperties,
-        CT.jobRepository);
-    CT.jobService = new RedisJobServiceImpl(CT.jobRepository, CT.jobSchedule, CT.jobLogger);
-    CT.dispatcher = new RedisDispatcher(CT.redissonClient, CT.jobRepository);
-    CT.listener = new EventListener(notifier);
-    CT.redissonClient.getExecutorService(Container.EVENT)
+    container.jobSchedule = new RedisJobScheduleImpl(container.redissonClient, systemProperties,
+        container.jobRepository);
+    container.jobService = new RedisJobServiceImpl(container.jobRepository, container.jobSchedule,
+        container.jobLogger);
+    container.dispatcher = new RedisDispatcher(container.redissonClient, container.jobRepository);
+    container.listener = new EventListener(notifier);
+    container.redissonClient.getExecutorService(Container.EVENT)
         .registerWorkers(systemProperties.getParallel());
   }
 
@@ -190,27 +192,27 @@ public class Container {
 
   private static void init(RedissonProperties redissonProperties,
       SystemProperties systemProperties) {
-    CT = new Container();
-    CT.systemProperties = systemProperties;
-    CT.redissonClient = RedisConfig.redissonClient(redissonProperties);
-    CT.jobRepository = new RedisJobRepositoryImpl(CT.redissonClient);
-    CT.jobLogger = new RedisJobLoggerImpl(CT.redissonClient, CT.jobRepository);
-    CT.publisher = new RedisEventPublisherImpl(CT.redissonClient);
+    container = new Container();
+    container.systemProperties = systemProperties;
+    container.redissonClient = RedisConfig.redissonClient(redissonProperties);
+    container.jobRepository = new RedisJobRepositoryImpl(container.redissonClient);
+    container.jobLogger = new RedisJobLoggerImpl(container.redissonClient, container.jobRepository);
+    container.publisher = new RedisEventPublisherImpl(container.redissonClient);
   }
 
   private JobExecutor buildJobExecutor() {
-    JobExecutor jobExecutor = new JobExecutor();
-    jobExecutor.setId(UUID.randomUUID().toString());
-    jobExecutor.setName(jobExecutorProperties.getName());
-    jobExecutor.setKey(jobExecutorProperties.getKey());
+    JobExecutor je = new JobExecutor();
+    je.setId(UUID.randomUUID().toString());
+    je.setName(jobExecutorProperties.getName());
+    je.setKey(jobExecutorProperties.getKey());
     String address = jobExecutorProperties.getIp();
     if (address == null || address.length() == 0) {
       address = SystemUtils.getLocalAddress().getHostAddress();
     }
     address += Strings.COLON + jobExecutorProperties.getPort();
-    jobExecutor.setAddress(address);
-    jobExecutor.setGroups(JOB_GROUPS);
+    je.setAddress(address);
+    je.setGroups(JOB_GROUPS);
     JOB_GROUPS.forEach(group -> group.setGroupKey(jobExecutorProperties.getKey()));
-    return jobExecutor;
+    return je;
   }
 }

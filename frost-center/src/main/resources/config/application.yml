@@ -1,0 +1,50 @@
+spring:
+  profiles:
+    active: center,redis
+
+  application:
+    name: frost-center
+
+  jackson:
+    timeZone: GMT+8
+    dateFormat: yyyy-MM-dd HH:mm:ss
+
+  boot:
+    auth:
+      enabled: true
+
+  security:
+    user:
+      name: frost
+      password: frost
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+server:
+  port: 20000
+  servlet:
+    contextPath: /center
+
+
+logging:
+  level:
+    root: info
+  file: ${spring.application.name}.log
+
+frost:
+  redisson:
+    mode: 0
+
+    # 公共配置
+    password:
+    slaveConnectionPoolSize: 50
+    masterConnectionPoolSize: 50
+    timeout: 3000
+
+    # 单机模式
+    address: redis://localhost:6379

@@ -41,7 +41,7 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
   }
 
   @Configuration
-  public class WebConf implements WebMvcConfigurer {
+  public static class WebConf implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

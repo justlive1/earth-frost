@@ -49,7 +49,7 @@ public class RedisRegistry implements Registry {
     }
 
     // script执行器
-    if (Container.get().getJobExecutorProperties().getScriptJobEnabled()) {
+    if (Container.get().getJobExecutorProperties().isScriptJobEnabled()) {
       redissonClient.getExecutorService(String.format(Container.JOB_SCRIPT_CHANNEL, ""))
           .registerWorkers(systemProperties.getParallel(), pool);
       redissonClient
@@ -67,6 +67,7 @@ public class RedisRegistry implements Registry {
 
   @Override
   public void unregister() {
+    // nothing
   }
 
 }

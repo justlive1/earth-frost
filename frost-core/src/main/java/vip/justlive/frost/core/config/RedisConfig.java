@@ -1,5 +1,6 @@
 package vip.justlive.frost.core.config;
 
+import lombok.experimental.UtilityClass;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.ClusterServersConfig;
@@ -14,6 +15,7 @@ import org.redisson.config.SingleServerConfig;
  *
  * @author wubo
  */
+@UtilityClass
 public class RedisConfig {
 
   static RedissonClient redissonClient(RedissonProperties redissonProperties) {

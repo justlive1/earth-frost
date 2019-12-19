@@ -60,7 +60,7 @@ public class RedisJobServiceImpl implements JobService {
   public void updateJob(JobInfo jobInfo) {
     JobInfo localJobInfo = jobRepository.findJobInfoById(jobInfo.getId());
     if (localJobInfo == null) {
-      throw Exceptions.fail("300002", "未查询到Job记录");
+      throw Exceptions.fail("未查询到Job记录");
     }
     this.mergeData(localJobInfo, jobInfo);
 
@@ -88,7 +88,7 @@ public class RedisJobServiceImpl implements JobService {
 
     JobInfo localJobInfo = jobRepository.findJobInfoById(jobId);
     if (localJobInfo == null) {
-      throw Exceptions.fail("300002", "未查询到Job记录");
+      throw Exceptions.fail("未查询到Job记录");
     }
 
     localJobInfo.setStatus(JobInfo.STATUS.PAUSED.name());

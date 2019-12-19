@@ -10,8 +10,15 @@ import vip.justlive.frost.core.config.JobExecutorProperties;
 import vip.justlive.frost.core.config.RedissonProperties;
 import vip.justlive.frost.core.config.SystemProperties;
 
+/**
+ * @author wubo
+ */
 @SpringBootApplication
 public class Application4Spring {
+
+  public static void main(String[] args) {
+    SpringApplication.run(Application4Spring.class, args);
+  }
 
   @Configuration
   static class Config {
@@ -40,9 +47,5 @@ public class Application4Spring {
       Container.initExecutor(jobExecutorProperties, redissonProperties, systemProperties);
       return Container.get();
     }
-  }
-
-  public static void main(String[] args) {
-    SpringApplication.run(Application4Spring.class, args);
   }
 }

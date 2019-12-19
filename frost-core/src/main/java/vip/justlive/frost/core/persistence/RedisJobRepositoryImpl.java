@@ -216,6 +216,9 @@ public class RedisJobRepositoryImpl implements JobRepository {
   public JobExecuteRecord findJobExecuteRecordById(String id) {
     RMap<String, JobExecuteRecord> map = redissonClient.getMap(Container.RECORD);
     JobExecuteRecord record = map.get(id);
+    if (record == null) {
+      return null;
+    }
     RListMultimap<String, JobRecordStatus> recordStatus = redissonClient
         .getListMultimap(Container.RECORD_STATUS);
     List<JobRecordStatus> statuses = recordStatus.getAll(id);
@@ -258,7 +261,8 @@ public class RedisJobRepositoryImpl implements JobRepository {
     script.setId(UUID.randomUUID().toString());
     script.setTime(Date.from(ZonedDateTime.now().toInstant()));
     scriptList.put(script.getJobId(), script);
-    if (scriptList.get(script.getJobId()).size() > 20) {
+    if (scriptList.get(script.getJobId()).size() > Container.get().getSystemProperties()
+        .getMaxScriptHistory()) {
       scriptList.get(script.getJobId()).remove(0);
     }
   }
@@ -311,7 +315,10 @@ public class RedisJobRepositoryImpl implements JobRepository {
       return;
     }
     for (String id : list.subList(from, Math.min(to, list.size()))) {
-      records.add(findJobExecuteRecordById(id));
+      JobExecuteRecord record = findJobExecuteRecordById(id);
+      if (record != null) {
+        records.add(record);
+      }
     }
   }
 }

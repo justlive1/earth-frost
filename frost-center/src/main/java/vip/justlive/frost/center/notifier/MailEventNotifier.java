@@ -2,40 +2,35 @@ package vip.justlive.frost.center.notifier;
 
 import java.util.Arrays;
 import java.util.List;
-import lombok.Data;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ParserContext;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.core.config.Container;
 import vip.justlive.frost.core.notify.Event;
+import vip.justlive.oxygen.core.util.MoreObjects;
 
 /**
  * 邮件事件通知器
  *
  * @author wubo
  */
-
-/**
- * 邮件事件通知器
- *
- * @author wubo
- *
- */
+@Setter
+@RequiredArgsConstructor
 public class MailEventNotifier extends AbstractEventNotifier {
 
-  private static final List<String> SUPPORT_EVENTS = Arrays.asList(Event.TYPE.DISPATCH_FAIL.name(),
-      Event.TYPE.EXECUTE_FAIL.name(), Event.TYPE.TIMEOUT_MONITOR.name());
+  private static final List<String> SUPPORT_EVENTS = Arrays
+      .asList(Event.TYPE.DISPATCH_FAIL.name(), Event.TYPE.EXECUTE_FAIL.name(),
+          Event.TYPE.TIMEOUT_MONITOR.name());
 
   private final MailSender sender;
 
   /**
    * 邮件接收者
    */
-  private String[] to = {"root@localhost"};
+  private String[] to;
 
   /**
    * 邮件抄送
@@ -45,23 +40,7 @@ public class MailEventNotifier extends AbstractEventNotifier {
   /**
    * 邮件发送者
    */
-  private String from = null;
-
-  /**
-   * 邮件文本
-   */
-  private Expression text;
-
-  /**
-   * 邮件主题
-   */
-  private Expression subject;
-
-  public MailEventNotifier(MailSender sender) {
-    this.sender = sender;
-    this.subject = PARSER.parseExpression(DEFAULT_SUBJECT, ParserContext.TEMPLATE_EXPRESSION);
-    this.text = PARSER.parseExpression(DEFAULT_TEXT, ParserContext.TEMPLATE_EXPRESSION);
-  }
+  private String from;
 
   @Override
   protected boolean shouldNotify(Event event) {
@@ -77,10 +56,11 @@ public class MailEventNotifier extends AbstractEventNotifier {
       return;
     }
 
-    Msg msg = new Msg();
-    msg.event = event;
-    msg.job = jobInfo;
-    EvaluationContext context = new StandardEvaluationContext(msg);
+    Map<String, Object> attrs = MoreObjects.mapOf("event", event, "job", jobInfo);
+
+    String subjectVal = ENGINE.render(DEFAULT_SUBJECT, attrs);
+    String textVal = ENGINE.render(DEFAULT_TEXT, attrs);
+
     SimpleMailMessage message = new SimpleMailMessage();
 
     String[] mails = jobInfo.getNotifyMails();
@@ -93,58 +73,11 @@ public class MailEventNotifier extends AbstractEventNotifier {
     }
     message.setTo(dest);
     message.setFrom(from);
-    message.setSubject(subject.getValue(context, String.class));
-    message.setText(text.getValue(context, String.class));
+    message.setSubject(subjectVal);
+    message.setText(textVal);
     message.setCc(cc);
 
     sender.send(message);
-  }
-
-  public void setTo(String[] to) {
-    this.to = Arrays.copyOf(to, to.length);
-  }
-
-  public String[] getTo() {
-    return Arrays.copyOf(to, to.length);
-  }
-
-  public void setCc(String[] cc) {
-    this.cc = Arrays.copyOf(cc, cc.length);
-  }
-
-  public String[] getCc() {
-    return Arrays.copyOf(cc, cc.length);
-  }
-
-  public void setFrom(String from) {
-    this.from = from;
-  }
-
-  public String getFrom() {
-    return from;
-  }
-
-  public void setSubject(String subject) {
-    this.subject = PARSER.parseExpression(subject, ParserContext.TEMPLATE_EXPRESSION);
-  }
-
-  public String getSubject() {
-    return subject.getExpressionString();
-  }
-
-  public void setText(String text) {
-    this.text = PARSER.parseExpression(text, ParserContext.TEMPLATE_EXPRESSION);
-  }
-
-  public String getText() {
-    return text.getExpressionString();
-  }
-
-  @Data
-  public static class Msg {
-
-    private Event event;
-    private JobInfo job;
   }
 }
 

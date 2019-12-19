@@ -25,7 +25,7 @@ public class FacadeBuilderTest {
 
   @org.junit.Test
   public void test() {
-    testJob();
+//    testJob();
   }
 
   public void testJob() {

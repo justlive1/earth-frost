@@ -1,22 +1,19 @@
 package vip.justlive.frost.center.controller;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.executor.CronExpression;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import vip.justlive.frost.api.model.JobExecuteRecord;
-import vip.justlive.frost.api.model.JobExecutor;
 import vip.justlive.frost.api.model.JobInfo;
 import vip.justlive.frost.api.model.JobInfo.MODE;
 import vip.justlive.frost.api.model.JobScript;
-import vip.justlive.frost.api.model.Page;
 import vip.justlive.frost.core.config.Container;
 import vip.justlive.frost.core.service.JobService;
 import vip.justlive.oxygen.core.exception.CodedException;
@@ -44,7 +41,7 @@ public class CenterController {
    *
    * @return view
    */
-  @RequestMapping("/login.html")
+  @GetMapping("/login.html")
   public ModelAndView login() {
     return new ModelAndView("login/login.html");
   }
@@ -54,9 +51,8 @@ public class CenterController {
    *
    * @return view
    */
-  @RequestMapping({"/", "index.html"})
+  @GetMapping({"/", "index.html"})
   public ModelAndView index() {
-
     return new ModelAndView("index.html");
   }
 
@@ -66,10 +62,9 @@ public class CenterController {
    *
    * @return executors
    */
-  @RequestMapping("/queryExecutors")
+  @GetMapping("/queryExecutors")
   public Resp queryExecutors() {
-    List<JobExecutor> list = jobService.queryExecutors();
-    return Resp.success(list);
+    return Resp.success(jobService.queryExecutors());
   }
 
   /**
@@ -78,11 +73,10 @@ public class CenterController {
    * @param jobInfo job信息
    * @return jobId
    */
-  @RequestMapping("/addJob")
+  @PostMapping("/addJob")
   public Resp addJob(@RequestBody JobInfo jobInfo) {
     check(jobInfo);
-    String jobId = jobService.addJob(jobInfo);
-    return Resp.success(jobId);
+    return Resp.success(jobService.addJob(jobInfo));
   }
 
   /**
@@ -91,7 +85,7 @@ public class CenterController {
    * @param jobInfo job信息
    * @return resp
    */
-  @RequestMapping("/updateJob")
+  @PostMapping("/updateJob")
   public Resp updateJob(@RequestBody JobInfo jobInfo) {
     check(jobInfo);
     if (jobInfo.getChildJobIds() != null && Arrays.asList(jobInfo.getChildJobIds())
@@ -108,7 +102,7 @@ public class CenterController {
    * @param id job编号
    * @return resp
    */
-  @RequestMapping("/pauseJob")
+  @PostMapping("/pauseJob")
   public Resp pauseJob(String id) {
     jobService.pauseJob(id);
     return Resp.success("暂停成功");
@@ -120,7 +114,7 @@ public class CenterController {
    * @param id job编号
    * @return resp
    */
-  @RequestMapping("/resumeJob")
+  @PostMapping("/resumeJob")
   public Resp resumeJob(String id) {
     jobService.resumeJob(id);
     return Resp.success("恢复成功");
@@ -132,7 +126,7 @@ public class CenterController {
    * @param id job编号
    * @return resp
    */
-  @RequestMapping("/removeJob")
+  @PostMapping("/removeJob")
   public Resp removeJob(String id) {
     jobService.removeJob(id);
     return Resp.success("删除成功");
@@ -144,7 +138,7 @@ public class CenterController {
    * @param id job编号
    * @return resp
    */
-  @RequestMapping("/triggerJob")
+  @PostMapping("/triggerJob")
   public Resp triggerJob(String id) {
     jobService.triggerJob(id);
     return Resp.success("触发成功");
@@ -156,11 +150,10 @@ public class CenterController {
    *
    * @return infos
    */
-  @RequestMapping("/queryJobInfos")
+  @PostMapping("/queryJobInfos")
   public Resp queryJobInfos(@RequestParam(defaultValue = "1") int pageIndex,
       @RequestParam(defaultValue = "10") int pageSize) {
-    Page<JobInfo> jobInfos = jobService.queryJobInfos(pageIndex, pageSize);
-    return Resp.success(jobInfos);
+    return Resp.success(jobService.queryJobInfos(pageIndex, pageSize));
   }
 
   /**
@@ -168,10 +161,9 @@ public class CenterController {
    *
    * @return jobs
    */
-  @RequestMapping("/queryAllJobs")
+  @GetMapping("/queryAllJobs")
   public Resp queryAllJobs() {
-    List<JobInfo> jobInfos = jobService.queryAllJobs();
-    return Resp.success(jobInfos);
+    return Resp.success(jobService.queryAllJobs());
   }
 
   /**
@@ -180,7 +172,7 @@ public class CenterController {
    * @param id job编号
    * @return jobInfo
    */
-  @RequestMapping("/findJobInfoById")
+  @PostMapping("/findJobInfoById")
   public Resp findJobInfoById(String id) {
     return Resp.success(jobService.findJobInfoById(id));
   }
@@ -195,13 +187,11 @@ public class CenterController {
    * @param pageSize 每页条数
    * @return page
    */
-  @RequestMapping("/queryJobExecuteRecords")
+  @PostMapping("/queryJobExecuteRecords")
   public Resp queryJobExecuteRecords(String groupKey, String jobKey, String jobId,
       @RequestParam(defaultValue = "1") int pageIndex,
       @RequestParam(defaultValue = "10") int pageSize) {
-    Page<JobExecuteRecord> records = jobService
-        .queryJobRecords(groupKey, jobKey, jobId, pageIndex, pageSize);
-    return Resp.success(records);
+    return Resp.success(jobService.queryJobRecords(groupKey, jobKey, jobId, pageIndex, pageSize));
   }
 
   /**
@@ -210,7 +200,7 @@ public class CenterController {
    * @param script 脚本
    * @return resp
    */
-  @RequestMapping("/addJobScript")
+  @PostMapping("/addJobScript")
   public Resp addJobScript(@RequestBody JobScript script) {
     jobService.addJobScript(script);
     return Resp.success("操作成功");
@@ -222,7 +212,7 @@ public class CenterController {
    * @param jobId job编号
    * @return script
    */
-  @RequestMapping("/queryJobScripts")
+  @PostMapping("/queryJobScripts")
   public Resp queryJobScripts(String jobId) {
     return Resp.success(jobService.queryJobScripts(jobId));
   }
@@ -234,7 +224,7 @@ public class CenterController {
    * @param end 结束
    * @return 统计信息
    */
-  @RequestMapping("/queryJobStatistic")
+  @PostMapping("/queryJobStatistic")
   public Resp queryJobStatistic(String begin, String end) {
     return Resp.success(jobService.queryJobStatistic(begin, end));
   }
@@ -245,7 +235,7 @@ public class CenterController {
    * @param jobId 任务编号
    * @return resp
    */
-  @RequestMapping("/removeJobRecords")
+  @PostMapping("/removeJobRecords")
   public Resp removeJobRecords(@RequestParam String jobId) {
     jobService.removeJobRecords(jobId);
     return Resp.success("删除成功");
@@ -269,10 +259,11 @@ public class CenterController {
     if (Objects.equals(jobInfo.getMode(), MODE.SIMPLE.name()) && jobInfo.getTimestamp() == null) {
       throw Exceptions.fail("执行时间不能为空");
     }
-    if (Objects.equals(jobInfo.getMode(), JobInfo.MODE.DELAY.name())) {
-      if (jobInfo.getDelay() == null || jobInfo.getInitDelay() == null) {
-        throw Exceptions.fail("延时格式有误");
-      }
+    boolean b =
+        Objects.equals(jobInfo.getMode(), JobInfo.MODE.DELAY.name()) && (jobInfo.getDelay() == null
+            || jobInfo.getInitDelay() == null);
+    if (b) {
+      throw Exceptions.fail("延时格式有误");
     }
   }
 }

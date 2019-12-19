@@ -2,22 +2,22 @@ package vip.justlive.frost.center.notifier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import vip.justlive.frost.core.notify.Event;
 import vip.justlive.frost.core.notify.Notifier;
+import vip.justlive.oxygen.core.template.SimpleTemplateEngine;
+import vip.justlive.oxygen.core.template.TemplateEngine;
 
 /**
  * 事件通知抽象类
- * 
- * @author wubo
  *
+ * @author wubo
  */
 public abstract class AbstractEventNotifier implements Notifier {
 
   protected static final String DEFAULT_SUBJECT =
-      "There is something wrong with #{job.name} (#{job.id})";
-  protected static final String DEFAULT_TEXT = "#{job.name} (#{job.id}) \n #{event.message}";
-  protected static final SpelExpressionParser PARSER = new SpelExpressionParser();
+      "There is something wrong with ${job.name} (${job.id})";
+  protected static final String DEFAULT_TEXT = "${job.name} (${job.id}) \n ${event.message}";
+  protected static final TemplateEngine ENGINE = new SimpleTemplateEngine();
 
   /**
    * 是否启用
@@ -48,7 +48,7 @@ public abstract class AbstractEventNotifier implements Notifier {
 
   /**
    * 处理通知逻辑
-   * 
+   *
    * @param event
    */
   protected abstract void doNotify(Event event);

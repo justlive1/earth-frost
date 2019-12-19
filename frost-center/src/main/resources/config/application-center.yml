@@ -1,0 +1,24 @@
+
+spring:
+  mail:
+    host: smtp.mail.com
+    username:
+    password:
+
+frost:
+  system:
+    # 每个job支持并行处理数
+    parallel: 10
+
+  notifier:
+    mail:
+      enabled: false
+      from: ${spring.mail.username}
+      to:
+
+    dingtalk:
+      enabled: false
+      accessToken:
+      linkUrl: http://localhost:20000/center
+      secret:
+
