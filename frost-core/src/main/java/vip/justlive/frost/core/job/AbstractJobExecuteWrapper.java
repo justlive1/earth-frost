@@ -15,6 +15,7 @@ import vip.justlive.frost.core.notify.EventPublisher;
 import vip.justlive.frost.core.persistence.JobRepository;
 import vip.justlive.oxygen.core.exception.CodedException;
 import vip.justlive.oxygen.core.exception.Exceptions;
+import vip.justlive.oxygen.core.exception.WrappedException;
 
 /**
  * 执行job抽象
@@ -86,6 +87,9 @@ public abstract class AbstractJobExecuteWrapper extends AbstractWrapper {
     super.exception(e);
     jobRecordStatus.setStatus(JobExecuteRecord.STATUS.FAIL.name());
     String cause;
+    if (e instanceof WrappedException) {
+      e = (Exception) ((WrappedException) e).getException();
+    }
     if (e instanceof CodedException) {
       cause = ((CodedException) e).getErrorCode().toString();
     } else {

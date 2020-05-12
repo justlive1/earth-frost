@@ -25,7 +25,7 @@ public class SecurityConf extends WebSecurityConfigurerAdapter {
     // Page with login form is served as /login.html and does a POST on /login
     http.formLogin().loginPage("/login.html").loginProcessingUrl("/login").permitAll();
     // The UI does a POST on /logout on logout
-    http.logout().logoutUrl("/logout");
+    http.logout().logoutUrl("/logout").logoutSuccessUrl("/login.html");
     // The ui currently doesn't support csrf
     http.csrf().disable();
 
